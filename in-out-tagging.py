@@ -99,4 +99,4 @@ if __name__ == '__main__':
     answers, ground_truth = generator(n_users=5, n_papers=10, acc_min=0.5, n_excl=8)
     mv_result = majority_voting(answers=answers)
 
-   get_accuracy(mv_result, ground_truth)
+    get_accuracy(mv_result, ground_truth)
