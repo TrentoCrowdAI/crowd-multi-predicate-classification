@@ -62,5 +62,28 @@ def generator(n_users, n_papers, acc_min, n_excl):
     return answers, ground_truth
 
 
+def majority_voting(answers):
+    results = []
+    for paper_answ in answers:
+        frequencies = {None: 0,
+                       'MAYBE': 0,
+                       'OUT': 0}
+        for answ in paper_answ:
+            if isinstance(answ, list):
+                frequencies['OUT'] += 1
+            elif answ:
+                frequencies['MAYBE'] += 1
+            else:
+                frequencies[None] += 1
+
+        mv = max(frequencies, key=frequencies.get)
+        if mv == 'OUT':
+            mv = ['F criteria']
+        results.append(mv)
+
+    return results
+
+
 if __name__ == '__main__':
     answers, ground_truth = generator(n_users=5, n_papers=10, acc_min=0.5, n_excl=8)
+    majority_voting(answers=answers)
