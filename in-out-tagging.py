@@ -19,7 +19,7 @@ def generator(n_users, n_papers, acc_min, n_excl):
         ground_truth.append(gt_criteria)
 
     # Answers generation
-    users_accracy = np.random.uniform(acc_min, 1., n_users)
+    users_accracy = np.random.uniform(acc_min, .7, n_users)
     answers = []
     for paper_id in range(n_papers):
         truth = ground_truth[paper_id]
@@ -84,6 +84,19 @@ def majority_voting(answers):
     return results
 
 
+def get_accuracy(data, ground_truth):
+    count = 0.
+    for mv, gt in zip(data, ground_truth):
+        if mv == gt:
+            count += 1
+        elif type(mv) == type(gt):
+            count += 1
+
+    return count/len(data)
+
+
 if __name__ == '__main__':
     answers, ground_truth = generator(n_users=5, n_papers=10, acc_min=0.5, n_excl=8)
-    majority_voting(answers=answers)
+    mv_result = majority_voting(answers=answers)
+
+   get_accuracy(mv_result, ground_truth)
