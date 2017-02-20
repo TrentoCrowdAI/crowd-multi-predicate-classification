@@ -19,7 +19,7 @@ def generator(n_users, n_papers, acc_min, n_excl):
         ground_truth.append(gt_criteria)
 
     # Answers generation
-    users_accracy = np.random.uniform(acc_min, .8, n_users)
+    users_accracy = np.random.uniform(acc_min, 1., n_users)
     answers = []
     for paper_id in range(n_papers):
         truth = ground_truth[paper_id]
@@ -41,11 +41,26 @@ def generator(n_users, n_papers, acc_min, n_excl):
                     answ_for_paper.append(truth)
             else:
                 # assign false value
-                answ_for_paper.append([])
+                # TO DO: 'F criteria'
+                if isinstance(truth, list):
+                    if np.random.binomial(1, 0.5):
+                        answ_for_paper.append('Maybe')
+                    else:
+                        answ_for_paper.append(None)
+                elif truth:
+                    if np.random.binomial(1, 0.5):
+                        answ_for_paper.append(None)
+                    else:
+                        answ_for_paper.append(['F criteria'])
+                else:
+                    if np.random.binomial(1, 0.5):
+                        answ_for_paper.append('Maybe')
+                    else:
+                        answ_for_paper.append(['F criteria'])
         answers.append(answ_for_paper)
 
     return answers, ground_truth
 
 
 if __name__ == '__main__':
-    answers, ground_truth = generator(n_users=5, n_papers=10, acc_min=0.6, n_excl=8)
+    answers, ground_truth = generator(n_users=5, n_papers=10, acc_min=0.5, n_excl=8)
