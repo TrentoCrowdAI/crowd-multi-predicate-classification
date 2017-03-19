@@ -96,7 +96,25 @@ def get_accuracy(data, ground_truth):
 
 
 if __name__ == '__main__':
-    answers, ground_truth = generator(n_users=5, n_papers=10, acc_min=0.5, n_excl=8)
-    mv_result = majority_voting(answers=answers)
 
-    get_accuracy(mv_result, ground_truth)
+    # experiment
+    # res_list = [range(3, 30, 1), [], []]
+    # for n_users in range(3, 30, 1):
+    #     temp_res = []
+    #     for i in range(100):
+    #         answers, ground_truth = generator(n_users=n_users, n_papers=10, acc_min=0.5, n_excl=8)
+    #         mv_result = majority_voting(answers=answers)
+    #         temp_res.append(get_accuracy(mv_result, ground_truth))
+    #     res_list[1].append(np.mean(temp_res))
+    #     res_list[2].append(np.std(temp_res))
+
+
+    # print res_lis
+    # t
+    temp_res = []
+    for i in range(100):
+            answers, ground_truth = generator(n_users=3, n_papers=5, acc_min=0.5, n_excl=8)
+            mv_result = majority_voting(answers=answers)
+            temp_res.append(get_accuracy(mv_result, ground_truth))
+    print np.mean(temp_res)
+    print np.std(temp_res)
