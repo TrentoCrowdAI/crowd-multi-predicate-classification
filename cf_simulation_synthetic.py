@@ -14,10 +14,10 @@ Parameters for the crowdflower synthesizer:
     budget - assumed total budget in dollars for the job; note: final budget may differs from initially assumed one,
     price_row - price per one row in dollars,
     judgment_min - min number judgments per row,
-    judgment_max - max number judgments per row,
+    # judgment_max - max number judgments per row,
     cheaters_prop - proportion of cheaters from whole population of workers
 
-    OUTPUT: accuracy of results, spent budget, total number of judgments being paid
+    OUTPUT: accuracy of results, spent budget, total number of pages being paid
 
 '''
 
@@ -87,13 +87,13 @@ trusted_workers_judgment = [ [[criteria_0 value, criteria_1 value,...], [criteri
 each element in 'trusted_workers_judgment' is judgments of trustworthy workers who passed tests questions,
 indexes of the trusted_workers_judgment' list present row id
 '''
-def first_round(trust_min, test_page, papers_page,
-                quiz_papers_n, n_papers, budget, price_row, gold_data,
-                judgment_min, cheaters_prop):
+def first_round(trust_min, test_page, papers_page, quiz_papers_n, n_papers,
+                budget, price_row, gold_data, judgment_min, cheaters_prop):
     pages_n = n_papers / papers_page
     rows_page = test_page+papers_page
     price_page = price_row*rows_page
-    budget_rest = budget
+    spent_budget = 0.
+    # budget_rest = budget
     trusted_workers_judgment = [[] for _ in range(rows_page*pages_n)]
     # number of different types of workers after completing a page
     trusted_workers_n = 0
@@ -123,20 +123,18 @@ def first_round(trust_min, test_page, papers_page,
                 untrusted_workers_n += 1
 
             # monetary issue
-            budget_rest -= price_page
-    # print 'tr: {}'.format(float(trusted_workers_n)/(trusted_workers_n+untrusted_workers_n))
-    # print 'untr: {}'.format(float(untrusted_workers_n)/(trusted_workers_n+untrusted_workers_n))
-    return (trusted_workers_judgment, budget_rest)
+            # budget_rest -= price_page
+            spent_budget += price_page
+    pages_paid_n = trusted_workers_n+untrusted_workers_n
+    return (trusted_workers_judgment, spent_budget, pages_paid_n)
 
 
 def synthesizer(trust_min=0.75, n_criteria=3, test_page=1, papers_page=3,
                 quiz_papers_n=4, n_papers=18, budget=50, price_row=0.4,
                 judgment_min=3, judgment_max=5, cheaters_prop=0.1):
-    gold_data = generate_gold_data(n_criteria=3, test_page=1, papers_page=3, n_papers=30)
-    trusted_workers_judgment, budget_rest = first_round(trust_min, test_page, papers_page, quiz_papers_n,
-                                                        n_papers, budget, price_row, gold_data, judgment_min,
-                                                        cheaters_prop)
-
+    gold_data = generate_gold_data(n_criteria, test_page, papers_page, n_papers)
+    trusted_workers_judgment, spent_budget, pages_paid_n = first_round(trust_min, test_page, papers_page, quiz_papers_n,
+                                                        n_papers, budget, price_row, gold_data, judgment_min, cheaters_prop)
 
 if __name__ == '__main__':
     synthesizer()
