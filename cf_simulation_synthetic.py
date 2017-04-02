@@ -9,7 +9,7 @@ Parameters for the crowdflower synthesizer:
     n_criteria - number of exclusion criteria,
     test_page - number of test questions per page,
     papers_page - number of papers(excluding test questions) per page,
-    n_pages - number of pages to be tagged by a user,
+    # n_pages - number of pages to be tagged by a user,
     n_papers - set of papers to be tagged(excluding test questions), must: n_papers % papers_page = 0,
     budget - assumed total budget in dollars for the job; note: final budget may differs from initially assumed one,
     price_row - price per one row in dollars,
@@ -22,10 +22,7 @@ Parameters for the crowdflower synthesizer:
 '''
 
 import random
-
-
-def second_round():
-    pass
+import numpy as np
 
 
 def get_accuracy():
@@ -59,45 +56,86 @@ def generate_gold_data(n_criteria=3, test_page=1, papers_page=3, n_papers=30):
 def get_worker_accuracy(trust_min, quiz_papers_n):
     n_init = int(trust_min*quiz_papers_n)
     possible_trust_values = [float(n)/quiz_papers_n for n in range(n_init, quiz_papers_n+1, 1)]
-    worker_accuracy = (random.uniform(0.6, 1.) + random.choice(possible_trust_values))/2
-    return worker_accuracy
+    worker_trust = random.choice(possible_trust_values)
+    worker_accuracy = (random.uniform(0.6, 1.) + worker_trust)/2
+    return (worker_accuracy, worker_trust)
 
+
+# get current worker's trust
+def get_trust(w_page_judgment, gold_data, test_page, worker_trust, quiz_papers_n):
+    correctly_tagged_tests = 0
+    for row_id in w_page_judgment.keys()[:test_page]:
+        if gold_data[row_id] == w_page_judgment[row_id]:
+            correctly_tagged_tests += 1
+    new_trust = (worker_trust*quiz_papers_n + correctly_tagged_tests)/(quiz_papers_n + test_page)
+    return new_trust
+
+
+def do_judgment(worker_accuracy, gold_criteria):
+    judgment = []
+    for cr in gold_criteria:
+        if np.random.binomial(1, worker_accuracy):
+            judgment.append(cr)
+        else:
+            judgment.append(abs(cr-1))
+    return judgment
 
 '''
-workers_judgment = [{row_id: [criteria_0 value, criteria_1 value,...],
-                    row_id2: [criteria_0 value, criteria_1 value,...]}, {},..]
+trusted_workers_judgment = [ [[criteria_0 value, criteria_1 value,...], [criteria_0 value, criteria_1 value,...], ..],
+                             [[..], [..], ..],..]
 
-each element in 'workers_judgment' is judgments of a trustworthy worker who passed tests questions,
-indexes of the workers_judgment' list present workers' id
+each element in 'trusted_workers_judgment' is judgments of trustworthy workers who passed tests questions,
+indexes of the trusted_workers_judgment' list present row id
 '''
-def first_round(trust_min, n_criteria, test_page, papers_page,
-                n_pages, n_papers, budget, price_row, gold_data,
-                judgment_min, judgment_max, cheaters_prop, quiz_papers_n):
-    budget_rest = budget
+def first_round(trust_min, test_page, papers_page,
+                quiz_papers_n, n_papers, budget, price_row, gold_data,
+                judgment_min, cheaters_prop):
     pages_n = n_papers / papers_page
     rows_page = test_page+papers_page
-    workers_judgment = []
+    price_page = price_row*rows_page
+    budget_rest = budget
+    trusted_workers_judgment = [[] for _ in range(rows_page*pages_n)]
+    # number of different types of workers after completing a page
+    trusted_workers_n = 0
+    untrusted_workers_n = 0
     for page_id in range(pages_n):
-        for row_id_id in range(page_id*rows_page, page_id*rows_page+rows_page, 1):
-            trust_judgment = 0
-            while trust_judgment != judgment_min:
-                worker_accuracy = get_worker_accuracy(trust_min, quiz_papers_n)
-                pass
-            # do_judgment()
-            # is_passed_tests()
-    pass
+        trust_judgment = 0
+        while trust_judgment != judgment_min:
+            w_page_judgment = {}
+            worker_accuracy, worker_trust = get_worker_accuracy(trust_min, quiz_papers_n)
+            for row_id in range(page_id*rows_page, page_id*rows_page+rows_page, 1):
+                # if a worker is a cheater
+                if np.random.binomial(1, cheaters_prop):
+                    w_judgment = do_judgment(worker_accuracy=0.5, gold_criteria=gold_data[row_id])
+                else:
+                    w_judgment = do_judgment(worker_accuracy=worker_accuracy, gold_criteria=gold_data[row_id])
+                w_page_judgment.update({row_id: w_judgment})
 
+            new_worker_trust = get_trust(w_page_judgment, gold_data, test_page, worker_trust, quiz_papers_n)
+            # is a worker passed tests rows
+            if new_worker_trust >= trust_min:
+                # add data to trusted_workers_judgment
+                for row_id in w_page_judgment.keys():
+                    trusted_workers_judgment[row_id].append(w_page_judgment[row_id])
+                trusted_workers_n += 1
+                trust_judgment += 1
+            else:
+                untrusted_workers_n += 1
+
+            # monetary issue
+            budget_rest -= price_page
+    # print 'tr: {}'.format(float(trusted_workers_n)/(trusted_workers_n+untrusted_workers_n))
+    # print 'untr: {}'.format(float(untrusted_workers_n)/(trusted_workers_n+untrusted_workers_n))
+    return (trusted_workers_judgment, budget_rest)
 
 
 def synthesizer(trust_min=0.75, n_criteria=3, test_page=1, papers_page=3,
-                n_pages=1, n_papers=30, budget=50, price_row=0.4,
-                judgment_min=3, judgment_max=5, cheaters_prop=0.2, quiz_papers_n=4):
+                quiz_papers_n=4, n_papers=18, budget=50, price_row=0.4,
+                judgment_min=3, judgment_max=5, cheaters_prop=0.1):
     gold_data = generate_gold_data(n_criteria=3, test_page=1, papers_page=3, n_papers=30)
-    first_round(trust_min, n_criteria, test_page, papers_page,
-                n_pages, n_papers, budget, price_row, gold_data,
-                judgment_min, judgment_max, cheaters_prop, quiz_papers_n)
-
-
+    trusted_workers_judgment, budget_rest = first_round(trust_min, test_page, papers_page, quiz_papers_n,
+                                                        n_papers, budget, price_row, gold_data, judgment_min,
+                                                        cheaters_prop)
 
 
 if __name__ == '__main__':
