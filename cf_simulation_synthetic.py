@@ -25,8 +25,17 @@ import random
 import numpy as np
 
 
-def get_accuracy():
-    pass
+def get_accuracy(gold_data, trusted_workers_judgment):
+    total_criteria_judgments = 0.
+    correct_criteria_judgments = 0.
+    for row_id, row_gold in enumerate(gold_data):
+        for row_judgment in trusted_workers_judgment[row_id]:
+            for gold, judg in zip(row_gold, row_judgment):
+                if gold == judg:
+                    correct_criteria_judgments += 1
+                total_criteria_judgments += 1
+    job_accuracy = correct_criteria_judgments/total_criteria_judgments
+    return job_accuracy
 
 
 '''
@@ -92,7 +101,7 @@ def first_round(trust_min, test_page, papers_page, quiz_papers_n, n_papers,
     pages_n = n_papers / papers_page
     rows_page = test_page+papers_page
     price_page = price_row*rows_page
-    spent_budget = 0.
+    budget_spent = 0.
     # budget_rest = budget
     trusted_workers_judgment = [[] for _ in range(rows_page*pages_n)]
     # number of different types of workers after completing a page
@@ -124,17 +133,16 @@ def first_round(trust_min, test_page, papers_page, quiz_papers_n, n_papers,
 
             # monetary issue
             # budget_rest -= price_page
-            spent_budget += price_page
-    pages_paid_n = trusted_workers_n+untrusted_workers_n
-    return (trusted_workers_judgment, spent_budget, pages_paid_n)
+            budget_spent += price_page
+    paid_pages_n = trusted_workers_n+untrusted_workers_n
+    return (trusted_workers_judgment, budget_spent, paid_pages_n)
 
 
 def synthesizer(trust_min=0.75, n_criteria=3, test_page=1, papers_page=3,
                 quiz_papers_n=4, n_papers=18, budget=50, price_row=0.4,
                 judgment_min=3, judgment_max=5, cheaters_prop=0.1):
     gold_data = generate_gold_data(n_criteria, test_page, papers_page, n_papers)
-    trusted_workers_judgment, spent_budget, pages_paid_n = first_round(trust_min, test_page, papers_page, quiz_papers_n,
+    trusted_workers_judgment, budget_spent, paid_pages_n = first_round(trust_min, test_page, papers_page, quiz_papers_n,
                                                         n_papers, budget, price_row, gold_data, judgment_min, cheaters_prop)
-
-if __name__ == '__main__':
-    synthesizer()
+    job_accuracy = get_accuracy(gold_data, trusted_workers_judgment)
+    return (job_accuracy, budget_spent, paid_pages_n)
