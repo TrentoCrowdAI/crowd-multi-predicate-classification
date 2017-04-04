@@ -24,7 +24,9 @@ def do_quiz(trust_min, quiz_papers_n, cheaters_prop):
         # decide if paper in/out of scope
         # bernoulli trial with p=0.5
         gold_value = np.random.binomial(1, 0.5)
-        worker_judgment = np.random.binomial(1, worker_accuracy)
+        worker_judgment = np.random.binomial(1,
+                                             worker_accuracy if gold_value == 1
+                                             else 1-worker_accuracy)
         if gold_value == worker_judgment:
             correct_judgments += 1
     worker_trust = float(correct_judgments)/quiz_papers_n
