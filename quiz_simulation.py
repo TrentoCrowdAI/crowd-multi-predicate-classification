@@ -2,7 +2,7 @@ import numpy as np
 
 
 def do_quiz(trust_min, quiz_papers_n, cheaters_prop):
-    easy_add_val = 0.2
+    easy_add_val = 0.1
     correct_judgments = 0
     # decide if a worker a cheater
     if np.random.binomial(1, cheaters_prop):
@@ -32,11 +32,13 @@ def do_quiz(trust_min, quiz_papers_n, cheaters_prop):
                     worker_accuracy = 1.
                 else:
                     worker_accuracy += easy_add_val
-        worker_judgment = np.random.binomial(1,
-                                             worker_accuracy if gold_value == 1
-                                             else 1-worker_accuracy)
-        if gold_value == worker_judgment:
+        if np.random.binomial(1, worker_accuracy):
             correct_judgments += 1
+        # worker_judgment = np.random.binomial(1,
+        #                                      worker_accuracy if gold_value == 1
+        #                                      else 1-worker_accuracy)
+        # if gold_value == worker_judgment:
+        #     correct_judgments += 1
     worker_trust = float(correct_judgments)/quiz_papers_n
     if worker_trust >= trust_min:
         return (worker_trust, worker_accuracy, worker_type)
@@ -55,7 +57,7 @@ if __name__ == '__main__':
         'worker': 0
     }
     for _ in range(1000):
-        result = do_quiz(trust_min=0.75, quiz_papers_n=4, cheaters_prop=0.3)
+        result = do_quiz(trust_min=0.75, quiz_papers_n=4, cheaters_prop=0.5)
         if len(result) > 1:
             statistic_passed[result[2]] += 1
             statistic_total[result[2]] += 1
