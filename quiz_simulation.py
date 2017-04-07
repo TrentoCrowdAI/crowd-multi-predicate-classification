@@ -26,11 +26,12 @@ def do_quiz(trust_min, quiz_papers_n, cheaters_prop):
         # bernoulli trial with p=0.5
         gold_value = np.random.binomial(1, 0.5)
         # if a paper is easy, otherwise it is avg
-        if np.random.binomial(1, 0.5):
-            if worker_accuracy + easy_add_val > 1.:
-                worker_accuracy = 1.
-            else:
-                worker_accuracy += easy_add_val
+        if worker_type is not 'rand_ch':
+            if np.random.binomial(1, 0.5):
+                if worker_accuracy + easy_add_val > 1.:
+                    worker_accuracy = 1.
+                else:
+                    worker_accuracy += easy_add_val
         worker_judgment = np.random.binomial(1,
                                              worker_accuracy if gold_value == 1
                                              else 1-worker_accuracy)
