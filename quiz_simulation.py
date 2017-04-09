@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def do_quiz(trust_min, quiz_papers_n, cheaters_prop):
+def do_quiz_scope(trust_min, quiz_papers_n, cheaters_prop):
     easy_add_val = 0.2
     correct_judgments = 0
     # decide if a worker a cheater

@@ -4,10 +4,10 @@ run experiments
 
 import numpy as np
 from cf_simulation_synthetic import synthesizer
-from quiz_simulation import do_quiz
+from quiz_simulation import do_quiz_scope
 
 
-def run_quiz():
+def run_quiz_scope():
     statistic_passed = {
         'rand_ch': 0,
         'smart_ch': 0,
@@ -19,7 +19,7 @@ def run_quiz():
         'worker': 0
     }
     for _ in range(1000):
-        result = do_quiz(trust_min=0.75, quiz_papers_n=4, cheaters_prop=0.5)
+        result = do_quiz_scope(trust_min=0.75, quiz_papers_n=4, cheaters_prop=0.5)
         if len(result) > 1:
             statistic_passed[result[2]] += 1
             statistic_total[result[2]] += 1
@@ -35,7 +35,7 @@ def run_quiz():
     print 'workers passed: {}%'.format(workers_passed)
 
 
-def run_task():
+def run_task_criteria():
     tests_page_params = [1, 1, 1, 2, 2, 3]
     papers_page_params = [1, 2, 3, 2, 3, 3]
     for test_page, papaers_page in zip(tests_page_params, papers_page_params):
@@ -66,4 +66,5 @@ def run_task():
 
 
 if __name__ == '__main__':
-    run_quiz()
+    run_quiz_scope()
+
