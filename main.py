@@ -34,6 +34,17 @@ def run_quiz_scope():
     print 'smart cheaters passed: {}%'.format(smart_cheaters_passed)
     print 'workers passed: {}%'.format(workers_passed)
 
+#   calculate the proportion of types of users passed the quiz
+    user_prop = []
+    users_passed = float(sum(statistic_passed.values()))
+    for user_t in ['rand_ch', 'smart_ch', 'worker']:
+        user_prop.append(statistic_passed[user_t]/users_passed)
+    return user_prop
+
+
+def run_task_scope():
+    pass
+
 
 def run_task_criteria():
     tests_page_params = [1, 1, 1, 2, 2, 3]
@@ -66,5 +77,6 @@ def run_task_criteria():
 
 
 if __name__ == '__main__':
+    # run_task_scope()
     run_quiz_scope()
 
