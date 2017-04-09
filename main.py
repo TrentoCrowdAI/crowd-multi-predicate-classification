@@ -5,9 +5,10 @@ run experiments
 import numpy as np
 from cf_simulation_synthetic import synthesizer
 from quiz_simulation import do_quiz_scope
+from task_simulation import do_task_scope
 
 
-def run_quiz_scope():
+def run_quiz_scope(trust_min=0.75, quiz_papers_n=4, cheaters_prop=0.5):
     statistic_passed = {
         'rand_ch': 0,
         'smart_ch': 0,
@@ -19,7 +20,7 @@ def run_quiz_scope():
         'worker': 0
     }
     for _ in range(1000):
-        result = do_quiz_scope(trust_min=0.75, quiz_papers_n=4, cheaters_prop=0.5)
+        result = do_quiz_scope(trust_min, quiz_papers_n, cheaters_prop)
         if len(result) > 1:
             statistic_passed[result[2]] += 1
             statistic_total[result[2]] += 1
@@ -42,8 +43,15 @@ def run_quiz_scope():
     return user_prop
 
 
-def run_task_scope():
-    pass
+def run_task_scope(trust_min, user_prop):
+    # params for the task_scope function
+    tests_page_params = [1, 1, 1, 2, 2, 3]
+    papers_page_params = [1, 2, 3, 2, 3, 3]
+    for test_page, papaers_page in zip(tests_page_params, papers_page_params):
+        job_accuracy_list = []
+        budget_spent_list = []
+        for _ in range(1000):
+            do_task_scope()
 
 
 def run_task_criteria():
@@ -77,6 +85,9 @@ def run_task_criteria():
 
 
 if __name__ == '__main__':
-    # run_task_scope()
-    run_quiz_scope()
+    trust_min = 0.75
+    quiz_papers_n = 4
+    cheaters_prop = 0.5
+    user_prop = run_quiz_scope(trust_min, quiz_papers_n, cheaters_prop)
+    run_task_scope(trust_min, user_prop)
 
