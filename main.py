@@ -8,7 +8,7 @@ from quiz_simulation import do_quiz_scope
 from task_simulation import do_task_scope
 
 
-def run_quiz_scope(trust_min=0.75, quiz_papers_n=4, cheaters_prop=0.5):
+def run_quiz_scope(trust_min=0.75, quiz_papers_n=4, cheaters_prop=0.5,  easy_add_acc = 0.2):
     statistic_passed = {
         'rand_ch': 0,
         'smart_ch': 0,
@@ -26,7 +26,7 @@ def run_quiz_scope(trust_min=0.75, quiz_papers_n=4, cheaters_prop=0.5):
         'worker': []
     }
     for _ in range(1000):
-        result = do_quiz_scope(trust_min, quiz_papers_n, cheaters_prop)
+        result = do_quiz_scope(trust_min, quiz_papers_n, cheaters_prop, easy_add_acc)
         if len(result) > 1:
             statistic_passed[result[2]] += 1
             statistic_total[result[2]] += 1
@@ -109,6 +109,7 @@ if __name__ == '__main__':
     trust_min = 0.75
     quiz_papers_n = 4
     cheaters_prop = 0.5
-    user_prop, user_population = run_quiz_scope(trust_min, quiz_papers_n, cheaters_prop)
+    easy_add_acc = 0.2
+    user_prop, user_population = run_quiz_scope(trust_min, quiz_papers_n, cheaters_prop, easy_add_acc)
     run_task_scope(trust_min, user_prop, user_population)
 
