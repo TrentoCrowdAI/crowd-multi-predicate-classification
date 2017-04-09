@@ -25,17 +25,17 @@ def do_quiz_scope(trust_min, quiz_papers_n, cheaters_prop, easy_add_val):
         # bernoulli trial with p=0.5
         # gold_value = np.random.binomial(1, 0.5)
 
+        worker_accuracy_new = worker_accuracy
         # if a paper is easy, otherwise it is avg
         if worker_type is not 'rand_ch':
             if np.random.binomial(1, 0.5):
                 if worker_accuracy + easy_add_val > 1.:
-                    worker_accuracy = 1.
+                    worker_accuracy_new = 1.
                 else:
-                    worker_accuracy += easy_add_val
-        if np.random.binomial(1, worker_accuracy):
+                    worker_accuracy_new = worker_accuracy + easy_add_val
+        if np.random.binomial(1, worker_accuracy_new):
             correct_judgments += 1
     worker_trust = float(correct_judgments)/quiz_papers_n
     if worker_trust >= trust_min:
         return (worker_trust, worker_accuracy, worker_type)
     return (worker_type,)
-
