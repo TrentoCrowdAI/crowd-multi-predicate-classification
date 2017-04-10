@@ -38,6 +38,7 @@ def run_quiz_scope(trust_min=0.75, quiz_papers_n=4, cheaters_prop=0.5,  easy_add
     smart_cheaters_passed = statistic_passed['smart_ch'] / float(statistic_total['smart_ch']) * 100
     workers_passed = statistic_passed['worker'] / float(statistic_total['worker']) * 100
 
+    print '*** Quiz ***'
     print 'random cheaters passed: {}%'.format(rand_cheaters_passed)
     print 'smart cheaters passed: {}%'.format(smart_cheaters_passed)
     print 'workers passed: {}%'.format(workers_passed)
@@ -50,36 +51,62 @@ def run_quiz_scope(trust_min=0.75, quiz_papers_n=4, cheaters_prop=0.5,  easy_add
     return [user_prop, user_population]
 
 
-def run_task_scope(trust_min, user_prop, user_population, easy_add_acc, quiz_papers_n):
+def run_task_scope(trust_min, user_prop, user_population, easy_add_acc, quiz_papers_n, n_papers):
     # params for the do_task_scope function
     tests_page_params = [1, 1, 1, 2, 2, 3]
     papers_page_params = [1, 2, 3, 2, 3, 3]
     # TEST!!!
     tests_page_params = [1]
     papers_page_params = [3]
-    n_papers = 18
     price_row = 0.4
     judgment_min = 3
     fp_lose = 3
     fn_lose = 1
-    # for statistics
-    job_accuracy_list = []
-    budget_spent_list = []
     # do simulation
     for test_page, papers_page in zip(tests_page_params, papers_page_params):
+        # for statistics
+        budget_spent_list = []
+        paid_pages_n_list = []
+        worker_accuracy_dist = []
+        users_did_round_prop_list = [[], []]
+        acc_list = []
+        fp_list = []
+        fn_list = []
+        fp_lose_list = []
+        fn_lose_list = []
         for _ in range(1000):
             task_results = do_task_scope(trust_min, test_page, papers_page, n_papers, price_row, judgment_min,
                                          user_prop, user_population, easy_add_acc, quiz_papers_n, fp_lose, fn_lose)
+            budget_spent_list.append(task_results[0])
+            paid_pages_n_list.append(task_results[1])
+            worker_accuracy_dist += task_results[2]
+            users_did_round_prop_list[0].append(task_results[3][0])
+            users_did_round_prop_list[1].append(task_results[3][1])
+            acc_list.append(task_results[4])
+            fp_list.append(task_results[5])
+            fn_list.append(task_results[6])
+            fp_lose_list.append(task_results[7])
+            fn_lose_list.append(task_results[8])
 
+        budget_spent_avg = np.average(budget_spent_list)
+        paid_pages_n_avg = np.average(paid_pages_n_list)
+        users_did_round_prop_avg = [np.average(users_did_round_prop_list[0]),
+                                    np.average(users_did_round_prop_list[1])]
+        acc_avg = np.average(acc_list)
+        fp_avg = np.average(fp_list)
+        fn_avg = np.average(fn_list)
+        fp_lose_avg = np.average(fp_lose_list)
+        fn_lose_avg = np.average(fn_lose_list)
 
-
-
-
-
-
-
-
-
+        print '\n*** Task execution ***'
+        print 'budget_spent_avg: ${}'.format(budget_spent_avg)
+        print 'paid_pages_n_avg: {}'.format(paid_pages_n_avg)
+        print 'users_did_round_prop_avg: {}'.format(users_did_round_prop_avg)
+        print 'acc_avg: {}'.format(acc_avg)
+        print 'fp_avg: {}'.format(fp_avg)
+        print 'fn_avg: {}'.format(fn_avg)
+        print 'fp_lose_avg: {}'.format(fp_lose_avg)
+        print 'fn_lose_avg: {}'.format(fn_lose_avg)
 
 
 def run_task_criteria():
@@ -117,6 +144,12 @@ if __name__ == '__main__':
     quiz_papers_n = 4
     cheaters_prop = 0.5
     easy_add_acc = 0.2
-    user_prop, user_population = run_quiz_scope(trust_min, quiz_papers_n, cheaters_prop, easy_add_acc)
-    run_task_scope(trust_min, user_prop, user_population, easy_add_acc, quiz_papers_n)
+    n_papers = 18
 
+    print '*** Set up ***'
+    print 'quiz_papers_n: {}'.format(quiz_papers_n)
+    print 'n_papers: {}'.format(n_papers)
+    print 'trust_thrh: {}\n'.format(trust_min)
+
+    user_prop, user_population = run_quiz_scope(trust_min, quiz_papers_n, cheaters_prop, easy_add_acc)
+    run_task_scope(trust_min, user_prop, user_population, easy_add_acc, quiz_papers_n, n_papers)
