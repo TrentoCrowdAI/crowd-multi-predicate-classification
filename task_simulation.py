@@ -68,6 +68,9 @@ def do_round(trust_min, test_page, papers_page, n_papers, price_row, gold_data,
     # number of different types of workers after completing a page
     trusted_workers_n = 0
     untrusted_workers_n = 0
+    worker_accuracy_dist = []
+    cheaters_did_round = 0
+    users_did_round = 0
 
     for page_id in range(pages_n):
         trust_judgment = 0
@@ -100,6 +103,12 @@ def do_round(trust_min, test_page, papers_page, n_papers, price_row, gold_data,
             new_worker_trust = get_trust(w_page_judgment, gold_data, test_page, worker_trust, quiz_papers_n)
             # is a worker passed tests rows
             if new_worker_trust >= trust_min:
+                if is_rand_ch:
+                    cheaters_did_round += 1
+                    users_did_round += 1
+                else:
+                    users_did_round += 1
+                worker_accuracy_dist.append(worker_accuracy)
                 # add data to trusted_workers_judgment
                 for row_id in w_page_judgment.keys():
                     trusted_judgment[row_id].append(w_page_judgment[row_id])
@@ -110,8 +119,11 @@ def do_round(trust_min, test_page, papers_page, n_papers, price_row, gold_data,
 
             # monetary issue
             budget_spent += price_page
+
+    users_did_round_prop = [float(cheaters_did_round)/users_did_round,
+                            float(users_did_round-cheaters_did_round)/users_did_round]
     paid_pages_n = trusted_workers_n+untrusted_workers_n
-    return (trusted_judgment, budget_spent, paid_pages_n)
+    return (trusted_judgment, budget_spent, paid_pages_n, worker_accuracy_dist, users_did_round_prop)
 
 
 def do_task_scope(trust_min, test_page, papers_page, n_papers, price_row, judgment_min,
@@ -122,11 +134,13 @@ def do_task_scope(trust_min, test_page, papers_page, n_papers, price_row, judgme
     tests_n = test_page * pages_n
     total_papers_n = tests_n + n_papers
     gold_data = [(random.randint(0, 1), random.randint(0, 1)) for _ in range(total_papers_n)]
-    do_round(trust_min, test_page, papers_page, n_papers, price_row, gold_data,
-             judgment_min, user_prop, user_population, easy_add_acc, quiz_papers_n)
+    round_res = do_round(trust_min, test_page, papers_page, n_papers, price_row, gold_data,
+                         judgment_min, user_prop, user_population, easy_add_acc, quiz_papers_n)
+    trusted_judgment = round_res[0]
+    budget_spent = round_res[1]
+    paid_pages_n = round_res[2]
+    worker_accuracy_dist = round_res[3]
+    users_did_round_prop = round_res[4]
 
-    pass
-    # trusted_workers_judgment, budget_spent, paid_pages_n = first_round(trust_min, test_page, papers_page, quiz_papers_n,
-    #                                                     n_papers, budget, price_row, gold_data, judgment_min, cheaters_prop)
     # job_accuracy = get_accuracy(gold_data, trusted_workers_judgment)
     # return (job_accuracy, budget_spent, paid_pages_n)
