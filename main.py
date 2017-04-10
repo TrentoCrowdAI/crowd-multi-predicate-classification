@@ -3,6 +3,7 @@ run experiments
 '''
 
 import numpy as np
+import pandas as pd
 from cf_simulation_synthetic import synthesizer
 from quiz_simulation import do_quiz_scope
 from task_simulation import do_task_scope
@@ -55,13 +56,11 @@ def run_task_scope(trust_min, user_prop, user_population, easy_add_acc, quiz_pap
     # params for the do_task_scope function
     tests_page_params = [1, 1, 1, 2, 2, 3]
     papers_page_params = [1, 2, 3, 2, 3, 3]
-    # TEST!!!
-    tests_page_params = [1]
-    papers_page_params = [3]
     price_row = 0.4
     judgment_min = 3
-    fp_lose = 3
-    fn_lose = 1
+    fp_cost = 3
+    fn_cost = 1
+    data = []
     # do simulation
     for test_page, papers_page in zip(tests_page_params, papers_page_params):
         # for statistics
@@ -76,7 +75,7 @@ def run_task_scope(trust_min, user_prop, user_population, easy_add_acc, quiz_pap
         fn_lose_list = []
         for _ in range(1000):
             task_results = do_task_scope(trust_min, test_page, papers_page, n_papers, price_row, judgment_min,
-                                         user_prop, user_population, easy_add_acc, quiz_papers_n, fp_lose, fn_lose)
+                                         user_prop, user_population, easy_add_acc, quiz_papers_n, fp_cost, fn_cost)
             budget_spent_list.append(task_results[0])
             paid_pages_n_list.append(task_results[1])
             worker_accuracy_dist += task_results[2]
@@ -98,7 +97,14 @@ def run_task_scope(trust_min, user_prop, user_population, easy_add_acc, quiz_pap
         fp_lose_avg = np.average(fp_lose_list)
         fn_lose_avg = np.average(fn_lose_list)
 
+        data.append([test_page, papers_page, trust_min, quiz_papers_n, n_papers, price_row, judgment_min,
+                     fp_cost, fn_cost, budget_spent_avg, paid_pages_n_avg, users_did_round_prop_avg[0],
+                     users_did_round_prop_avg[1], acc_avg, fp_avg, fn_avg, fp_lose_avg, fn_lose_avg])
+
         print '\n*** Task execution ***'
+        print 'tests per page: {}'.format(test_page)
+        print 'papers per page: {}'.format(papers_page)
+        print '-----------------------'
         print 'budget_spent_avg: ${}'.format(budget_spent_avg)
         print 'paid_pages_n_avg: {}'.format(paid_pages_n_avg)
         print 'users_did_round_prop_avg: {}'.format(users_did_round_prop_avg)
@@ -107,6 +113,14 @@ def run_task_scope(trust_min, user_prop, user_population, easy_add_acc, quiz_pap
         print 'fn_avg: {}'.format(fn_avg)
         print 'fp_lose_avg: {}'.format(fp_lose_avg)
         print 'fn_lose_avg: {}'.format(fn_lose_avg)
+
+    res_frame = pd.DataFrame(data=data,
+                             columns=['test_page', 'papers_page', 'trust_min', 'quiz_papers_n',
+                                      'n_papers', 'price_row', 'judgment_min', 'fp_cost', 'fn_cost',
+                                      'budget_spent_avg', 'paid_pages_n_avg', 'ch_did_round_prop',
+                                      'wrk_did_round_prop', 'acc_avg', 'fp_avg', 'fn_avg', 'fp_lose_avg',
+                                      'fn_lose_avg'])
+    res_frame.to_csv('visualisation/task_stat.csv', index=False)
 
 
 def run_task_criteria():
