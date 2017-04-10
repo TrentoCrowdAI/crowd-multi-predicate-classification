@@ -47,11 +47,11 @@ def run_quiz_scope(trust_min=0.75, quiz_papers_n=4, cheaters_prop=0.5,  easy_add
     users_passed = float(sum(statistic_passed.values()))
     for user_t in ['rand_ch', 'smart_ch', 'worker']:
         user_prop.append(statistic_passed[user_t]/users_passed)
-    return (user_prop, user_population)
+    return [user_prop, user_population]
 
 
 def run_task_scope(trust_min, user_prop, user_population, easy_add_acc, quiz_papers_n):
-    # params for the task_scope function
+    # params for the do_task_scope function
     tests_page_params = [1, 1, 1, 2, 2, 3]
     papers_page_params = [1, 2, 3, 2, 3, 3]
     # TEST!!!
@@ -62,13 +62,15 @@ def run_task_scope(trust_min, user_prop, user_population, easy_add_acc, quiz_pap
     judgment_min = 3
     fp_lose = 3
     fn_lose = 1
+    # for statistics
+    job_accuracy_list = []
+    budget_spent_list = []
     # do simulation
     for test_page, papers_page in zip(tests_page_params, papers_page_params):
-        job_accuracy_list = []
-        budget_spent_list = []
         for _ in range(1000):
-            do_task_scope(trust_min, test_page, papers_page, n_papers, price_row, judgment_min,
-                          user_prop, user_population, easy_add_acc, quiz_papers_n, fp_lose, fn_lose)
+            task_results = do_task_scope(trust_min, test_page, papers_page, n_papers, price_row, judgment_min,
+                                         user_prop, user_population, easy_add_acc, quiz_papers_n, fp_lose, fn_lose)
+
 
 
 

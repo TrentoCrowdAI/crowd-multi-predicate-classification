@@ -58,7 +58,7 @@ def pick_worker(user_prop, user_population):
     else:
         worker_trust, worker_accuracy = user_population['rand_ch'].pop(0)
         user_population['rand_ch'].append((worker_trust, worker_accuracy))
-    return (worker_trust, worker_accuracy)
+    return [worker_trust, worker_accuracy]
 
 
 # get current worker's trust
@@ -139,7 +139,7 @@ def do_round(trust_min, test_page, papers_page, n_papers, price_row, gold_data,
     users_did_round_prop = [float(cheaters_did_round)/users_did_round,
                             float(users_did_round-cheaters_did_round)/users_did_round]
     paid_pages_n = trusted_workers_n+untrusted_workers_n
-    return (trusted_judgment, budget_spent, paid_pages_n, worker_accuracy_dist, users_did_round_prop)
+    return [trusted_judgment, budget_spent, paid_pages_n, worker_accuracy_dist, users_did_round_prop]
 
 
 def do_task_scope(trust_min, test_page, papers_page, n_papers, price_row, judgment_min,
