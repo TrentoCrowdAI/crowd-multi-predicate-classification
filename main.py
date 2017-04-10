@@ -54,6 +54,9 @@ def run_task_scope(trust_min, user_prop, user_population, easy_add_acc, quiz_pap
     # params for the task_scope function
     tests_page_params = [1, 1, 1, 2, 2, 3]
     papers_page_params = [1, 2, 3, 2, 3, 3]
+    # TEST!!!
+    tests_page_params = [1]
+    papers_page_params = [3]
     n_papers = 18
     price_row = 0.4
     judgment_min = 3
@@ -64,8 +67,6 @@ def run_task_scope(trust_min, user_prop, user_population, easy_add_acc, quiz_pap
         job_accuracy_list = []
         budget_spent_list = []
         for _ in range(1000):
-            # TEST!!!
-            papers_page = 3
             do_task_scope(trust_min, test_page, papers_page, n_papers, price_row, judgment_min,
                           user_prop, user_population, easy_add_acc, quiz_papers_n, fp_lose, fn_lose)
 

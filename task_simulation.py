@@ -50,11 +50,14 @@ def pick_worker(user_prop, user_population):
     t_worker = user_prop[2]
     p_val = np.random.uniform(0.0, 1.)
     if p_val < t_worker:
-        worker_trust, worker_accuracy = user_population['worker'].pop()
+        worker_trust, worker_accuracy = user_population['worker'].pop(0)
+        user_population['worker'].append((worker_trust, worker_accuracy))
     elif p_val >= t_worker and p_val < t_worker + smart_ch:
-        worker_trust, worker_accuracy = user_population['smart_ch'].pop()
+        worker_trust, worker_accuracy = user_population['smart_ch'].pop(0)
+        user_population['smart_ch'].append((worker_trust, worker_accuracy))
     else:
-        worker_trust, worker_accuracy = user_population['rand_ch'].pop()
+        worker_trust, worker_accuracy = user_population['rand_ch'].pop(0)
+        user_population['rand_ch'].append((worker_trust, worker_accuracy))
     return (worker_trust, worker_accuracy)
 
 
