@@ -50,7 +50,7 @@ def run_quiz_scope(trust_min=0.75, quiz_papers_n=4, cheaters_prop=0.5,  easy_add
     return (user_prop, user_population)
 
 
-def run_task_scope(trust_min, user_prop, user_population):
+def run_task_scope(trust_min, user_prop, user_population, easy_add_acc, quiz_papers_n):
     # params for the task_scope function
     tests_page_params = [1, 1, 1, 2, 2, 3]
     papers_page_params = [1, 2, 3, 2, 3, 3]
@@ -62,8 +62,10 @@ def run_task_scope(trust_min, user_prop, user_population):
         job_accuracy_list = []
         budget_spent_list = []
         for _ in range(1000):
-            do_task_scope(trust_min, test_page, papers_page, n_papers,
-                          price_row, judgment_min, user_prop, user_population)
+            # TEST!!!
+            papers_page = 3
+            do_task_scope(trust_min, test_page, papers_page, n_papers, price_row, judgment_min,
+                          user_prop, user_population, easy_add_acc, quiz_papers_n)
 
 
 
@@ -111,5 +113,5 @@ if __name__ == '__main__':
     cheaters_prop = 0.5
     easy_add_acc = 0.2
     user_prop, user_population = run_quiz_scope(trust_min, quiz_papers_n, cheaters_prop, easy_add_acc)
-    run_task_scope(trust_min, user_prop, user_population)
+    run_task_scope(trust_min, user_prop, user_population, easy_add_acc, quiz_papers_n)
 

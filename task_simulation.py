@@ -46,31 +46,20 @@ def pick_worker(user_prop, user_population):
 
 
 # get current worker's trust
-# def get_trust(w_page_judgment, gold_data, test_page, worker_trust, quiz_papers_n):
-#     correctly_tagged_tests = 0
-#     for row_id in w_page_judgment.keys()[:test_page]:
-#         if gold_data[row_id] == w_page_judgment[row_id]:
-#             correctly_tagged_tests += 1
-#     new_trust = (worker_trust*quiz_papers_n + correctly_tagged_tests)/(quiz_papers_n + test_page)
-#     return new_trust
-
-#
-# def do_judgment(worker_accuracy, gold_criteria):
-#     judgment = []
-#     for cr in gold_criteria:
-#         if np.random.binomial(1, worker_accuracy):
-#             judgment.append(cr)
-#         else:
-#             judgment.append(abs(cr-1))
-#     return judgment
-
+def get_trust(w_page_judgment, gold_data, test_page, worker_trust, quiz_papers_n):
+    correctly_tagged_tests = 0
+    for row_id in w_page_judgment.keys()[:test_page]:
+        if gold_data[row_id][0] == w_page_judgment[row_id]:
+            correctly_tagged_tests += 1
+    new_trust = (worker_trust*quiz_papers_n + correctly_tagged_tests)/(quiz_papers_n + test_page)
+    return new_trust
 
 '''
 each element in 'trusted_workers_judgment' is judgments of users who passed tests questions,
 indexes of the trusted_workers_judgment' present row id
 '''
-def do_round(trust_min, test_page, papers_page, n_papers, price_row,
-             gold_data, judgment_min, user_prop, user_population):
+def do_round(trust_min, test_page, papers_page, n_papers, price_row, gold_data,
+             judgment_min, user_prop, user_population, easy_add_acc, quiz_papers_n):
     cheaters_prop = user_prop[0] + user_prop[1]
     pages_n = n_papers / papers_page
     rows_page = test_page+papers_page
@@ -86,18 +75,34 @@ def do_round(trust_min, test_page, papers_page, n_papers, price_row,
     for page_id in range(pages_n):
         trust_judgment = 0
         while trust_judgment != judgment_min:
-            # w_page_judgment = {}
+            w_page_judgment = {}
             worker_trust, worker_accuracy = pick_worker(user_prop, user_population)
+            if worker_accuracy == 0.5:
+                is_rand_ch = True
+            else:
+                is_rand_ch = False
 
-    #         for row_id in range(page_id*rows_page, page_id*rows_page+rows_page, 1):
-    #             # if a worker is a cheater
-    #             if np.random.binomial(1, cheaters_prop):
-    #                 w_judgment = do_judgment(worker_accuracy=0.5, gold_criteria=gold_data[row_id])
-    #             else:
-    #                 w_judgment = do_judgment(worker_accuracy=worker_accuracy, gold_criteria=gold_data[row_id])
-    #             w_page_judgment.update({row_id: w_judgment})
-    #
-    #         new_worker_trust = get_trust(w_page_judgment, gold_data, test_page, worker_trust, quiz_papers_n)
+            for row_id in range(page_id*rows_page, page_id*rows_page+rows_page, 1):
+                gold_value = gold_data[row_id][0]
+                # if the paper is average
+                # OR
+                # if the worker is a random cheater
+                if gold_data[row_id][1] == 0 or is_rand_ch:
+                    worker_judgment = np.random.binomial(1, worker_accuracy
+                                                         if gold_value == 1
+                                                         else 1 - worker_accuracy)
+                else:
+                    if worker_accuracy + easy_add_acc > 1.:
+                        worker_accuracy_new = 1.
+                    else:
+                        worker_accuracy_new = worker_accuracy + easy_add_acc
+                    worker_judgment = np.random.binomial(1, worker_accuracy_new
+                                                         if gold_value == 1
+                                                         else 1 - worker_accuracy_new)
+                w_page_judgment.update({row_id: worker_judgment})
+            new_worker_trust = get_trust(w_page_judgment, gold_data, test_page, worker_trust, quiz_papers_n)
+
+
     #         # is a worker passed tests rows
     #         if new_worker_trust >= trust_min:
     #             # add data to trusted_workers_judgment
@@ -115,16 +120,16 @@ def do_round(trust_min, test_page, papers_page, n_papers, price_row,
     # return (trusted_workers_judgment, budget_spent, paid_pages_n)
 
 
-def do_task_scope(trust_min, test_page, papers_page, n_papers,
-                  price_row, judgment_min, user_prop, user_population):
+def do_task_scope(trust_min, test_page, papers_page, n_papers, price_row, judgment_min,
+                  user_prop, user_population, easy_add_acc, quiz_papers_n):
     # generate gold data
     # [paper_x] = [[gold_val], [is_easy]]
     pages_n = n_papers / papers_page
     tests_n = test_page * pages_n
     total_papers_n = tests_n + n_papers
     gold_data = [(random.randint(0, 1), random.randint(0, 1)) for _ in range(total_papers_n)]
-    do_round(trust_min, test_page, papers_page, n_papers,
-                price_row, gold_data, judgment_min, user_prop, user_population)
+    do_round(trust_min, test_page, papers_page, n_papers, price_row, gold_data,
+             judgment_min, user_prop, user_population, easy_add_acc, quiz_papers_n)
 
     pass
     # trusted_workers_judgment, budget_spent, paid_pages_n = first_round(trust_min, test_page, papers_page, quiz_papers_n,
