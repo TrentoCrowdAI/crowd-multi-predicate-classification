@@ -37,5 +37,5 @@ def do_quiz_scope(trust_min, quiz_papers_n, cheaters_prop, easy_add_val):
             correct_judgments += 1
     worker_trust = float(correct_judgments)/quiz_papers_n
     if worker_trust >= trust_min:
-        return (worker_trust, worker_accuracy, worker_type)
-    return worker_type
+        return [worker_trust, worker_accuracy, worker_type]
+    return [worker_type]
