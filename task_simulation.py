@@ -60,17 +60,14 @@ indexes of the trusted_workers_judgment' present row id
 '''
 def do_round(trust_min, test_page, papers_page, n_papers, price_row, gold_data,
              judgment_min, user_prop, user_population, easy_add_acc, quiz_papers_n):
-    cheaters_prop = user_prop[0] + user_prop[1]
     pages_n = n_papers / papers_page
     rows_page = test_page+papers_page
     price_page = price_row*rows_page
     budget_spent = 0.
-    # budget_rest = budget
-    trusted_workers_judgment = [[] for _ in range(rows_page*pages_n)]
+    trusted_judgment = [[] for _ in range(rows_page*pages_n)]
     # number of different types of workers after completing a page
     trusted_workers_n = 0
     untrusted_workers_n = 0
-
 
     for page_id in range(pages_n):
         trust_judgment = 0
@@ -101,23 +98,20 @@ def do_round(trust_min, test_page, papers_page, n_papers, price_row, gold_data,
                                                          else 1 - worker_accuracy_new)
                 w_page_judgment.update({row_id: worker_judgment})
             new_worker_trust = get_trust(w_page_judgment, gold_data, test_page, worker_trust, quiz_papers_n)
+            # is a worker passed tests rows
+            if new_worker_trust >= trust_min:
+                # add data to trusted_workers_judgment
+                for row_id in w_page_judgment.keys():
+                    trusted_judgment[row_id].append(w_page_judgment[row_id])
+                trusted_workers_n += 1
+                trust_judgment += 1
+            else:
+                untrusted_workers_n += 1
 
-
-    #         # is a worker passed tests rows
-    #         if new_worker_trust >= trust_min:
-    #             # add data to trusted_workers_judgment
-    #             for row_id in w_page_judgment.keys():
-    #                 trusted_workers_judgment[row_id].append(w_page_judgment[row_id])
-    #             trusted_workers_n += 1
-    #             trust_judgment += 1
-    #         else:
-    #             untrusted_workers_n += 1
-    #
-    #         # monetary issue
-    #         # budget_rest -= price_page
-    #         budget_spent += price_page
-    # paid_pages_n = trusted_workers_n+untrusted_workers_n
-    # return (trusted_workers_judgment, budget_spent, paid_pages_n)
+            # monetary issue
+            budget_spent += price_page
+    paid_pages_n = trusted_workers_n+untrusted_workers_n
+    return (trusted_judgment, budget_spent, paid_pages_n)
 
 
 def do_task_scope(trust_min, test_page, papers_page, n_papers, price_row, judgment_min,
