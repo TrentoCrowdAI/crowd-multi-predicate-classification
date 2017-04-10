@@ -57,6 +57,8 @@ def run_task_scope(trust_min, user_prop, user_population, easy_add_acc, quiz_pap
     n_papers = 18
     price_row = 0.4
     judgment_min = 3
+    fp_lose = 3
+    fn_lose = 1
     # do simulation
     for test_page, papers_page in zip(tests_page_params, papers_page_params):
         job_accuracy_list = []
@@ -65,7 +67,7 @@ def run_task_scope(trust_min, user_prop, user_population, easy_add_acc, quiz_pap
             # TEST!!!
             papers_page = 3
             do_task_scope(trust_min, test_page, papers_page, n_papers, price_row, judgment_min,
-                          user_prop, user_population, easy_add_acc, quiz_papers_n)
+                          user_prop, user_population, easy_add_acc, quiz_papers_n, fp_lose, fn_lose)
 
 
 

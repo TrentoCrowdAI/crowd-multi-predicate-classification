@@ -19,17 +19,30 @@ import random
 import numpy as np
 
 
-# def get_accuracy(gold_data, trusted_workers_judgment):
-#     total_criteria_judgments = 0.
-#     correct_criteria_judgments = 0.
-#     for row_id, row_gold in enumerate(gold_data):
-#         for row_judgment in trusted_workers_judgment[row_id]:
-#             for gold, judg in zip(row_gold, row_judgment):
-#                 if gold == judg:
-#                     correct_criteria_judgments += 1
-#                 total_criteria_judgments += 1
-#     job_accuracy = correct_criteria_judgments/total_criteria_judgments
-#     return job_accuracy
+def get_metrics(gold_data, trusted_judgment, fp_cost, fn_cost):
+    fp_count = 0
+    fn_count = 0
+    correct_count = 0
+    total_rows = len(gold_data)
+    p_count = sum([row[0] for row in gold_data])
+    f_count = total_rows - p_count
+    for gold, users_values in zip(gold_data, trusted_judgment):
+        gold_value = gold[0]
+        aggregated_value = max(set(users_values), key=users_values.count)
+        # if the paper in scope
+        if gold_value == aggregated_value:
+            correct_count += 1
+        else:
+            if gold_value:
+                fp_count += 1
+            else:
+                fn_count += 1
+    acc = float(correct_count)/total_rows
+    fp = float(fp_count)/p_count
+    fn = float(fn_count)/f_count
+    fp_lose = fp_count * fp_cost
+    fn_lose = fn_count * fn_cost
+    return [acc, fp, fn, fp_lose, fn_lose]
 
 
 def pick_worker(user_prop, user_population):
@@ -127,7 +140,7 @@ def do_round(trust_min, test_page, papers_page, n_papers, price_row, gold_data,
 
 
 def do_task_scope(trust_min, test_page, papers_page, n_papers, price_row, judgment_min,
-                  user_prop, user_population, easy_add_acc, quiz_papers_n):
+                  user_prop, user_population, easy_add_acc, quiz_papers_n, fp_cost, fn_cost):
     # generate gold data
     # [paper_x] = [[gold_val], [is_easy]]
     pages_n = n_papers / papers_page
@@ -142,5 +155,6 @@ def do_task_scope(trust_min, test_page, papers_page, n_papers, price_row, judgme
     worker_accuracy_dist = round_res[3]
     users_did_round_prop = round_res[4]
 
-    # job_accuracy = get_accuracy(gold_data, trusted_workers_judgment)
-    # return (job_accuracy, budget_spent, paid_pages_n)
+    acc, fp, fn, fp_lose, fn_lose = get_metrics(gold_data, trusted_judgment, fp_cost, fn_cost)
+    return [budget_spent, paid_pages_n, worker_accuracy_dist,
+            users_did_round_prop, acc, fp, fn, fp_lose, fn_lose]
