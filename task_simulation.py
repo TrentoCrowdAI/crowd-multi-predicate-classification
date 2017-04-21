@@ -20,29 +20,36 @@ import numpy as np
 
 
 def get_metrics(gold_data, trusted_judgment, fp_cost, fn_cost):
-    fp_count = 0
-    fn_count = 0
+    fp_mv_count = 0
+    fn_mv_count = 0
+    fp_cons_count = 0
+    fn_cons_count = 0
     correct_count = 0
     total_rows = len(gold_data)
     p_count = sum([row[0] for row in gold_data])
     f_count = total_rows - p_count
+    judgment_num = float(len(trusted_judgment[0]))
     for gold, users_values in zip(gold_data, trusted_judgment):
         gold_value = gold[0]
         aggregated_value_mv = max(set(users_values), key=users_values.count)
+        # classification function: users consent rate
+        consent_prop = users_values.count(aggregated_value_mv)/judgment_num
+        # if consent_prop >= 0.8:
+        #     consent_value =
         # if the paper in scope
         if gold_value == aggregated_value_mv:
             correct_count += 1
         else:
             if gold_value:
-                fp_count += 1
+                fp_mv_count += 1
             else:
-                fn_count += 1
+                fn_mv_count += 1
     acc_mv = float(correct_count)/total_rows
-    fp = float(fp_count)/p_count
-    fn = float(fn_count)/f_count
-    fp_lose = fp_count * fp_cost
-    fn_lose = fn_count * fn_cost
-    return [acc_mv, fp, fn, fp_lose, fn_lose]
+    fp = float(fp_mv_count)/p_count
+    fn = float(fn_mv_count)/f_count
+    fp_mv_lose = fp_mv_count * fp_cost
+    fn_mv_lose = fn_mv_count * fn_cost
+    return [acc_mv, fp, fn, fp_mv_lose, fn_mv_lose]
 
 
 def pick_worker(user_prop, user_population):
@@ -158,6 +165,6 @@ def do_task_scope(trust_min, test_page, papers_page, n_papers, price_row, judgme
     worker_accuracy_dist = round_res[3]
     users_did_round_prop = round_res[4]
 
-    acc_mv, fp, fn, fp_lose, fn_lose = get_metrics(gold_data, trusted_judgment, fp_cost, fn_cost)
+    acc_mv, fp, fn, fp_mv_lose, fn_mv_lose = get_metrics(gold_data, trusted_judgment, fp_cost, fn_cost)
     return [budget_spent, paid_pages_n, worker_accuracy_dist,
-            users_did_round_prop, acc_mv, fp, fn, fp_lose, fn_lose]
+            users_did_round_prop, acc_mv, fp, fn, fp_mv_lose, fn_mv_lose]
