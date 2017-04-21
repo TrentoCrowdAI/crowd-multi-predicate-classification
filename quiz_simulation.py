@@ -6,7 +6,7 @@ def do_quiz_scope(trust_min, quiz_papers_n, cheaters_prop, easy_add_val):
     # decide if a worker a cheater
     if np.random.binomial(1, cheaters_prop):
         # decide if a worker a random cheater or smart one
-        rand_cheater_prop = 0.5
+        rand_cheater_prop = 1.
         if np.random.binomial(1, rand_cheater_prop):
             # random cheater
             worker_type = 'rand_ch'

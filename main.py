@@ -26,17 +26,20 @@ def run_quiz_scope(trust_min=0.75, quiz_papers_n=4, cheaters_prop=0.5,  easy_add
         'smart_ch': [],
         'worker': []
     }
-    for _ in range(1000):
+    acc_passed_distr = []
+    for _ in range(10000):
         result = do_quiz_scope(trust_min, quiz_papers_n, cheaters_prop, easy_add_acc)
         if len(result) > 1:
             statistic_passed[result[2]] += 1
             statistic_total[result[2]] += 1
             user_population[result[2]].append(result[:2])
+            acc_passed_distr.append(result[1])
         else:
             statistic_total[result[0]] += 1
 
     rand_cheaters_passed = statistic_passed['rand_ch'] / float(statistic_total['rand_ch']) * 100
-    smart_cheaters_passed = statistic_passed['smart_ch'] / float(statistic_total['smart_ch']) * 100
+    # smart_cheaters_passed = statistic_passed['smart_ch'] / float(statistic_total['smart_ch']) * 100
+    smart_cheaters_passed = 0.
     workers_passed = statistic_passed['worker'] / float(statistic_total['worker']) * 100
 
     print '*** Quiz ***'
@@ -54,73 +57,90 @@ def run_quiz_scope(trust_min=0.75, quiz_papers_n=4, cheaters_prop=0.5,  easy_add
 
 def run_task_scope(trust_min, user_prop, user_population, easy_add_acc, quiz_papers_n, n_papers):
     # params for the do_task_scope function
-    tests_page_params = [1, 1, 1, 2, 2, 3]
-    papers_page_params = [1, 2, 3, 2, 3, 3]
-    price_row = 0.4
+    # tests_page_params = [1, 1, 1, 2, 2, 3]
+    # papers_page_params = [1, 2, 3, 2, 3, 3]
+    tests_page_params = [1]*9
+    papers_page_params = [1, 2, 3, 4, 5, 6, 7, 8, 9]
+    price_row = 0.2
     judgment_min = 3
     fp_cost = 3
     fn_cost = 1
     data = []
+    accuracy_data = []
     # do simulation
     for test_page, papers_page in zip(tests_page_params, papers_page_params):
-        # for statistics
-        budget_spent_list = []
-        paid_pages_n_list = []
-        worker_accuracy_dist = []
-        users_did_round_prop_list = [[], []]
-        acc_list = []
-        fp_list = []
-        fn_list = []
-        fp_lose_list = []
-        fn_lose_list = []
-        for _ in range(1000):
-            task_results = do_task_scope(trust_min, test_page, papers_page, n_papers, price_row, judgment_min,
-                                         user_prop, user_population, easy_add_acc, quiz_papers_n, fp_cost, fn_cost)
-            budget_spent_list.append(task_results[0])
-            paid_pages_n_list.append(task_results[1])
-            worker_accuracy_dist += task_results[2]
-            users_did_round_prop_list[0].append(task_results[3][0])
-            users_did_round_prop_list[1].append(task_results[3][1])
-            acc_list.append(task_results[4])
-            fp_list.append(task_results[5])
-            fn_list.append(task_results[6])
-            fp_lose_list.append(task_results[7])
-            fn_lose_list.append(task_results[8])
+        for judgment_min in [3, 5, 7]:
+            # for statistics
+            budget_spent_list = []
+            paid_pages_n_list = []
+            worker_accuracy_dist = []
+            users_did_round_prop_list = [[], []]
+            acc_list = []
+            fp_list = []
+            fn_list = []
+            fp_lose_list = []
+            fn_lose_list = []
+            for _ in range(1000):
+                task_results = do_task_scope(trust_min, test_page, papers_page, n_papers, price_row, judgment_min,
+                                             user_prop, user_population, easy_add_acc, quiz_papers_n, fp_cost, fn_cost)
+                budget_spent_list.append(task_results[0])
+                paid_pages_n_list.append(task_results[1])
+                worker_accuracy_dist += task_results[2]
+                users_did_round_prop_list[0].append(task_results[3][0])
+                users_did_round_prop_list[1].append(task_results[3][1])
+                acc_list.append(task_results[4])
+                fp_list.append(task_results[5])
+                fn_list.append(task_results[6])
+                fp_lose_list.append(task_results[7])
+                fn_lose_list.append(task_results[8])
 
-        budget_spent_avg = np.average(budget_spent_list)
-        paid_pages_n_avg = np.average(paid_pages_n_list)
-        users_did_round_prop_avg = [np.average(users_did_round_prop_list[0]),
-                                    np.average(users_did_round_prop_list[1])]
-        acc_avg = np.average(acc_list)
-        fp_avg = np.average(fp_list)
-        fn_avg = np.average(fn_list)
-        fp_lose_avg = np.average(fp_lose_list)
-        fn_lose_avg = np.average(fn_lose_list)
+            budget_spent_avg = np.average(budget_spent_list)
+            paid_pages_n_avg = np.average(paid_pages_n_list)
+            users_did_round_prop_avg = [np.average(users_did_round_prop_list[0]),
+                                        np.average(users_did_round_prop_list[1])]
+            acc_avg = np.average(acc_list)
+            acc_std = np.std(acc_list)
+            fp_avg = np.average(fp_list)
+            fn_avg = np.average(fn_list)
+            fp_lose_avg = np.average(fp_lose_list)
+            fp_lose_std = np.std(fp_lose_list)
+            fn_lose_avg = np.average(fn_lose_list)
+            fn_lose_std = np.std(fn_lose_list)
 
-        data.append([test_page, papers_page, trust_min, quiz_papers_n, n_papers, price_row, judgment_min,
-                     fp_cost, fn_cost, budget_spent_avg, paid_pages_n_avg, users_did_round_prop_avg[0],
-                     users_did_round_prop_avg[1], acc_avg, fp_avg, fn_avg, fp_lose_avg, fn_lose_avg])
+            data.append([test_page, papers_page, trust_min, quiz_papers_n, n_papers, price_row, judgment_min,
+                         fp_cost, fn_cost, budget_spent_avg, paid_pages_n_avg, users_did_round_prop_avg[0],
+                         users_did_round_prop_avg[1], acc_avg, fp_avg, fn_avg, fp_lose_avg, fn_lose_avg,
+                         acc_std, fp_lose_std, fn_lose_std])
+            accuracy_data.append([test_page, papers_page, trust_min, quiz_papers_n, n_papers, price_row, judgment_min,
+                             fp_cost, fn_cost]+acc_list)
 
-        print '\n*** Task execution ***'
-        print 'tests per page: {}'.format(test_page)
-        print 'papers per page: {}'.format(papers_page)
-        print '-----------------------'
-        print 'budget_spent_avg: ${}'.format(budget_spent_avg)
-        print 'paid_pages_n_avg: {}'.format(paid_pages_n_avg)
-        print 'users_did_round_prop_avg: {}'.format(users_did_round_prop_avg)
-        print 'acc_avg: {}'.format(acc_avg)
-        print 'fp_avg: {}'.format(fp_avg)
-        print 'fn_avg: {}'.format(fn_avg)
-        print 'fp_lose_avg: {}'.format(fp_lose_avg)
-        print 'fn_lose_avg: {}'.format(fn_lose_avg)
+            print '\n*** Task execution ***'
+            print 'tests per page: {}'.format(test_page)
+            print 'papers per page: {}'.format(papers_page)
+            print '-----------------------'
+            print 'budget_spent_avg: ${}'.format(budget_spent_avg)
+            print 'paid_pages_n_avg: {}'.format(paid_pages_n_avg)
+            print 'users_did_round_prop_avg: {}'.format(users_did_round_prop_avg)
+            print 'acc_avg: {}'.format(acc_avg)
+            print 'fp_avg: {}'.format(fp_avg)
+            print 'fn_avg: {}'.format(fn_avg)
+            print 'fp_lose_avg: {}'.format(fp_lose_avg)
+            print 'fn_lose_avg: {}'.format(fn_lose_avg)
 
     res_frame = pd.DataFrame(data=data,
                              columns=['test_page', 'papers_page', 'trust_min', 'quiz_papers_n',
                                       'n_papers', 'price_row', 'judgment_min', 'fp_cost', 'fn_cost',
                                       'budget_spent_avg', 'paid_pages_n_avg', 'ch_did_round_prop',
                                       'wrk_did_round_prop', 'acc_avg', 'fp_avg', 'fn_avg', 'fp_lose_avg',
-                                      'fn_lose_avg'])
-    res_frame.to_csv('visualisation/task_stat.csv', index=False)
+                                      'fn_lose_avg', 'acc_std', 'fp_lose_std', 'fn_lose_std'])
+    # res_frame.to_csv('visualisation/task_stat_{}_{}.csv'.format(trust_min, cheaters_prop), index=False)
+    res_frame.to_csv('visualisation/task_results_plot2_test.csv'.format(trust_min, cheaters_prop), index=False)
+
+    # accuracy_columns = ['test_page', 'papers_page', 'trust_min', 'quiz_papers_n',
+    #                     'n_papers', 'price_row', 'judgment_min', 'fp_cost', 'fn_cost'] \
+    #                      + range(len(acc_list))
+    # accuracy_frame = pd.DataFrame(data=accuracy_data, columns=accuracy_columns)
+    # accuracy_frame.to_csv('visualisation/accuracy.csv', index=False)
 
 
 def run_task_criteria():
@@ -154,11 +174,11 @@ def run_task_criteria():
 
 
 if __name__ == '__main__':
-    trust_min = 0.75
+    trust_min = 1.
     quiz_papers_n = 4
-    cheaters_prop = 0.5
-    easy_add_acc = 0.2
-    n_papers = 18
+    cheaters_prop = 0.25
+    easy_add_acc = 0.0
+    n_papers = 300
 
     print '*** Set up ***'
     print 'quiz_papers_n: {}'.format(quiz_papers_n)
