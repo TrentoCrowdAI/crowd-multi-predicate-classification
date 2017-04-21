@@ -20,6 +20,7 @@ import numpy as np
 
 
 def get_metrics(gold_data, trusted_judgment, fp_cost, fn_cost):
+    consent_thrs = 0.8
     fp_mv_count = 0
     fn_mv_count = 0
     fp_cons_count = 0
@@ -34,8 +35,6 @@ def get_metrics(gold_data, trusted_judgment, fp_cost, fn_cost):
         aggregated_value_mv = max(set(users_values), key=users_values.count)
         # classification function: users consent rate
         consent_prop = users_values.count(aggregated_value_mv)/judgment_num
-        # if consent_prop >= 0.8:
-        #     consent_value =
         # if the paper in scope
         if gold_value == aggregated_value_mv:
             correct_count += 1
@@ -44,12 +43,22 @@ def get_metrics(gold_data, trusted_judgment, fp_cost, fn_cost):
                 fp_mv_count += 1
             else:
                 fn_mv_count += 1
+
+            if consent_prop >= consent_thrs:
+                if gold_value:
+                    fp_cons_count += 1
+                else:
+                    fn_cons_count += 1
+            else:
+                fn_cons_count += 1
     acc_mv = float(correct_count)/total_rows
     fp = float(fp_mv_count)/p_count
     fn = float(fn_mv_count)/f_count
     fp_mv_lose = fp_mv_count * fp_cost
     fn_mv_lose = fn_mv_count * fn_cost
-    return [acc_mv, fp, fn, fp_mv_lose, fn_mv_lose]
+    fp_cons_lose = fp_cons_count * fp_cost
+    fn_cons_lose = fn_cons_count * fn_cost
+    return [acc_mv, fp, fn, fp_mv_lose, fn_mv_lose, fp_cons_lose, fn_cons_lose]
 
 
 def pick_worker(user_prop, user_population):
@@ -165,6 +174,8 @@ def do_task_scope(trust_min, test_page, papers_page, n_papers, price_row, judgme
     worker_accuracy_dist = round_res[3]
     users_did_round_prop = round_res[4]
 
-    acc_mv, fp, fn, fp_mv_lose, fn_mv_lose = get_metrics(gold_data, trusted_judgment, fp_cost, fn_cost)
+    acc_mv, fp, fn, fp_mv_lose, fn_mv_lose, fp_cons_lose, fn_cons_lose = get_metrics(gold_data, trusted_judgment,
+                                                                                     fp_cost, fn_cost)
     return [budget_spent, paid_pages_n, worker_accuracy_dist,
-            users_did_round_prop, acc_mv, fp, fn, fp_mv_lose, fn_mv_lose]
+            users_did_round_prop, acc_mv, fp, fn, fp_mv_lose, fn_mv_lose,
+            fp_cons_lose, fn_cons_lose]
