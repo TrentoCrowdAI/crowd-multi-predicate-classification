@@ -28,21 +28,21 @@ def get_metrics(gold_data, trusted_judgment, fp_cost, fn_cost):
     f_count = total_rows - p_count
     for gold, users_values in zip(gold_data, trusted_judgment):
         gold_value = gold[0]
-        aggregated_value = max(set(users_values), key=users_values.count)
+        aggregated_value_mv = max(set(users_values), key=users_values.count)
         # if the paper in scope
-        if gold_value == aggregated_value:
+        if gold_value == aggregated_value_mv:
             correct_count += 1
         else:
             if gold_value:
                 fp_count += 1
             else:
                 fn_count += 1
-    acc = float(correct_count)/total_rows
+    acc_mv = float(correct_count)/total_rows
     fp = float(fp_count)/p_count
     fn = float(fn_count)/f_count
     fp_lose = fp_count * fp_cost
     fn_lose = fn_count * fn_cost
-    return [acc, fp, fn, fp_lose, fn_lose]
+    return [acc_mv, fp, fn, fp_lose, fn_lose]
 
 
 def pick_worker(user_prop, user_population):
@@ -158,6 +158,6 @@ def do_task_scope(trust_min, test_page, papers_page, n_papers, price_row, judgme
     worker_accuracy_dist = round_res[3]
     users_did_round_prop = round_res[4]
 
-    acc, fp, fn, fp_lose, fn_lose = get_metrics(gold_data, trusted_judgment, fp_cost, fn_cost)
+    acc_mv, fp, fn, fp_lose, fn_lose = get_metrics(gold_data, trusted_judgment, fp_cost, fn_cost)
     return [budget_spent, paid_pages_n, worker_accuracy_dist,
-            users_did_round_prop, acc, fp, fn, fp_lose, fn_lose]
+            users_did_round_prop, acc_mv, fp, fn, fp_lose, fn_lose]

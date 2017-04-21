@@ -75,7 +75,7 @@ def run_task_scope(trust_min, user_prop, user_population, easy_add_acc, quiz_pap
             paid_pages_n_list = []
             worker_accuracy_dist = []
             users_did_round_prop_list = [[], []]
-            acc_list = []
+            acc_mv_list = []
             fp_list = []
             fn_list = []
             fp_lose_list = []
@@ -88,7 +88,7 @@ def run_task_scope(trust_min, user_prop, user_population, easy_add_acc, quiz_pap
                 worker_accuracy_dist += task_results[2]
                 users_did_round_prop_list[0].append(task_results[3][0])
                 users_did_round_prop_list[1].append(task_results[3][1])
-                acc_list.append(task_results[4])
+                acc_mv_list.append(task_results[4])
                 fp_list.append(task_results[5])
                 fn_list.append(task_results[6])
                 fp_lose_list.append(task_results[7])
@@ -98,8 +98,8 @@ def run_task_scope(trust_min, user_prop, user_population, easy_add_acc, quiz_pap
             paid_pages_n_avg = np.average(paid_pages_n_list)
             users_did_round_prop_avg = [np.average(users_did_round_prop_list[0]),
                                         np.average(users_did_round_prop_list[1])]
-            acc_avg = np.average(acc_list)
-            acc_std = np.std(acc_list)
+            acc_mv_avg = np.average(acc_mv_list)
+            acc_mv_std = np.std(acc_mv_list)
             fp_avg = np.average(fp_list)
             fn_avg = np.average(fn_list)
             fp_lose_avg = np.average(fp_lose_list)
@@ -109,10 +109,10 @@ def run_task_scope(trust_min, user_prop, user_population, easy_add_acc, quiz_pap
 
             data.append([test_page, papers_page, trust_min, quiz_papers_n, n_papers, price_row, judgment_min,
                          fp_cost, fn_cost, budget_spent_avg, paid_pages_n_avg, users_did_round_prop_avg[0],
-                         users_did_round_prop_avg[1], acc_avg, fp_avg, fn_avg, fp_lose_avg, fn_lose_avg,
-                         acc_std, fp_lose_std, fn_lose_std])
+                         users_did_round_prop_avg[1], acc_mv_avg, fp_avg, fn_avg, fp_lose_avg, fn_lose_avg,
+                         acc_mv_std, fp_lose_std, fn_lose_std])
             accuracy_data.append([test_page, papers_page, trust_min, quiz_papers_n, n_papers, price_row, judgment_min,
-                             fp_cost, fn_cost]+acc_list)
+                             fp_cost, fn_cost]+acc_mv_list)
 
             print '\n*** Task execution ***'
             print 'tests per page: {}'.format(test_page)
@@ -121,7 +121,7 @@ def run_task_scope(trust_min, user_prop, user_population, easy_add_acc, quiz_pap
             print 'budget_spent_avg: ${}'.format(budget_spent_avg)
             print 'paid_pages_n_avg: {}'.format(paid_pages_n_avg)
             print 'users_did_round_prop_avg: {}'.format(users_did_round_prop_avg)
-            print 'acc_avg: {}'.format(acc_avg)
+            print 'acc_avg: {}'.format(acc_mv_avg)
             print 'fp_avg: {}'.format(fp_avg)
             print 'fn_avg: {}'.format(fn_avg)
             print 'fp_lose_avg: {}'.format(fp_lose_avg)
@@ -131,8 +131,8 @@ def run_task_scope(trust_min, user_prop, user_population, easy_add_acc, quiz_pap
                              columns=['test_page', 'papers_page', 'trust_min', 'quiz_papers_n',
                                       'n_papers', 'price_row', 'judgment_min', 'fp_cost', 'fn_cost',
                                       'budget_spent_avg', 'paid_pages_n_avg', 'ch_did_round_prop',
-                                      'wrk_did_round_prop', 'acc_avg', 'fp_avg', 'fn_avg', 'fp_lose_avg',
-                                      'fn_lose_avg', 'acc_std', 'fp_lose_std', 'fn_lose_std'])
+                                      'wrk_did_round_prop', 'acc_mv_avg', 'fp_avg', 'fn_avg', 'fp_lose_avg',
+                                      'fn_lose_avg', 'acc_mv_std', 'fp_lose_std', 'fn_lose_std'])
     # res_frame.to_csv('visualisation/task_stat_{}_{}.csv'.format(trust_min, cheaters_prop), index=False)
     res_frame.to_csv('visualisation/task_results_plot2_test.csv'.format(trust_min, cheaters_prop), index=False)
 
