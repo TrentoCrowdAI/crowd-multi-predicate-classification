@@ -158,6 +158,15 @@ def do_task_scope(trust_min, test_page, papers_page, n_papers, price_row, judgme
     worker_accuracy_dist = round_res[3]
     users_did_round_prop = round_res[4]
 
+    # delete test items before estimating the metrics
+    add_val = test_page + papers_page
+    tests_ids = range(test_page)
+    for _ in range(pages_n-1):
+        tests_ids += map(lambda x: x + add_val, tests_ids[-test_page:])
+    for test_id in sorted(tests_ids, reverse=True):
+        del gold_data[test_id]
+        del trusted_judgment[test_id]
+
     acc, fp, fn, fp_lose, fn_lose = get_metrics(gold_data, trusted_judgment, fp_cost, fn_cost)
     return [budget_spent, paid_pages_n, worker_accuracy_dist,
             users_did_round_prop, acc, fp, fn, fp_lose, fn_lose]
