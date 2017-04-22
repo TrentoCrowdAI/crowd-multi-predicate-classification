@@ -59,8 +59,8 @@ def run_task_scope(trust_min, user_prop, user_population, easy_add_acc, quiz_pap
     # params for the do_task_scope function
     # tests_page_params = [1, 1, 1, 2, 2, 3]
     # papers_page_params = [1, 2, 3, 2, 3, 3]
-    tests_page_params = [1]*9
-    papers_page_params = [1, 2, 3, 4, 5, 6, 7, 8, 9]
+    tests_page_params = [1, 2, 3, 4, 5]
+    papers_page_params = [4] * 5
     price_row = 0.2
     judgment_min = 5
     fp_cost = 3
@@ -145,8 +145,7 @@ def run_task_scope(trust_min, user_prop, user_population, easy_add_acc, quiz_pap
                                       'wrk_did_round_prop', 'acc_mv_avg', 'fp_avg', 'fn_avg', 'fp_mv_lose_avg',
                                       'fn_mv_lose_avg', 'acc_mv_std', 'fp_mv_lose_std', 'fn_mv_lose_std',
                                       'fp_cons_lose_avg', 'fp_cons_lose_std', 'fn_cons_lose_avg', 'fn_cons_lose_std'])
-    # res_frame.to_csv('visualisation/task_stat_{}_{}.csv'.format(trust_min, cheaters_prop), index=False)
-    # res_frame.to_csv('visualisation/data/task_results_cost.csv'.format(trust_min, cheaters_prop), index=False)
+    res_frame.to_csv('visualisation/data/task_classfunc_cons08.csv', index=False)
 
     # accuracy_columns = ['test_page', 'papers_page', 'trust_min', 'quiz_papers_n',
     #                     'n_papers', 'price_row', 'judgment_min', 'fp_cost', 'fn_cost'] \
@@ -161,7 +160,7 @@ def run_task_criteria():
     for test_page, papaers_page in zip(tests_page_params, papers_page_params):
         job_accuracy_list = []
         budget_spent_list = []
-        for _ in range(1000):
+        for _ in range(10000):
             job_accuracy, budget_spent, paid_pages_n = synthesizer(trust_min=1., n_criteria=3,
                                                                    test_page=test_page, papers_page=papaers_page,
                                                                    quiz_papers_n=4, n_papers=18, budget=50,
@@ -188,9 +187,9 @@ def run_task_criteria():
 if __name__ == '__main__':
     trust_min = 1.
     quiz_papers_n = 4
-    cheaters_prop = 0.25
+    cheaters_prop = 0.3
     easy_add_acc = 0.0
-    n_papers = 30
+    n_papers = 100
 
     print '*** Set up ***'
     print 'quiz_papers_n: {}'.format(quiz_papers_n)
