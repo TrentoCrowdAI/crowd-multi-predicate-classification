@@ -81,7 +81,7 @@ def run_task_scope(trust_min, user_prop, user_population, easy_add_acc, quiz_pap
         fn_mv_lose_list = []
         fp_cons_lose_list = []
         fn_cons_lose_list = []
-        for _ in range(1000):
+        for _ in range(10000):
             task_results = do_task_scope(trust_min, test_page, papers_page, n_papers, price_row, judgment_min,
                                          user_prop, user_population, easy_add_acc, quiz_papers_n, fp_cost, fn_cost)
             budget_spent_list.append(task_results[0])

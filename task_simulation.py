@@ -44,12 +44,14 @@ def get_metrics(gold_data, trusted_judgment, fp_cost, fn_cost):
             else:
                 fn_mv_count += 1
 
-            if consent_prop >= consent_thrs:
+        if consent_prop >= consent_thrs:
+            if gold_value != aggregated_value_mv:
                 if gold_value:
                     fp_cons_count += 1
                 else:
                     fn_cons_count += 1
-            else:
+        else:
+            if gold_value != 1:
                 fn_cons_count += 1
     acc_mv = float(correct_count)/total_rows
     fp = float(fp_mv_count)/p_count
