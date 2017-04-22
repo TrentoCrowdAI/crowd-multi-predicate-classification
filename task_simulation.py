@@ -163,8 +163,9 @@ def do_task_scope(trust_min, test_page, papers_page, n_papers, price_row, judgme
     # generate gold data
     # [paper_x] = [[gold_val], [is_easy]]
     pages_n = n_papers / papers_page
-    tests_n = test_page * pages_n
-    total_papers_n = tests_n + n_papers
+    rows_page = test_page + papers_page
+    total_papers_n = rows_page * pages_n
+
     gold_data = [(random.randint(0, 1), random.randint(0, 1)) for _ in range(total_papers_n)]
     round_res = do_round(trust_min, test_page, papers_page, n_papers, price_row, gold_data,
                          judgment_min, user_prop, user_population, easy_add_acc, quiz_papers_n)
@@ -173,6 +174,15 @@ def do_task_scope(trust_min, test_page, papers_page, n_papers, price_row, judgme
     paid_pages_n = round_res[2]
     worker_accuracy_dist = round_res[3]
     users_did_round_prop = round_res[4]
+
+    # delete test items before estimating the metrics
+    add_val = test_page + papers_page
+    tests_ids = range(test_page)
+    for _ in range(pages_n - 1):
+        tests_ids += map(lambda x: x + add_val, tests_ids[-test_page:])
+    for test_id in sorted(tests_ids, reverse=True):
+        del gold_data[test_id]
+        del trusted_judgment[test_id]
 
     acc_mv, fp, fn, fp_mv_lose, fn_mv_lose, fp_cons_lose, fn_cons_lose = get_metrics(gold_data, trusted_judgment,
                                                                                      fp_cost, fn_cost)
