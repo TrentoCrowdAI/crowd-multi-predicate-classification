@@ -147,8 +147,8 @@ def do_task_scope(trust_min, test_page, papers_page, n_papers, price_row, judgme
     # generate gold data
     # [paper_x] = [[gold_val], [is_easy]]
     pages_n = n_papers / papers_page
-    tests_n = test_page * pages_n
-    total_papers_n = tests_n + n_papers
+    rows_page = test_page + papers_page
+    total_papers_n = rows_page * pages_n
     gold_data = [(random.randint(0, 1), random.randint(0, 1)) for _ in range(total_papers_n)]
     round_res = do_round(trust_min, test_page, papers_page, n_papers, price_row, gold_data,
                          judgment_min, user_prop, user_population, easy_add_acc, quiz_papers_n)
