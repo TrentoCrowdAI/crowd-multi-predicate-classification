@@ -19,8 +19,7 @@ import random
 import numpy as np
 
 
-def get_metrics(gold_data, trusted_judgment, fp_cost, fn_cost):
-    consent_thrs = 0.8
+def get_metrics(gold_data, trusted_judgment, fp_cost, fn_cost, consent_thrs):
     fp_mv_count = 0
     fn_mv_count = 0
     fp_cons_count = 0
@@ -184,8 +183,10 @@ def do_task_scope(trust_min, test_page, papers_page, n_papers, price_row, judgme
     #     del gold_data[test_id]
     #     del trusted_judgment[test_id]
 
+    consent_thrs = 1.
     acc_mv, fp, fn, fp_mv_lose, fn_mv_lose, fp_cons_lose, fn_cons_lose = get_metrics(gold_data, trusted_judgment,
-                                                                                     fp_cost, fn_cost)
+                                                                                     fp_cost, fn_cost, consent_thrs)
+
     return [budget_spent, paid_pages_n, worker_accuracy_dist,
             users_did_round_prop, acc_mv, fp, fn, fp_mv_lose, fn_mv_lose,
-            fp_cons_lose, fn_cons_lose]
+            fp_cons_lose, fn_cons_lose, consent_thrs]

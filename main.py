@@ -81,7 +81,7 @@ def run_task_scope(trust_min, user_prop, user_population, easy_add_acc, quiz_pap
         fn_mv_lose_list = []
         fp_cons_lose_list = []
         fn_cons_lose_list = []
-        for _ in range(100):
+        for _ in range(1000):
             task_results = do_task_scope(trust_min, test_page, papers_page, n_papers, price_row, judgment_min,
                                          user_prop, user_population, easy_add_acc, quiz_papers_n, fp_cost, fn_cost)
             budget_spent_list.append(task_results[0])
@@ -113,12 +113,13 @@ def run_task_scope(trust_min, user_prop, user_population, easy_add_acc, quiz_pap
         fp_cons_lose_std = np.std(fp_cons_lose_list)
         fn_cons_lose_avg = np.average(fn_cons_lose_list)
         fn_cons_lose_std = np.std(fn_cons_lose_list)
+        consent_thrs = task_results[11]
 
         data.append([test_page, papers_page, trust_min, quiz_papers_n, n_papers, price_row, judgment_min,
                      fp_cost, fn_cost, budget_spent_avg, paid_pages_n_avg, users_did_round_prop_avg[0],
                      users_did_round_prop_avg[1], acc_mv_avg, fp_avg, fn_avg, fp_mv_lose_avg, fn_mv_lose_avg,
                      acc_mv_std, fp_mv_lose_std, fn_mv_lose_std, fp_cons_lose_avg, fp_cons_lose_std,
-                     fn_cons_lose_avg, fn_cons_lose_std])
+                     fn_cons_lose_avg, fn_cons_lose_std, consent_thrs])
         accuracy_data.append([test_page, papers_page, trust_min, quiz_papers_n, n_papers, price_row, judgment_min,
                          fp_cost, fn_cost]+acc_mv_list)
 
@@ -136,15 +137,16 @@ def run_task_scope(trust_min, user_prop, user_population, easy_add_acc, quiz_pap
         print 'fn_mv_lose_avg: {}'.format(fn_mv_lose_avg)
         print 'fp_cons_lose_avg: {}'.format(fp_cons_lose_avg)
         print 'fn_cons_lose_avg: {}'.format(fn_cons_lose_avg)
+    return data[0]
 
-
-    res_frame = pd.DataFrame(data=data,
-                             columns=['test_page', 'papers_page', 'trust_min', 'quiz_papers_n',
-                                      'n_papers', 'price_row', 'judgment_min', 'fp_cost', 'fn_cost',
-                                      'budget_spent_avg', 'paid_pages_n_avg', 'ch_did_round_prop',
-                                      'wrk_did_round_prop', 'acc_mv_avg', 'fp_avg', 'fn_avg', 'fp_mv_lose_avg',
-                                      'fn_mv_lose_avg', 'acc_mv_std', 'fp_mv_lose_std', 'fn_mv_lose_std',
-                                      'fp_cons_lose_avg', 'fp_cons_lose_std', 'fn_cons_lose_avg', 'fn_cons_lose_std'])
+    # res_frame = pd.DataFrame(data=data,
+    #                          columns=['test_page', 'papers_page', 'trust_min', 'quiz_papers_n',
+    #                                   'n_papers', 'price_row', 'judgment_min', 'fp_cost', 'fn_cost',
+    #                                   'budget_spent_avg', 'paid_pages_n_avg', 'ch_did_round_prop',
+    #                                   'wrk_did_round_prop', 'acc_mv_avg', 'fp_avg', 'fn_avg', 'fp_mv_lose_avg',
+    #                                   'fn_mv_lose_avg', 'acc_mv_std', 'fp_mv_lose_std', 'fn_mv_lose_std',
+    #                                   'fp_cons_lose_avg', 'fp_cons_lose_std', 'fn_cons_lose_avg', 'fn_cons_lose_std',
+    #                                   'consent_thrs'])
     # res_frame.to_csv('visualisation/data/task_classfunc_cons08.csv', index=False)
 
     # accuracy_columns = ['test_page', 'papers_page', 'trust_min', 'quiz_papers_n',
@@ -189,12 +191,26 @@ if __name__ == '__main__':
     quiz_papers_n = 4
     cheaters_prop = 0.3
     easy_add_acc = 0.0
-    n_papers = 100
+    n_papers = 300
 
-    print '*** Set up ***'
-    print 'quiz_papers_n: {}'.format(quiz_papers_n)
-    print 'n_papers: {}'.format(n_papers)
-    print 'trust_thrh: {}\n'.format(trust_min)
+    # print '*** Set up ***'
+    # print 'quiz_papers_n: {}'.format(quiz_papers_n)
+    # print 'n_papers: {}'.format(n_papers)
+    # print 'trust_thrh: {}\n'.format(trust_min)
 
-    user_prop, user_population = run_quiz_scope(trust_min, quiz_papers_n, cheaters_prop, easy_add_acc)
-    run_task_scope(trust_min, user_prop, user_population, easy_add_acc, quiz_papers_n, n_papers)
+    data = []
+    for quiz_papers_n in range(1, 11, 1):
+        print quiz_papers_n
+        user_prop, user_population = run_quiz_scope(trust_min, quiz_papers_n, cheaters_prop, easy_add_acc)
+        d_item = run_task_scope(trust_min, user_prop, user_population, easy_add_acc, quiz_papers_n, n_papers)
+        data.append(d_item)
+
+    res_frame = pd.DataFrame(data=data,
+                             columns=['test_page', 'papers_page', 'trust_min', 'quiz_papers_n',
+                                      'n_papers', 'price_row', 'judgment_min', 'fp_cost', 'fn_cost',
+                                      'budget_spent_avg', 'paid_pages_n_avg', 'ch_did_round_prop',
+                                      'wrk_did_round_prop', 'acc_mv_avg', 'fp_avg', 'fn_avg', 'fp_mv_lose_avg',
+                                      'fn_mv_lose_avg', 'acc_mv_std', 'fp_mv_lose_std', 'fn_mv_lose_std',
+                                      'fp_cons_lose_avg', 'fp_cons_lose_std', 'fn_cons_lose_avg', 'fn_cons_lose_std',
+                                      'consent_thrs'])
+    res_frame.to_csv('visualisation/data/cons_1.csv', index=False)
