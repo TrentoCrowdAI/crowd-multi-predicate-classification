@@ -59,8 +59,8 @@ def run_task_scope(trust_min, user_prop, user_population, easy_add_acc, quiz_pap
     # params for the do_task_scope function
     # tests_page_params = [1, 1, 1, 2, 2, 3]
     # papers_page_params = [1, 2, 3, 2, 3, 3]
-    tests_page_params = [1, 2, 3, 4, 5]
-    papers_page_params = [4] * 5
+    tests_page_params = [0]
+    papers_page_params = [5]
     price_row = 0.2
     judgment_min = 5
     fp_cost = 3
@@ -81,7 +81,7 @@ def run_task_scope(trust_min, user_prop, user_population, easy_add_acc, quiz_pap
         fn_mv_lose_list = []
         fp_cons_lose_list = []
         fn_cons_lose_list = []
-        for _ in range(10000):
+        for _ in range(100):
             task_results = do_task_scope(trust_min, test_page, papers_page, n_papers, price_row, judgment_min,
                                          user_prop, user_population, easy_add_acc, quiz_papers_n, fp_cost, fn_cost)
             budget_spent_list.append(task_results[0])
@@ -145,7 +145,7 @@ def run_task_scope(trust_min, user_prop, user_population, easy_add_acc, quiz_pap
                                       'wrk_did_round_prop', 'acc_mv_avg', 'fp_avg', 'fn_avg', 'fp_mv_lose_avg',
                                       'fn_mv_lose_avg', 'acc_mv_std', 'fp_mv_lose_std', 'fn_mv_lose_std',
                                       'fp_cons_lose_avg', 'fp_cons_lose_std', 'fn_cons_lose_avg', 'fn_cons_lose_std'])
-    res_frame.to_csv('visualisation/data/task_classfunc_cons08.csv', index=False)
+    # res_frame.to_csv('visualisation/data/task_classfunc_cons08.csv', index=False)
 
     # accuracy_columns = ['test_page', 'papers_page', 'trust_min', 'quiz_papers_n',
     #                     'n_papers', 'price_row', 'judgment_min', 'fp_cost', 'fn_cost'] \

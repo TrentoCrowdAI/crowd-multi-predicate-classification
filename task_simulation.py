@@ -58,8 +58,8 @@ def get_metrics(gold_data, trusted_judgment, fp_cost, fn_cost):
     fn = float(fn_mv_count)/f_count
     fp_mv_lose = fp_mv_count * fp_cost
     fn_mv_lose = fn_mv_count * fn_cost
-    fp_cons_lose = fp_cons_count * fp_cost
-    fn_cons_lose = fn_cons_count * fn_cost
+    fp_cons_lose = fp * fp_cost
+    fn_cons_lose = fn * fn_cost
     return [acc_mv, fp, fn, fp_mv_lose, fn_mv_lose, fp_cons_lose, fn_cons_lose]
 
 
@@ -134,22 +134,20 @@ def do_round(trust_min, test_page, papers_page, n_papers, price_row, gold_data,
                                                          if gold_value == 1
                                                          else 1 - worker_accuracy_new)
                 w_page_judgment.update({row_id: worker_judgment})
-            new_worker_trust = get_trust(w_page_judgment, gold_data, test_page, worker_trust, quiz_papers_n)
+            # new_worker_trust = get_trust(w_page_judgment, gold_data, test_page, worker_trust, quiz_papers_n)
             # is a worker passed tests rows
-            if new_worker_trust >= trust_min:
-                if is_rand_ch:
-                    cheaters_did_round += 1
-                    users_did_round += 1
-                else:
-                    users_did_round += 1
-                worker_accuracy_dist.append(worker_accuracy)
-                # add data to trusted_workers_judgment
-                for row_id in w_page_judgment.keys():
-                    trusted_judgment[row_id].append(w_page_judgment[row_id])
-                trusted_workers_n += 1
-                trust_judgment += 1
+
+            if is_rand_ch:
+                cheaters_did_round += 1
+                users_did_round += 1
             else:
-                untrusted_workers_n += 1
+                users_did_round += 1
+            worker_accuracy_dist.append(worker_accuracy)
+            # add data to trusted_workers_judgment
+            for row_id in w_page_judgment.keys():
+                trusted_judgment[row_id].append(w_page_judgment[row_id])
+            trusted_workers_n += 1
+            trust_judgment += 1
 
             # monetary issue
             budget_spent += price_page
@@ -178,13 +176,13 @@ def do_task_scope(trust_min, test_page, papers_page, n_papers, price_row, judgme
     users_did_round_prop = round_res[4]
 
     # delete test items before estimating the metrics
-    add_val = test_page + papers_page
-    tests_ids = range(test_page)
-    for _ in range(pages_n - 1):
-        tests_ids += map(lambda x: x + add_val, tests_ids[-test_page:])
-    for test_id in sorted(tests_ids, reverse=True):
-        del gold_data[test_id]
-        del trusted_judgment[test_id]
+    # add_val = test_page + papers_page
+    # tests_ids = range(test_page)
+    # for _ in range(pages_n - 1):
+    #     tests_ids += map(lambda x: x + add_val, tests_ids[-test_page:])
+    # for test_id in sorted(tests_ids, reverse=True):
+    #     del gold_data[test_id]
+    #     del trusted_judgment[test_id]
 
     acc_mv, fp, fn, fp_mv_lose, fn_mv_lose, fp_cons_lose, fn_cons_lose = get_metrics(gold_data, trusted_judgment,
                                                                                      fp_cost, fn_cost)
