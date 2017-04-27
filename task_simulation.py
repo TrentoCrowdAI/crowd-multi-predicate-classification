@@ -57,8 +57,10 @@ def get_metrics(gold_data, trusted_judgment, fp_cost, fn_cost, consent_thrs):
     fn = float(fn_mv_count)/f_count
     fp_mv_lose = fp_mv_count * fp_cost
     fn_mv_lose = fn_mv_count * fn_cost
-    fp_cons_lose = fp * fp_cost
-    fn_cons_lose = fn * fn_cost
+    # fp_cons_lose = float(fp_cons_count)/p_count * fp_cost
+    # fn_cons_lose = float(fn_cons_count)/f_count * fn_cost
+    fp_cons_lose = fp_cons_count * fp_cost/float(total_rows)
+    fn_cons_lose = fn_cons_count * fn_cost/float(total_rows)
     return [acc_mv, fp, fn, fp_mv_lose, fn_mv_lose, fp_cons_lose, fn_cons_lose]
 
 

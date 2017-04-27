@@ -205,12 +205,18 @@ if __name__ == '__main__':
         d_item = run_task_scope(trust_min, user_prop, user_population, easy_add_acc, quiz_papers_n, n_papers)
         data.append(d_item)
 
-    res_frame = pd.DataFrame(data=data,
-                             columns=['test_page', 'papers_page', 'trust_min', 'quiz_papers_n',
-                                      'n_papers', 'price_row', 'judgment_min', 'fp_cost', 'fn_cost',
-                                      'budget_spent_avg', 'paid_pages_n_avg', 'ch_did_round_prop',
-                                      'wrk_did_round_prop', 'acc_mv_avg', 'fp_avg', 'fn_avg', 'fp_mv_lose_avg',
-                                      'fn_mv_lose_avg', 'acc_mv_std', 'fp_mv_lose_std', 'fn_mv_lose_std',
-                                      'fp_cons_lose_avg', 'fp_cons_lose_std', 'fn_cons_lose_avg', 'fn_cons_lose_std',
-                                      'consent_thrs'])
-    res_frame.to_csv('visualisation/data/cons_1.csv', index=False)
+# Nt=3
+# z=0.3
+# Zs=(z*0.5**Nt)/(z*0.5**Nt + (2.*(1-z)/(Nt+1))*(1-1./(2**Nt+1)))
+# alpha_new=5.
+# beta_new=1.
+# a_tw_avg = 0.5+0.5*(alpha_new/(alpha_new+beta_new))
+# a_avg = Zs*0.5 + (1-Zs)*a_tw_avg
+
+# d = pd.read_csv('visualisation/data/quiz_acc_passed.csv')
+# count = 0.
+# vals = d[d.columns[0]].values
+# for a in vals:
+#     if a >= 0.8 and a<= 0.82:
+#         count += 1
+# print count/len(vals)
