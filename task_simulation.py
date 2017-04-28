@@ -19,31 +19,16 @@ import random
 import numpy as np
 
 
-def get_metrics(gold_data, trusted_judgment, fp_cost, fn_cost, consent_thrs):
-    fp_mv_count = 0
-    fn_mv_count = 0
+def get_metrics(gold_data, trusted_judgment, fp_cost, Nj):
     fp_cons_count = 0
     fn_cons_count = 0
-    correct_count = 0
     total_rows = len(gold_data)
-    p_count = sum([row[0] for row in gold_data])
-    f_count = total_rows - p_count
-    judgment_num = float(len(trusted_judgment[0]))
     for gold, users_values in zip(gold_data, trusted_judgment):
         gold_value = gold[0]
         aggregated_value_mv = max(set(users_values), key=users_values.count)
         # classification function: users consent rate
-        consent_prop = users_values.count(aggregated_value_mv)/judgment_num
-        # if the paper in scope
-        if gold_value == aggregated_value_mv:
-            correct_count += 1
-        else:
-            if gold_value:
-                fp_mv_count += 1
-            else:
-                fn_mv_count += 1
-
-        if consent_prop >= consent_thrs:
+        consent = users_values.count(aggregated_value_mv)
+        if consent >= Nj:
             if gold_value != aggregated_value_mv:
                 if gold_value:
                     fp_cons_count += 1
@@ -52,16 +37,10 @@ def get_metrics(gold_data, trusted_judgment, fp_cost, fn_cost, consent_thrs):
         else:
             if gold_value != 1:
                 fn_cons_count += 1
-    acc_mv = float(correct_count)/total_rows
-    fp = float(fp_mv_count)/p_count
-    fn = float(fn_mv_count)/f_count
-    fp_mv_lose = fp_mv_count * fp_cost
-    fn_mv_lose = fn_mv_count * fn_cost
-    # fp_cons_lose = float(fp_cons_count)/p_count * fp_cost
-    # fn_cons_lose = float(fn_cons_count)/f_count * fn_cost
-    fp_cons_lose = fp_cons_count * fp_cost/float(total_rows)
-    fn_cons_lose = fn_cons_count * fn_cost/float(total_rows)
-    return [acc_mv, fp, fn, fp_mv_lose, fn_mv_lose, fp_cons_lose, fn_cons_lose]
+    fp_cons_loss = fp_cons_count * fp_cost/float(total_rows)
+    fn_cons_loss = fn_cons_count / float(total_rows)
+    loss = fp_cons_loss + fn_cons_loss
+    return loss
 
 
 def pick_worker(user_prop, user_population):
@@ -93,11 +72,11 @@ def get_trust(w_page_judgment, gold_data, test_page, worker_trust, quiz_papers_n
 each element in 'trusted_workers_judgment' is judgments of users who passed tests questions,
 indexes of the trusted_workers_judgment' present row id
 '''
-def do_round(trust_min, test_page, papers_page, n_papers, price_row, gold_data,
-             judgment_min, user_prop, user_population, easy_add_acc, quiz_papers_n):
+def do_round(trust_trsh, tests_page, papers_page, n_papers, price_row, gold_data,
+             N, user_prop, user_population, easy_add_acc, quiz_papers_n):
     pages_n = n_papers / papers_page
-    rows_page = test_page+papers_page
-    price_page = price_row*rows_page
+    rows_page = tests_page + papers_page
+    price_page = price_row * rows_page
     budget_spent = 0.
     trusted_judgment = [[] for _ in range(rows_page*pages_n)]
     # number of different types of workers after completing a page
@@ -109,7 +88,7 @@ def do_round(trust_min, test_page, papers_page, n_papers, price_row, gold_data,
 
     for page_id in range(pages_n):
         trust_judgment = 0
-        while trust_judgment != judgment_min:
+        while trust_judgment != N:
             w_page_judgment = {}
             worker_trust, worker_accuracy = pick_worker(user_prop, user_population)
             if worker_accuracy == 0.5:
@@ -135,7 +114,7 @@ def do_round(trust_min, test_page, papers_page, n_papers, price_row, gold_data,
                                                          if gold_value == 1
                                                          else 1 - worker_accuracy_new)
                 w_page_judgment.update({row_id: worker_judgment})
-            # new_worker_trust = get_trust(w_page_judgment, gold_data, test_page, worker_trust, quiz_papers_n)
+            # new_worker_trust = get_trust(w_page_judgment, gold_data, tests_page, worker_trsh, quiz_papers_n)
             # is a worker passed tests rows
 
             if is_rand_ch:
@@ -159,36 +138,21 @@ def do_round(trust_min, test_page, papers_page, n_papers, price_row, gold_data,
     return [trusted_judgment, budget_spent, paid_pages_n, worker_accuracy_dist, users_did_round_prop]
 
 
-def do_task_scope(trust_min, test_page, papers_page, n_papers, price_row, judgment_min,
-                  user_prop, user_population, easy_add_acc, quiz_papers_n, fp_cost, fn_cost):
+def do_task_scope(trust_trsh, tests_page, papers_page, n_papers, price_row, N,
+                  user_prop, user_population, easy_add_acc, quiz_papers_n):
     # generate gold data
     # [paper_x] = [[gold_val], [is_easy]]
     pages_n = n_papers / papers_page
-    rows_page = test_page + papers_page
+    rows_page = tests_page + papers_page
     total_papers_n = rows_page * pages_n
-
     gold_data = [(random.randint(0, 1), random.randint(0, 1)) for _ in range(total_papers_n)]
-    round_res = do_round(trust_min, test_page, papers_page, n_papers, price_row, gold_data,
-                         judgment_min, user_prop, user_population, easy_add_acc, quiz_papers_n)
+    round_res = do_round(trust_trsh, tests_page, papers_page, n_papers, price_row, gold_data,
+                         N, user_prop, user_population, easy_add_acc, quiz_papers_n)
     trusted_judgment = round_res[0]
     budget_spent = round_res[1]
-    paid_pages_n = round_res[2]
-    worker_accuracy_dist = round_res[3]
-    users_did_round_prop = round_res[4]
 
-    # delete test items before estimating the metrics
-    # add_val = test_page + papers_page
-    # tests_ids = range(test_page)
-    # for _ in range(pages_n - 1):
-    #     tests_ids += map(lambda x: x + add_val, tests_ids[-test_page:])
-    # for test_id in sorted(tests_ids, reverse=True):
-    #     del gold_data[test_id]
-    #     del trusted_judgment[test_id]
+    return [gold_data, trusted_judgment, budget_spent]
 
-    consent_thrs = 1.
-    acc_mv, fp, fn, fp_mv_lose, fn_mv_lose, fp_cons_lose, fn_cons_lose = get_metrics(gold_data, trusted_judgment,
-                                                                                     fp_cost, fn_cost, consent_thrs)
+    # loss = get_metrics(gold_data, trusted_judgment, fp_cost, Nj)
 
-    return [budget_spent, paid_pages_n, worker_accuracy_dist,
-            users_did_round_prop, acc_mv, fp, fn, fp_mv_lose, fn_mv_lose,
-            fp_cons_lose, fn_cons_lose, consent_thrs]
+    # return [budget_spent, loss]
