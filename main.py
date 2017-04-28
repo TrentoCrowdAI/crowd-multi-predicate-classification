@@ -62,7 +62,7 @@ def run_task_scope(trust_trsh, user_prop, user_population, easy_add_acc, n_paper
     fp_cost = 3
     data = []
     # do simulation
-    for N in range(5, 11, 2):
+    for N in range(3, 21, 2):
         Nj_params = range(N/2 + 1, N + 1, 1)
         loss_dict = {}
         for key in Nj_params:
