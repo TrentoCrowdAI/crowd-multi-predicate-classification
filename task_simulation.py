@@ -24,7 +24,8 @@ def get_metrics(gold_data, trusted_judgment, fp_cost, Nj):
     fn_cons_count = 0
     total_rows = len(gold_data)
     for gold, users_values in zip(gold_data, trusted_judgment):
-        gold_value = gold[0]
+        # gold_value = gold[0]
+        gold_value = gold
         aggregated_value_mv = max(set(users_values), key=users_values.count)
         # classification function: users consent rate
         consent = users_values.count(aggregated_value_mv)

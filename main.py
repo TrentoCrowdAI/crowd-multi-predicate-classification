@@ -125,30 +125,29 @@ def run_task_criteria():
 
 
 def postProc_algorithm():
-    trusts_trsh = 1.
-    cheaters_prop = 0.3
+    trusts_trsh = 0.
+    cheaters_prop = 0.9
     n_papers = 600
     quiz_papers_n = 5
     papers_page = 5
-    J = 11
-    theta = 0.3
+    J = 5
+    theta = 0.5
     cost = 3
     print 'theta: {}'.format(theta)
 
     user_prop, user_population, acc_distribution = run_quiz_scope(trusts_trsh, quiz_papers_n, cheaters_prop, 0.0)
-    print '-------------'
     GT, psi_obj, psi_w = synthesize(acc_distribution, n_papers, papers_page, J, theta)
     Jt = J / 2 + 1
-    print 'Jt mv: {}'.format(Jt)
     print '-------------'
-    for _ in range(3):
+    for _ in range(5):
+        print 'Jt: {}'.format(Jt)
         agg_values, theta_est = classifier(psi_obj, Jt)
         acc_avg = estimate_accuracy(agg_values, psi_w)
         Jt = find_jt(theta_est, J, acc_avg, cost)
+        loss_real = get_metrics(GT, psi_obj, cost, Jt)
+        print 'loss_real: {}'.format(loss_real)
         print 'theta_est: {}'.format(theta_est)
-        print 'Jt optim: {}'.format(Jt)
         print '-------'
-    pass
 
 
 if __name__ == '__main__':
