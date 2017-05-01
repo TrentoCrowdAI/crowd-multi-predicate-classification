@@ -28,7 +28,7 @@ def synthesize(acc_distribution, n_papers, papers_page, J, theta):
         for _pointer in range(J):
             worker_id = page_id * papers_page + _pointer
             worker_acc = random.choice(acc_distribution)
-            for obj_id in range(page_id*J, page_id*J+J, 1):
+            for obj_id in range(page_id*papers_page, page_id*papers_page+papers_page, 1):
                 gold_value = GT[obj_id]
                 if gold_value:
                     worker_judgment = np.random.binomial(1, worker_acc)
