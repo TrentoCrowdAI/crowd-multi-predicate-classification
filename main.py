@@ -8,7 +8,7 @@ from cf_simulation_synthetic import synthesizer
 from quiz_simulation import do_quiz_scope
 from task_simulation import do_task_scope, get_metrics
 from generator import synthesize
-from classifier_utils import classifier, estimate_accuracy
+from classifier_utils import classifier, estimate_accuracy, estimate_loss
 
 
 def run_quiz_scope(trust_min=0.75, quiz_papers_n=4, cheaters_prop=0.5,  easy_add_acc = 0.2):
@@ -132,12 +132,14 @@ def postProc_algorithm():
     papers_page = 5
     J = 5
     theta = 0.5
+    cost = 3
 
     user_prop, user_population, acc_distribution = run_quiz_scope(trusts_trsh, quiz_papers_n, cheaters_prop, 0.0)
     GT, psi_obj, psi_w = synthesize(acc_distribution, n_papers, papers_page, J, theta)
     Jt = 4
     agg_values, theta_est = classifier(psi_obj, Jt)
     acc_avg = estimate_accuracy(agg_values, psi_w)
+    loss_est = estimate_loss(theta, J, Jt, acc_avg, cost)
     pass
 
 

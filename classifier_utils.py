@@ -1,4 +1,5 @@
 import numpy as np
+from scipy.special import binom
 
 
 def classifier(psi_obj, Jt):
@@ -25,3 +26,16 @@ def estimate_accuracy(agg_values, psi_w):
         acc_distr.update({w_id: acc_estimation})
     acc_avg = np.mean(acc_distr.values())
     return acc_avg
+
+
+def estimate_loss(theta, J, Jt, acc_avg, cost):
+    p_fe = 0.
+    for k in range(Jt, J+1, 1):
+        p_fe += binom(J, k)*(1-acc_avg)**k*acc_avg**(J-k)
+    p_fe *= theta
+    p_fi = 0.
+    for k in range(J-Jt+1, J+1, 1):
+        p_fi += binom(J, k)*(1-acc_avg)**k*acc_avg**(J-k)
+    p_fi *= (1-theta)
+    loss = p_fe * cost + p_fi
+    return loss
