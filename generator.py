@@ -3,14 +3,27 @@ import random
 
 
 def synthesize(acc_distribution, n_papers, papers_page, J, theta):
-    # generate ground truth
-    GT = {}
-    for obj in range(n_papers):
-        GT[obj] = np.random.binomial(1, theta)
+    '''
+    
+    :param acc_distribution: 
+    :param n_papers: 
+    :param papers_page: 
+    :param J: 
+    :param theta: 
+    :return:GT- ground truth values
+            GT = [obj_1_val, obj_2_val, ..]
+            psi_obj - observations 
+            psi_obj = [[obj_1 values], []]
+            psi_w - workers' judgments on papers
+            psi_w = [{obj_id: val,..}, {}], index === worker's id
+    '''
+
+    GT = [np.random.binomial(1, theta) for _ in range(n_papers)]
 
     # generate observations
-    Psi = [[] for obj in range(n_papers)]
     pages_n = n_papers / papers_page
+    psi_obj = [[] for obj in range(n_papers)]
+    psi_w = [{} for _ in range(pages_n*J)]
     for page_id in range(pages_n):
         for _pointer in range(J):
             worker_id = page_id * papers_page + _pointer
@@ -21,5 +34,6 @@ def synthesize(acc_distribution, n_papers, papers_page, J, theta):
                     worker_judgment = np.random.binomial(1, worker_acc)
                 else:
                     worker_judgment = np.random.binomial(1, 1-worker_acc)
-                Psi[obj_id].append((worker_id, worker_judgment))
-    return GT, Psi
+                psi_obj[obj_id].append(worker_judgment)
+                psi_w[worker_id].update({obj_id: worker_judgment})
+    return GT, psi_obj, psi_w

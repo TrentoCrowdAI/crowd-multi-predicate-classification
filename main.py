@@ -8,6 +8,7 @@ from cf_simulation_synthetic import synthesizer
 from quiz_simulation import do_quiz_scope
 from task_simulation import do_task_scope, get_metrics
 from generator import synthesize
+from classifier_utils import classifier
 
 
 def run_quiz_scope(trust_min=0.75, quiz_papers_n=4, cheaters_prop=0.5,  easy_add_acc = 0.2):
@@ -128,9 +129,14 @@ def postProc_algorithm():
     cheaters_prop = 0.3
     n_papers = 300
     quiz_papers_n = 5
+    papers_page = 5
+    J = 5
+    theta = 0.5
 
-    user_prop, user_population, acc_distr = run_quiz_scope(trusts_trsh, quiz_papers_n, cheaters_prop, 0.0)
-    GT, Psi = synthesize(acc_distribution=acc_distr, n_papers=n_papers, papers_page=5, J=5, theta=0.5)
+    user_prop, user_population, acc_distribution = run_quiz_scope(trusts_trsh, quiz_papers_n, cheaters_prop, 0.0)
+    GT, psi_obj, psi_w = synthesize(acc_distribution, n_papers, papers_page, J, theta)
+    Jt = 4
+    classifier(psi_obj, psi_w, Jt)
     pass
 
 
