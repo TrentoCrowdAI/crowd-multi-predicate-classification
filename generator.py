@@ -26,7 +26,7 @@ def synthesize(acc_distribution, n_papers, papers_page, J, theta):
     psi_w = [{} for _ in range(pages_n*J)]
     for page_id in range(pages_n):
         for _pointer in range(J):
-            worker_id = page_id * papers_page + _pointer
+            worker_id = page_id * J + _pointer
             worker_acc = random.choice(acc_distribution)
             for obj_id in range(page_id*papers_page, page_id*papers_page+papers_page, 1):
                 gold_value = GT[obj_id]
