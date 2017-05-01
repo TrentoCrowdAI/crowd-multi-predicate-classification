@@ -8,7 +8,7 @@ from cf_simulation_synthetic import synthesizer
 from quiz_simulation import do_quiz_scope
 from task_simulation import do_task_scope, get_metrics
 from generator import synthesize
-from classifier_utils import classifier, estimate_accuracy, estimate_loss
+from classifier_utils import classifier, estimate_accuracy, find_jt
 
 
 def run_quiz_scope(trust_min=0.75, quiz_papers_n=4, cheaters_prop=0.5,  easy_add_acc = 0.2):
@@ -127,19 +127,27 @@ def run_task_criteria():
 def postProc_algorithm():
     trusts_trsh = 1.
     cheaters_prop = 0.3
-    n_papers = 300
+    n_papers = 600
     quiz_papers_n = 5
     papers_page = 5
-    J = 5
-    theta = 0.5
+    J = 11
+    theta = 0.3
     cost = 3
+    print 'theta: {}'.format(theta)
 
     user_prop, user_population, acc_distribution = run_quiz_scope(trusts_trsh, quiz_papers_n, cheaters_prop, 0.0)
+    print '-------------'
     GT, psi_obj, psi_w = synthesize(acc_distribution, n_papers, papers_page, J, theta)
-    Jt = 4
-    agg_values, theta_est = classifier(psi_obj, Jt)
-    acc_avg = estimate_accuracy(agg_values, psi_w)
-    loss_est = estimate_loss(theta, J, Jt, acc_avg, cost)
+    Jt = J / 2 + 1
+    print 'Jt mv: {}'.format(Jt)
+    print '-------------'
+    for _ in range(3):
+        agg_values, theta_est = classifier(psi_obj, Jt)
+        acc_avg = estimate_accuracy(agg_values, psi_w)
+        Jt = find_jt(theta_est, J, acc_avg, cost)
+        print 'theta_est: {}'.format(theta_est)
+        print 'Jt optim: {}'.format(Jt)
+        print '-------'
     pass
 
 

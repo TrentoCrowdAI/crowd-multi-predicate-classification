@@ -39,3 +39,14 @@ def estimate_loss(theta, J, Jt, acc_avg, cost):
     p_fi *= (1-theta)
     loss = p_fe * cost + p_fi
     return loss
+
+
+def find_jt(theta, J, acc_avg, cost):
+    Jt_params = range(J / 2 + 1, J + 1, 1)
+    loss_stat = {}
+    for Jt in Jt_params:
+        loss = estimate_loss(theta, J, Jt, acc_avg, cost)
+        loss_stat.update({loss: Jt})
+    Jt_optim = loss_stat[min(loss_stat.keys())]
+    print 'loss_est: {}'.format(min(loss_stat.keys()))
+    return Jt_optim
