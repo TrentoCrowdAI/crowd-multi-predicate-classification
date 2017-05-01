@@ -7,6 +7,7 @@ import pandas as pd
 from cf_simulation_synthetic import synthesizer
 from quiz_simulation import do_quiz_scope
 from task_simulation import do_task_scope, get_metrics
+from generator import synthesize
 
 
 def run_quiz_scope(trust_min=0.75, quiz_papers_n=4, cheaters_prop=0.5,  easy_add_acc = 0.2):
@@ -52,7 +53,7 @@ def run_quiz_scope(trust_min=0.75, quiz_papers_n=4, cheaters_prop=0.5,  easy_add
     users_passed = float(sum(statistic_passed.values()))
     for user_t in ['rand_ch', 'smart_ch', 'worker']:
         user_prop.append(statistic_passed[user_t]/users_passed)
-    return [user_prop, user_population]
+    return [user_prop, user_population, acc_passed_distr]
 
 
 def run_task_scope(trust_trsh, user_prop, user_population, easy_add_acc, n_papers, quiz_papers_n):
@@ -122,12 +123,25 @@ def run_task_criteria():
               'budget_spent_std={}$\n'.format(job_accuracy_avg, job_accuracy_std, budget_spent_avg, budget_spent_std)
 
 
-if __name__ == '__main__':
+def postProc_algorithm():
     trusts_trsh = 1.
     cheaters_prop = 0.3
-    easy_add_acc = 0.0
     n_papers = 300
+    quiz_papers_n = 5
 
-    for quiz_papers_n in range(1, 11, 1):
-        user_prop, user_population = run_quiz_scope(trusts_trsh, quiz_papers_n, cheaters_prop, easy_add_acc)
-        d_item = run_task_scope(trusts_trsh, user_prop, user_population, easy_add_acc, n_papers, quiz_papers_n)
+    user_prop, user_population, acc_distr = run_quiz_scope(trusts_trsh, quiz_papers_n, cheaters_prop, 0.0)
+    GT, Psi = synthesize(acc_distribution=acc_distr, n_papers=n_papers, papers_page=5, J=5, theta=0.5)
+    pass
+
+
+if __name__ == '__main__':
+    postProc_algorithm()
+    # trusts_trsh = 1.
+    # cheaters_prop = 0.3
+    # easy_add_acc = 0.0
+    # n_papers = 300
+
+    # for quiz_papers_n in range(1, 11, 1):
+    #     quiz_papers_n = 5
+    #     user_prop, user_population, acc_distr = run_quiz_scope(trusts_trsh, quiz_papers_n, cheaters_prop, easy_add_acc)
+    #     d_item = run_task_scope(trusts_trsh, user_prop, user_population, easy_add_acc, n_papers, quiz_papers_n)
