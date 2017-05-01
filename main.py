@@ -136,7 +136,7 @@ def postProc_algorithm():
     user_prop, user_population, acc_distribution = run_quiz_scope(trusts_trsh, quiz_papers_n, cheaters_prop, 0.0)
     GT, psi_obj, psi_w = synthesize(acc_distribution, n_papers, papers_page, J, theta)
     Jt = 4
-    classifier(psi_obj, psi_w, Jt)
+    agg_values, theta_est = classifier(psi_obj, Jt)
     pass
 
 
