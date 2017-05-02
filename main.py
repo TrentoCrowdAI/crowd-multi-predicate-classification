@@ -8,7 +8,7 @@ from cf_simulation_synthetic import synthesizer
 from quiz_simulation import do_quiz_scope
 from task_simulation import do_task_scope, get_metrics
 from generator import synthesize
-from classifier_utils import classifier, estimate_accuracy, find_jt
+from classifier_utils import classifier, estimate_accuracy, find_jt, get_loss
 
 
 def run_quiz_scope(trust_min=0.75, quiz_papers_n=4, cheaters_prop=0.5,  easy_add_acc = 0.2):
@@ -38,7 +38,7 @@ def run_quiz_scope(trust_min=0.75, quiz_papers_n=4, cheaters_prop=0.5,  easy_add
             acc_passed_distr.append(result[1])
         else:
             statistic_total[result[0]] += 1
-
+    # pd.DataFrame(acc_passed_distr).to_csv('visualisation/data/quiz_acc_passed_z03_t5.csv', header=False, index=False)
     rand_cheaters_passed = statistic_passed['rand_ch'] / float(statistic_total['rand_ch']) * 100
     # smart_cheaters_passed = statistic_passed['smart_ch'] / float(statistic_total['smart_ch']) * 100
     smart_cheaters_passed = 0.
@@ -59,7 +59,7 @@ def run_quiz_scope(trust_min=0.75, quiz_papers_n=4, cheaters_prop=0.5,  easy_add
 
 def run_task_scope(trust_trsh, user_prop, user_population, easy_add_acc, n_papers, quiz_papers_n):
     tests_page = 0
-    papers_page = 5
+    papers_page = 10
     price_row = 0.2
     fp_cost = 3
     data = []
@@ -90,7 +90,7 @@ def run_task_scope(trust_trsh, user_prop, user_population, easy_add_acc, n_paper
     df = pd.DataFrame(data=data, columns=['tests_page', 'N', 'Nj', 'loss_avg',
                                           'loss_std', 'budget'])
 
-    with open('visualisation/data/task_main_plot_in05.csv', 'a') as f:
+    with open('visualisation/data/loss_tests_pin03.csv', 'a') as f:
         df.to_csv(f, header=False, index=False)
 
 
@@ -125,16 +125,18 @@ def run_task_criteria():
 
 
 def postProc_algorithm():
-    trusts_trsh = 0.
-    cheaters_prop = 0.9
+    trusts_trsh = 1.
+    cheaters_prop = 0.3
     n_papers = 600
     quiz_papers_n = 5
-    papers_page = 5
+    papers_page = 10
     J = 5
     theta = 0.5
     cost = 3
     print 'theta: {}'.format(theta)
 
+    # loss_real_dict = {0:[], 1:[], 2:[], 3:[], 4:[]}
+    # for i in range(100):
     user_prop, user_population, acc_distribution = run_quiz_scope(trusts_trsh, quiz_papers_n, cheaters_prop, 0.0)
     GT, psi_obj, psi_w = synthesize(acc_distribution, n_papers, papers_page, J, theta)
     Jt = J / 2 + 1
@@ -143,21 +145,25 @@ def postProc_algorithm():
         print 'Jt: {}'.format(Jt)
         agg_values, theta_est = classifier(psi_obj, Jt)
         acc_avg = estimate_accuracy(agg_values, psi_w)
-        Jt = find_jt(theta_est, J, acc_avg, cost)
-        loss_real = get_metrics(GT, psi_obj, cost, Jt)
-        print 'loss_real: {}'.format(loss_real)
+        Jt, loss_est = find_jt(theta_est, J, acc_avg, cost)
+        loss_real = get_loss(GT, psi_obj, cost, Jt)
+        # print 'loss_real: {}'.format(loss_real)
         print 'theta_est: {}'.format(theta_est)
+        print 'loss error %: {} '.format(100*(loss_real-loss_est)/(loss_real))
+        print 'loss dist: {} '.format(loss_real-loss_est)
+        print 'loss real: {} '.format(loss_real)
         print '-------'
-
+    #         loss_real_dict[_].append(loss_real)
+    # for k in loss_real_dict.keys():
+    #      print '{}. loss real: {}'.format(k, np.mean(loss_real_dict[k]))
 
 if __name__ == '__main__':
-    postProc_algorithm()
-    # trusts_trsh = 1.
-    # cheaters_prop = 0.3
-    # easy_add_acc = 0.0
-    # n_papers = 300
+    # postProc_algorithm()
+    trusts_trsh = 1.
+    cheaters_prop = 0.3
+    easy_add_acc = 0.0
+    n_papers = 500
 
-    # for quiz_papers_n in range(1, 11, 1):
-    #     quiz_papers_n = 5
-    #     user_prop, user_population, acc_distr = run_quiz_scope(trusts_trsh, quiz_papers_n, cheaters_prop, easy_add_acc)
-    #     d_item = run_task_scope(trusts_trsh, user_prop, user_population, easy_add_acc, n_papers, quiz_papers_n)
+    for quiz_papers_n in range(1, 11, 1):
+        user_prop, user_population, acc_distr = run_quiz_scope(trusts_trsh, quiz_papers_n, cheaters_prop, easy_add_acc)
+        d_item = run_task_scope(trusts_trsh, user_prop, user_population, easy_add_acc, n_papers, quiz_papers_n)

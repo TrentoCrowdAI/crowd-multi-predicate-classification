@@ -48,5 +48,28 @@ def find_jt(theta, J, acc_avg, cost):
         loss = estimate_loss(theta, J, Jt, acc_avg, cost)
         loss_stat.update({loss: Jt})
     Jt_optim = loss_stat[min(loss_stat.keys())]
-    print 'loss_est: {}'.format(min(loss_stat.keys()))
-    return Jt_optim
+    # print 'loss_est: {}'.format(min(loss_stat.keys()))
+    return Jt_optim, min(loss_stat.keys())
+
+
+def get_loss(gold_data, trusted_judgment, fp_cost, Nj):
+    fp_cons_count = 0
+    fn_cons_count = 0
+    total_rows = len(gold_data)
+    for gold_value, users_values in zip(gold_data, trusted_judgment):
+        aggregated_value_mv = max(set(users_values), key=users_values.count)
+        # classification function: users consent rate
+        consent = users_values.count(aggregated_value_mv)
+        if consent >= Nj:
+            if gold_value != aggregated_value_mv:
+                if gold_value:
+                    fp_cons_count += 1
+                else:
+                    fn_cons_count += 1
+        else:
+            if gold_value != 1:
+                fn_cons_count += 1
+    fp_cons_loss = fp_cons_count * fp_cost / float(total_rows)
+    fn_cons_loss = fn_cons_count / float(total_rows)
+    loss = fp_cons_loss + fn_cons_loss
+    return loss
