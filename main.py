@@ -44,10 +44,10 @@ def run_quiz_scope(trust_min=0.75, quiz_papers_n=4, cheaters_prop=0.5,  easy_add
     smart_cheaters_passed = 0.
     workers_passed = statistic_passed['worker'] / float(statistic_total['worker']) * 100
 
-    print '*** Quiz ***'
-    print 'random cheaters passed: {}%'.format(rand_cheaters_passed)
-    print 'smart cheaters passed: {}%'.format(smart_cheaters_passed)
-    print 'workers passed: {}%'.format(workers_passed)
+    # print '*** Quiz ***'
+    # print 'random cheaters passed: {}%'.format(rand_cheaters_passed)
+    # print 'smart cheaters passed: {}%'.format(smart_cheaters_passed)
+    # print 'workers passed: {}%'.format(workers_passed)
 
 #   calculate the proportion of types of users passed the quiz
     user_prop = []
@@ -71,7 +71,7 @@ def run_task_scope(trust_trsh, user_prop, user_population, easy_add_acc, n_paper
         loss_dict = {}
         for key in Nj_params:
             loss_dict.update({key: []})  # {Nj: [loss]}
-        for _ in range(100):
+        for _ in range(1000):
             gold_data, trusted_judgment, budget_spent = do_task_scope(trust_trsh, tests_page, papers_page,
                                                                       n_papers, price_row, N, user_prop,
                                                                       user_population, easy_add_acc, quiz_papers_n, theta)
@@ -151,47 +151,40 @@ def postProc_algorithm():
             print 'cost: {}'.format(cost)
             theta_est_list = []
             Jt_list = []
-            dist_mv_list = []
-            dist_clmv_list = []
-            for _ in range(5):
+            loss_mv = []
+            loss_clmv = []
+            for _ in range(30):
                 user_prop, user_population, acc_distribution = run_quiz_scope(trusts_trsh, quiz_papers_n,
                                                                               cheaters_prop, 0.0)
                 GT, psi_obj, psi_w = synthesize(acc_distribution, n_papers, papers_page, J, theta)
-
                 # MV estimation
                 agg_values, theta_est = classifier(psi_obj, Jt_mv)
                 acc_avg = estimate_accuracy(agg_values, psi_w)
-                loss_est_mv = get_loss(agg_values, psi_obj, cost, Jt_mv)
-                loss_real_mv = get_loss(GT, psi_obj, cost, Jt_mv)
-                dist_mv = np.log(abs(loss_real_mv - loss_est_mv))
-                dist_mv_list.append(dist_mv)
-
-                # Clas func: MV
-                Jt, loss_est = find_jt(theta_est, J, acc_avg, cost)
-                loss_real = get_loss(GT, psi_obj, cost, Jt)
-                dist_clmv = np.log(abs(loss_real-loss_est))
+                loss_mv.append(get_loss(GT, psi_obj, cost, Jt_mv))
+                # Class func: MV
+                Jt = find_jt(theta_est, J, acc_avg, cost)
+                loss_clmv.append(get_loss(GT, psi_obj, cost, Jt))
 
                 theta_est_list.append(theta_est)
                 Jt_list.append(Jt)
-                dist_clmv_list.append(dist_clmv)
-
-
-            data.append([theta, J, np.mean(Jt_list), np.std(Jt_list), cost,
-                         np.mean(dist_clmv_list), np.std(dist_clmv_list),
-                         np.mean(dist_mv_list), np.std(dist_mv_list)])
-    df = pd.DataFrame(data, columns=['theta', 'J', 'Jt_avg', 'Jt_std', 'cost',
-                                     'dist_clmv_avg', 'dist_clmv_std',
-                                     'dist_mv_avg', 'dist_mv_std'])
-    df.to_csv('visualisation/data/dist_theta.csv', index=False)
+            data.append([theta, np.mean(theta_est_list), np.std(theta_est_list),
+                         J, np.mean(Jt_list), np.std(Jt_list), cost,
+                         np.mean(loss_clmv), np.std(loss_clmv),
+                         np.mean(loss_mv), np.std(loss_mv)])
+    df = pd.DataFrame(data, columns=['theta', 'theta_est_avg', 'theta_est_std',
+                                     'J', 'Jt_avg', 'Jt_std', 'cost',
+                                     'loss_clmv_avg', 'loss_clmv_std',
+                                     'loss_mv_avg', 'loss_mv_std'])
+    df.to_csv('visualisation/data/loss_theta.csv', index=False)
 
 
 if __name__ == '__main__':
-    # postProc_algorithm()
-    trusts_trsh = 1.
-    cheaters_prop = 0.3
-    easy_add_acc = 0.0
-    n_papers = 500
-
-    for quiz_papers_n in range(1, 11, 1):
-        user_prop, user_population, acc_distr = run_quiz_scope(trusts_trsh, quiz_papers_n, cheaters_prop, easy_add_acc)
-        d_item = run_task_scope(trusts_trsh, user_prop, user_population, easy_add_acc, n_papers, quiz_papers_n)
+    postProc_algorithm()
+    # trusts_trsh = 1.
+    # cheaters_prop = 0.3
+    # easy_add_acc = 0.0
+    # n_papers = 500
+    #
+    # for quiz_papers_n in range(1, 11, 1):
+    #     user_prop, user_population, acc_distr = run_quiz_scope(trusts_trsh, quiz_papers_n, cheaters_prop, easy_add_acc)
+    #     d_item = run_task_scope(trusts_trsh, user_prop, user_population, easy_add_acc, n_papers, quiz_papers_n)

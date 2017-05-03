@@ -49,7 +49,7 @@ def find_jt(theta, J, acc_avg, cost):
         loss_stat.update({loss: Jt})
     Jt_optim = loss_stat[min(loss_stat.keys())]
     # print 'loss_est: {}'.format(min(loss_stat.keys()))
-    return Jt_optim, min(loss_stat.keys())
+    return Jt_optim
 
 
 def get_loss(gold_data, trusted_judgment, cost, Jt):
