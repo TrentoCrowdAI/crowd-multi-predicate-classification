@@ -61,17 +61,17 @@ def run_task_scope(trust_trsh, user_prop, user_population, easy_add_acc, n_paper
     tests_page = 0
     papers_page = 10
     price_row = 0.2
-    fp_cost = 10
+    fp_cost = 5
     data = []
-    theta = 0.3
+    theta = 0.5
     # do simulation
     # for N in range(3, 21, 2):
-    for N in [2, 3, 5]:
+    for N in [2, 3, 5, 10]:
         Nj_params = range(N/2 + 1, N + 1, 1)
         loss_dict = {}
         for key in Nj_params:
             loss_dict.update({key: []})  # {Nj: [loss]}
-        for _ in range(1000):
+        for _ in range(100):
             gold_data, trusted_judgment, budget_spent = do_task_scope(trust_trsh, tests_page, papers_page,
                                                                       n_papers, price_row, N, user_prop,
                                                                       user_population, easy_add_acc, quiz_papers_n, theta)
@@ -93,7 +93,7 @@ def run_task_scope(trust_trsh, user_prop, user_population, easy_add_acc, n_paper
     df = pd.DataFrame(data=data, columns=['tests_page', 'N', 'Nj', 'loss_avg',
                                           'loss_std', 'budget', 'cr', 'papers_page', 'theta'])
 
-    with open('visualisation/data/loss_budget_cr.csv', 'a') as f:
+    with open('visualisation/data/loss_tests.csv', 'a') as f:
         df.to_csv(f, index=False, header=False)
 
 
@@ -127,58 +127,62 @@ def run_task_criteria():
               'budget_spent_std={}$\n'.format(job_accuracy_avg, job_accuracy_std, budget_spent_avg, budget_spent_std)
 
 
-# def postProc_algorithm():
-#     trusts_trsh = 1.
-#     cheaters_prop = 0.3
-#     n_papers = 500
-#     quiz_papers_n = 5
-#     papers_page = 10
-#     theta_params = np.arange(0.1, 1, 0.1)
-#     # theta_params = [0.1, 0.5, 0.9]
-#     # cost_params = range(1, 10)
-#     cost = 5
-#
-#     # print 'theta: {}'.format(theta)
-#     # loss_real_dict = {0:[], 1:[], 2:[], 3:[], 4:[]}
-#     # for i in range(100):
-#     data = []
-#     for theta in theta_params:
-#         print 'theta: {}'.format(theta)
-#         # for cost in cost_params:
-#         for J in [2, 3, 5]:
-#             Jt_mv = J / 2 + 1
-#             print 'cost: {}'.format(cost)
-#             theta_est_list = []
-#             Jt_list = []
-#             dist_mv_list = []
-#             dist_clmv_list = []
-#             for _ in range(50):
-#                 user_prop, user_population, acc_distribution = run_quiz_scope(trusts_trsh, quiz_papers_n,
-#                                                                               cheaters_prop, 0.0)
-#                 GT, psi_obj, psi_w = synthesize(acc_distribution, n_papers, papers_page, J, theta)
-#
-#                 # MV estimation
-#                 agg_values, theta_est = classifier(psi_obj, Jt_mv)
-#                 acc_avg = estimate_accuracy(agg_values, psi_w)
-#                 loss_est_mv = get_loss(agg_values, psi_obj, cost, Jt_mv)
-#
-#                 # Clas func: MV
-#                 Jt, loss_est = find_jt(theta_est, J, acc_avg, cost)
-#                 loss_real = get_loss(GT, psi_obj, cost, Jt)
-#                 dist_clmv = np.log(abs(loss_real-loss_est))
-#
-#                 theta_est_list.append(theta_est)
-#                 Jt_list.append(Jt)
-#                 dist_clmv_list.append(dist_clmv)
-#
-#
-#             data.append([theta, np.mean(theta_est_list), np.std(theta_est_list),
-#                          J, np.mean(Jt_list), np.std(Jt_list), cost,
-#                          np.mean(dist_clmv_list), np.std(dist_clmv_list)])
-#     df = pd.DataFrame(data, columns=['theta', 'theta_est_avg', 'theta_est_std', 'J',
-#                                     'Jt_avg', 'Jt_std', 'cost', 'loss_dist_avg',
-#                                     'loss_dist_std'])
-#     df.to_csv('visualisation/data/loss_dist_mv.csv', index=False)
+def postProc_algorithm():
+    trusts_trsh = 1.
+    cheaters_prop = 0.3
+    n_papers = 500
+    quiz_papers_n = 5
+    papers_page = 10
+    theta_params = np.arange(0.1, 1, 0.1)
+    # theta_params = [0.1, 0.5, 0.9]
+    # cost_params = range(1, 10)
+    cost = 5
+
+    # print 'theta: {}'.format(theta)
+    # loss_real_dict = {0:[], 1:[], 2:[], 3:[], 4:[]}
+    # for i in range(100):
+    data = []
+    for theta in theta_params:
+        print 'theta: {}'.format(theta)
+        # for cost in cost_params:
+        for J in [2, 3, 5]:
+            print 'J: {}'.format(J)
+            Jt_mv = J / 2 + 1
+            print 'cost: {}'.format(cost)
+            theta_est_list = []
+            Jt_list = []
+            dist_mv_list = []
+            dist_clmv_list = []
+            for _ in range(5):
+                user_prop, user_population, acc_distribution = run_quiz_scope(trusts_trsh, quiz_papers_n,
+                                                                              cheaters_prop, 0.0)
+                GT, psi_obj, psi_w = synthesize(acc_distribution, n_papers, papers_page, J, theta)
+
+                # MV estimation
+                agg_values, theta_est = classifier(psi_obj, Jt_mv)
+                acc_avg = estimate_accuracy(agg_values, psi_w)
+                loss_est_mv = get_loss(agg_values, psi_obj, cost, Jt_mv)
+                loss_real_mv = get_loss(GT, psi_obj, cost, Jt_mv)
+                dist_mv = np.log(abs(loss_real_mv - loss_est_mv))
+                dist_mv_list.append(dist_mv)
+
+                # Clas func: MV
+                Jt, loss_est = find_jt(theta_est, J, acc_avg, cost)
+                loss_real = get_loss(GT, psi_obj, cost, Jt)
+                dist_clmv = np.log(abs(loss_real-loss_est))
+
+                theta_est_list.append(theta_est)
+                Jt_list.append(Jt)
+                dist_clmv_list.append(dist_clmv)
+
+
+            data.append([theta, J, np.mean(Jt_list), np.std(Jt_list), cost,
+                         np.mean(dist_clmv_list), np.std(dist_clmv_list),
+                         np.mean(dist_mv_list), np.std(dist_mv_list)])
+    df = pd.DataFrame(data, columns=['theta', 'J', 'Jt_avg', 'Jt_std', 'cost',
+                                     'dist_clmv_avg', 'dist_clmv_std',
+                                     'dist_mv_avg', 'dist_mv_std'])
+    df.to_csv('visualisation/data/dist_theta.csv', index=False)
 
 
 if __name__ == '__main__':
