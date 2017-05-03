@@ -10,6 +10,7 @@ from task_simulation import do_task_scope, get_metrics
 from generator import synthesize
 from classifier_utils import classifier, estimate_accuracy, find_jt, get_loss
 from fusion_utils import input_adapter
+from em import expectation_maximization
 
 
 def run_quiz_scope(trust_min=0.75, quiz_papers_n=4, cheaters_prop=0.5,  easy_add_acc = 0.2):
@@ -167,6 +168,7 @@ def postProc_algorithm():
                 loss_clmv.append(get_loss(GT, psi_obj, cost, Jt))
                 # Class func: EM
                 Psi = input_adapter(psi_w, n_papers)
+                acc_em, em_p = expectation_maximization(len(psi_w), n_papers, Psi)
 
                 theta_est_list.append(theta_est)
                 Jt_list.append(Jt)
