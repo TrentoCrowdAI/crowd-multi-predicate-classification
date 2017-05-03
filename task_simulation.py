@@ -139,10 +139,9 @@ def do_round(trust_trsh, tests_page, papers_page, n_papers, price_row, gold_data
 
 
 def do_task_scope(trust_trsh, tests_page, papers_page, n_papers, price_row, N,
-                  user_prop, user_population, easy_add_acc, quiz_papers_n):
+                  user_prop, user_population, easy_add_acc, quiz_papers_n, p_in):
     # generate gold data
     # [paper_x] = [[gold_val], [is_easy]]
-    p_in = 0.5
     pages_n = n_papers / papers_page
     rows_page = tests_page + papers_page
     total_papers_n = rows_page * pages_n
