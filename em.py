@@ -16,10 +16,11 @@ def expectation_maximization(N, M, Psi):
     """
     inv_Psi = invert(N, M, Psi)
     # convergence eps
-    eps = 0.001
+    eps = 0.01
 
     # init accuracies
     A = [0.8 for s in range(N)]
+    it = 1
     while True:
         # E-step
         p = []
@@ -39,8 +40,13 @@ def expectation_maximization(N, M, Psi):
             for s, val in Psi[obj]:
                 for v in C.keys():
                     if v == val:
-                        C[v] += math.log(A[s])
+                        if A[s] == 0.:
+                            A[s] = 0.5
+                            C[v] += math.log(A[s])
+
                     else:
+                        if A[s] == 1.:
+                            A[s] = 0.95
                         C[v] += math.log((1-A[s])/(V-1))
 
             # compute probs
@@ -61,5 +67,9 @@ def expectation_maximization(N, M, Psi):
             break
         else:
             A = A_new
+
+        it += 1
+        if it >= 10:
+            return A, p
 
     return A, p

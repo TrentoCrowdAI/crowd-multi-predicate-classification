@@ -9,7 +9,7 @@ from quiz_simulation import do_quiz_scope
 from task_simulation import do_task_scope, get_metrics
 from generator import synthesize
 from classifier_utils import classifier, estimate_accuracy, find_jt, get_loss
-from fusion_utils import input_adapter
+from fusion_utils import input_adapter, prob_binary_convert
 from em import expectation_maximization
 
 
@@ -151,36 +151,53 @@ def postProc_algorithm():
             print 'J: {}'.format(J)
             Jt_mv = J / 2 + 1
             print 'cost: {}'.format(cost)
-            theta_est_list = []
-            Jt_list = []
+            theta_mv_list = []
+            theta_em_list = []
+            Jt_mv_list = []
+            Jt_em_list = []
             loss_mv = []
+            loss_em =[]
             loss_clmv = []
-            for _ in range(30):
+            for _ in range(100):
                 user_prop, user_population, acc_distribution = run_quiz_scope(trusts_trsh, quiz_papers_n,
                                                                               cheaters_prop, 0.0)
                 GT, psi_obj, psi_w = synthesize(acc_distribution, n_papers, papers_page, J, theta)
                 # MV estimation
-                agg_values, theta_est = classifier(psi_obj, Jt_mv)
-                acc_avg = estimate_accuracy(agg_values, psi_w)
+                agg_values, theta_mv = classifier(psi_obj, Jt_mv)
+                acc_mv_avg = estimate_accuracy(agg_values, psi_w)
                 loss_mv.append(get_loss(GT, psi_obj, cost, Jt_mv))
                 # Class func: MV
-                Jt = find_jt(theta_est, J, acc_avg, cost)
-                loss_clmv.append(get_loss(GT, psi_obj, cost, Jt))
+                Jt_mv_opt = find_jt(theta_mv, J, acc_mv_avg, cost)
+                loss_clmv.append(get_loss(GT, psi_obj, cost, Jt_mv_opt))
+                theta_mv_list.append(theta_mv)
+                Jt_mv_list.append(Jt_mv_opt)
                 # Class func: EM
                 Psi = input_adapter(psi_w, n_papers)
                 acc_em, em_p = expectation_maximization(len(psi_w), n_papers, Psi)
+                acc_em_avg = np.mean(acc_em)
+                agg_em = prob_binary_convert(em_p)
+                theta_em = sum(agg_em) / float(len(agg_em))
+                Jt_em = find_jt(theta_em, J, acc_em_avg, cost)
+                loss_em.append(get_loss(GT, psi_obj, cost, Jt_em))
+                theta_em_list.append(theta_em)
+                Jt_em_list.append(Jt_em)
 
-                theta_est_list.append(theta_est)
-                Jt_list.append(Jt)
-            data.append([theta, np.mean(theta_est_list), np.std(theta_est_list),
-                         J, np.mean(Jt_list), np.std(Jt_list), cost,
+
+            data.append([theta, np.mean(theta_mv_list), np.std(theta_mv_list),
+                         np.mean(theta_em_list), np.std(theta_em_list),
+                         J, np.mean(Jt_mv_list), np.std(Jt_mv_list),
+                         np.mean(Jt_em_list), np.std(Jt_em_list), cost,
                          np.mean(loss_clmv), np.std(loss_clmv),
-                         np.mean(loss_mv), np.std(loss_mv)])
-    df = pd.DataFrame(data, columns=['theta', 'theta_est_avg', 'theta_est_std',
-                                     'J', 'Jt_avg', 'Jt_std', 'cost',
+                         np.mean(loss_mv), np.std(loss_mv),
+                         np.mean(loss_em), np.std(loss_em)])
+    df = pd.DataFrame(data, columns=['theta', 'theta_mv_avg', 'theta_mv_std',
+                                     'theta_em_avg', 'theta_em_std',
+                                     'J', 'Jt_mv_avg', 'Jt_mv_std',
+                                     'Jt_em_avg', 'Jt_em_std', 'cost',
                                      'loss_clmv_avg', 'loss_clmv_std',
-                                     'loss_mv_avg', 'loss_mv_std'])
-    df.to_csv('visualisation/data/loss_theta.csv', index=False)
+                                     'loss_mv_avg', 'loss_mv_std',
+                                     'loss_em_avg', 'loss_em_std'])
+    df.to_csv('visualisation/data/loss_theta_new.csv', index=False)
 
 
 if __name__ == '__main__':

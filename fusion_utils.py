@@ -1,3 +1,6 @@
+from collections import defaultdict
+
+
 def input_adapter(psi_w, n_papers):
     '''
     :param psi_w: 
@@ -25,3 +28,17 @@ def invert(N, M, Psi):
         for s, val in Psi[obj]:
             inv_Psi[s].append((obj, val))
     return inv_Psi
+
+
+def prob_binary_convert(data):
+    '''
+    :param data: 
+    :return: 
+    '''
+    data_b = []
+    for obj in data:
+        values = obj.keys()
+        probs = obj.values()
+        value_id = probs.index(max(probs))
+        data_b.append(values[value_id])
+    return data_b
