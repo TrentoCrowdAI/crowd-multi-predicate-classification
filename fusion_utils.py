@@ -1,6 +1,3 @@
-from collections import defaultdict
-
-
 def input_adapter(psi_w, n_papers):
     '''
     :param psi_w: 
@@ -42,3 +39,14 @@ def prob_binary_convert(data):
         value_id = probs.index(max(probs))
         data_b.append(values[value_id])
     return data_b
+
+
+def get_theta(data):
+    theta = 0.
+    for obj_p in data:
+        if len(obj_p) == 1:
+            if obj_p.keys()[0] == 1:
+                theta += obj_p[1]
+        else:
+            theta += obj_p[1]
+    return theta/len(data)

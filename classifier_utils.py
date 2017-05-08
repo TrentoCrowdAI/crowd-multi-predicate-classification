@@ -24,8 +24,9 @@ def estimate_accuracy(agg_values, psi_w):
                 count += 1
         acc_estimation = count/len(w_vals)
         acc_distr.update({w_id: acc_estimation})
-    acc_avg = np.mean(acc_distr.values())
-    return acc_avg
+    # acc_avg = np.mean(acc_distr.values())
+    acc = acc_distr.values()
+    return acc
 
 
 def estimate_loss(theta, J, Jt, acc_avg, cost):
@@ -49,7 +50,7 @@ def find_jt(theta, J, acc_avg, cost):
         loss_stat.update({loss: Jt})
     Jt_optim = loss_stat[min(loss_stat.keys())]
     # print 'loss_est: {}'.format(min(loss_stat.keys()))
-    return Jt_optim
+    return Jt_optim, min(loss_stat.keys())
 
 
 def get_loss(gold_data, trusted_judgment, cost, Jt):
