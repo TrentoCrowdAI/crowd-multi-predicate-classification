@@ -46,12 +46,12 @@ def run_quiz_scope(trust_min=0.75, quiz_papers_n=4, cheaters_prop=0.5,  easy_add
     smart_cheaters_passed = 0.
     workers_passed = statistic_passed['worker'] / float(statistic_total['worker']) * 100
 
-    # print '*** Quiz ***'
-    # print 'random cheaters passed: {}%'.format(rand_cheaters_passed)
-    # print 'smart cheaters passed: {}%'.format(smart_cheaters_passed)
-    # print 'workers passed: {}%'.format(workers_passed)
+    print '*** Quiz ***'
+    print 'random cheaters passed: {}%'.format(rand_cheaters_passed)
+    print 'smart cheaters passed: {}%'.format(smart_cheaters_passed)
+    print 'workers passed: {}%'.format(workers_passed)
 
-#   calculate the proportion of types of users passed the quiz
+    # calculate the proportion of types of users passed the quiz
     user_prop = []
     users_passed = float(sum(statistic_passed.values()))
     for user_t in ['rand_ch', 'smart_ch', 'worker']:
