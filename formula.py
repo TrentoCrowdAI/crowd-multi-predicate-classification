@@ -60,12 +60,12 @@ def plot_loss():
     ax.set_xlabel('Theta')
     ax.set_ylabel('Jt')
     ax.set_zlabel('Loss')
-    ax.text2D(0.05, 0.95, "Loss vs Theta vs Jt", transform=ax.transAxes)
+    ax.text2D(0.05, 0.95, "L    oss vs Theta vs Jt", transform=ax.transAxes)
 
     plt.show()
 
 
-def loss_vs_tests():
+def loss_vs_tests_scope():
     z = 0.22
     theta = 0.1
     cost = 10
@@ -86,6 +86,52 @@ def loss_vs_tests():
             to_csv('../data/loss_tests_formula_11111.csv', index=False, header=False)
 
 
+def loss_vs_tests_criteria():
+    z = 0.3
+    theta = 0.5
+    cost = 5
+    data = []
+    papers_page = 10
+    for Nt in range(1, 11, 1):
+        for J in [2, 3, 5, 10]:
+            Zs = (z * 0.5 ** Nt) / (z * 0.5 ** Nt + (2. * (1 - z) / (Nt + 1)) * (1 - 1. / (2 ** Nt + 1)))
+            acc_tw_avg = 2 ** (Nt + 1) * (Nt + 1) * (1 - 0.5 ** (Nt + 2)) / ((2 ** (Nt + 1) - 1) * (Nt + 2))
+            acc_avg = Zs * 0.5 + (1 - Zs) * acc_tw_avg
+
+            Jt_opt, loss = find_jt(theta, J, acc_avg, cost)
+            budget = J * (Nt + papers_page) / float(papers_page)
+            data.append([Nt, J, Jt_opt, loss, budget, cost])
+
+    pd.DataFrame(data, columns=['Nt', 'J', 'Jt_opt', 'loss', 'budget', 'cost']).\
+        to_csv('../data/criteria/loss_tests_criteria.csv', index=False)
+
+
+def find_jt_criteria(theta, J, acc_avg, cost):
+    Jt_params = range(J / 2 + 1, J + 1, 1)
+    loss_stat = {}
+    for Jt in Jt_params:
+        loss = estimate_loss_criteria(theta, J, Jt, acc_avg, cost)
+        loss_stat.update({loss: Jt})
+    Jt_optim = loss_stat[min(loss_stat.keys())]
+    # print 'loss_est: {}'.format(min(loss_stat.keys()))
+    return Jt_optim, min(loss_stat.keys())
+
+
+def estimate_loss_criteria(theta, J, Jt, acc_avg, cost):
+    p_fe_e = 0.
+    criteria_number = 4
+    for k in range(Jt, J+1, 1):
+        p_fe_e += binom(J, k)*(1-acc_avg)**k*acc_avg**(J-k)
+    p_fe_e *= theta
+    p_fe = 1 - pow(1-p_fe_e, criteria_number)
+
+    p_fi_e = 0.
+    for k in range(J-Jt+1, J+1, 1):
+        p_fi_e += binom(J, k)*(1-acc_avg)**k*acc_avg**(J-k)
+    p_fi_e *= (1-theta)
+    p_fi = 1 - pow(1 - p_fi_e, criteria_number)
+    loss = p_fe * cost + p_fi
+    return loss
 
 # z=0.3
 # Zs=(z*0.5**Nt)/(z*0.5**Nt + (2.*(1-z)/(Nt+1))*(1-1./(2**Nt+1)))
@@ -95,7 +141,8 @@ def loss_vs_tests():
 # acc = Zs*0.5 + (1-Zs)*a_tw_avg
 
 if __name__ == '__main__':
-    loss_vs_tests()
+    # loss_vs_tests_scope()
+    loss_vs_tests_criteria()
     # plot_loss()
     # find_min()
     # for Jt in [3, 4, 5]:
