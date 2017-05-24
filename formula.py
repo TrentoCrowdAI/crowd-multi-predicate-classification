@@ -98,7 +98,7 @@ def loss_vs_tests_criteria():
             acc_tw_avg = 2 ** (Nt + 1) * (Nt + 1) * (1 - 0.5 ** (Nt + 2)) / ((2 ** (Nt + 1) - 1) * (Nt + 2))
             acc_avg = Zs * 0.5 + (1 - Zs) * acc_tw_avg
 
-            Jt_opt, loss = find_jt(theta, J, acc_avg, cost)
+            Jt_opt, loss = find_jt_criteria(theta, J, acc_avg, cost)
             budget = J * (Nt + papers_page) / float(papers_page)
             data.append([Nt, J, Jt_opt, loss, budget, cost])
 
