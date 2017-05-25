@@ -55,7 +55,5 @@ def do_quiz_criteria(quiz_papers_n, cheaters_prop, criteria_num):
         for _ in range(criteria_num):
             if not np.random.binomial(1, worker_accuracy):
                 return [worker_type]
-        return [worker_accuracy, worker_type]
+    return [worker_accuracy, worker_type]
 
-
-print do_quiz_criteria(1., 4, 0.3, 4)
