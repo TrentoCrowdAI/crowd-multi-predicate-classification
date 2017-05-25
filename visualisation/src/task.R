@@ -169,3 +169,17 @@ ggplot(acc_plot, aes(x=papers_page, y=(fn_lose_avg+fp_lose_avg), group=judgment,
   ggtitle("Total lose VS papers per page") +
   xlab('Papers per page') +
   ylab('Total lose')
+
+
+
+# LOSS VS TESTS CRITERIA
+library(ggplot2)
+data <- loss_tests_criteria_confm
+ggplot(data, aes(x=Nt, y=loss, group=factor(J), col=factor(J), fill=factor(J))) + 
+  geom_line() +
+  geom_point() +
+  scale_x_continuous(breaks=c(1,2,3,4,5,6,7,8,9,10)) +
+  ggtitle("Loss VS Tests items (Acc as conf matrix)\nz = 0.3, cr = 5, Theta = 0.5") +
+  xlab('Number of test items') +
+  ylab('Average loss per paper')
+
