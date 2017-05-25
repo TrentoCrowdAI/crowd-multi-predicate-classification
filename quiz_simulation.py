@@ -40,3 +40,22 @@ def do_quiz_scope(trust_min, quiz_papers_n, cheaters_prop, easy_add_val):
     if worker_trust >= trust_min:
         return [worker_trust, worker_accuracy, worker_type]
     return [worker_type]
+
+
+def do_quiz_criteria(quiz_papers_n, cheaters_prop, criteria_num):
+    # decide if a worker a cheater
+    if np.random.binomial(1, cheaters_prop):
+        worker_type = 'rand_ch'
+        worker_accuracy = 0.5
+    else:
+        worker_type = 'worker'
+        worker_accuracy = 0.5 + (np.random.beta(1, 1) * 0.5)
+
+    for paper_id in range(quiz_papers_n):
+        for _ in range(criteria_num):
+            if not np.random.binomial(1, worker_accuracy):
+                return [worker_type]
+        return [worker_accuracy, worker_type]
+
+
+print do_quiz_criteria(1., 4, 0.3, 4)
