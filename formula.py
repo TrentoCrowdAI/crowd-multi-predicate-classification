@@ -13,15 +13,59 @@ import pandas as pd
 cost = 5
 J = 30
 Nt=5
-# z=0.3
-# Zs=(z*0.5**Nt)/(z*0.5**Nt + (2.*(1-z)/(Nt+1))*(1-1./(2**Nt+1)))
-# alpha_new=6.
-# beta_new=1.
-# a_tw_avg = 0.5+0.5*(alpha_new/(alpha_new+beta_new))
-# acc = Zs*0.5 + (1-Zs)*a_tw_avg
 acc=0.86
 
 
+# HELPERS
+def run_quiz_scope(trust_min=0.75, quiz_papers_n=4, cheaters_prop=0.5,  easy_add_acc = 0.2):
+    statistic_passed = {
+        'rand_ch': 0,
+        'smart_ch': 0,
+        'worker': 0
+    }
+    statistic_total = {
+        'rand_ch': 0,
+        'smart_ch': 0,
+        'worker': 0
+    }
+    # a value: (user_trust, user_accuracy)
+    user_population = {
+        'rand_ch': [],
+        'smart_ch': [],
+        'worker': []
+    }
+    acc_passed_distr = []
+    for _ in range(10000):
+        result = do_quiz_scope(trust_min, quiz_papers_n, cheaters_prop, easy_add_acc)
+        if len(result) > 1:
+            statistic_passed[result[2]] += 1
+            statistic_total[result[2]] += 1
+            user_population[result[2]].append(result[:2])
+            acc_passed_distr.append(result[1])
+        else:
+            statistic_total[result[0]] += 1
+    # pd.DataFrame(acc_passed_distr).to_csv('visualisation/data/quiz_acc_passed_z03_t5.csv', header=False, index=False)
+    rand_cheaters_passed = statistic_passed['rand_ch'] / float(statistic_total['rand_ch']) * 100
+    # smart_cheaters_passed = statistic_passed['smart_ch'] / float(statistic_total['smart_ch']) * 100
+    smart_cheaters_passed = 0.
+    workers_passed = statistic_passed['worker'] / float(statistic_total['worker']) * 100
+
+    print '*** Quiz ***'
+    print 'random cheaters passed: {}%'.format(rand_cheaters_passed)
+    print 'smart cheaters passed: {}%'.format(smart_cheaters_passed)
+    print 'workers passed: {}%'.format(workers_passed)
+
+    # calculate the proportion of types of users passed the quiz
+    user_prop = []
+    users_passed = float(sum(statistic_passed.values()))
+    for user_t in ['rand_ch', 'smart_ch', 'worker']:
+        user_prop.append(statistic_passed[user_t]/users_passed)
+    return [user_prop, user_population, acc_passed_distr]
+
+
+
+
+# FUNCTIONS
 def fun(theta, Jt):
     p_fe = 0.
     for k in range(Jt, J+1, 1):
