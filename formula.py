@@ -157,29 +157,30 @@ def loss_vs_tests_scope():
         pd.DataFrame(data, columns=['Nt', 'J', 'Jt_opt', 'loss', 'budget', 'cost']).\
             to_csv('../data/loss_tests_formula_11111.csv', index=False, header=False)
 
-
-def loss_vs_tests_criteria():
-    z = 0.3
-    theta = 0.5
-    cost = 5
-    data = []
-    papers_page = 10
-    criteria_num = 4
-    for Nt in range(1, 11, 1):
-        acc_avg = np.mean(run_quiz_criteria(quiz_papers_n=Nt, cheaters_prop=z, criteria_num=criteria_num))
-        for J in [2, 3, 5, 10]:
-            Jt_opt, loss = find_jt_criteria(theta, J, acc_avg, cost)
-            budget = J * (Nt + papers_page) / float(papers_page)
-            data.append([Nt, J, Jt_opt, loss, budget, cost])
-
-    pd.DataFrame(data, columns=['Nt', 'J', 'Jt_opt', 'loss', 'budget', 'cost']).\
-        to_csv('../data/criteria/loss_tests_criteria.csv', index=False)
+#
+# def loss_vs_tests_criteria():
+#     z = 0.3
+#     theta = 0.5
+#     cost = 5
+#     data = []
+#     papers_page = 10
+#     criteria_num = 4
+#     for Nt in range(1, 11, 1):
+#         acc_avg = np.mean(run_quiz_criteria(quiz_papers_n=Nt, cheaters_prop=z, criteria_num=criteria_num))
+#         for J in [2, 3, 5, 10]:
+#             Jt_opt, loss = find_jt_criteria(theta, J, acc_avg, cost)
+#             budget = J * (Nt + papers_page) / float(papers_page)
+#             data.append([Nt, J, Jt_opt, loss, budget, cost])
+#
+#     pd.DataFrame(data, columns=['Nt', 'J', 'Jt_opt', 'loss', 'budget', 'cost']).\
+#         to_csv('../data/criteria/loss_tests_criteria.csv', index=False)
 
 
 def loss_vs_tests_criteria_confm():
     z = 0.3
-    theta = 0.5
+    theta = 0.3
     cost = 5
+    data_confm = []
     data = []
     papers_page = 10
     criteria_num = 4
@@ -187,13 +188,20 @@ def loss_vs_tests_criteria_confm():
         acc = run_quiz_criteria_confm(quiz_papers_n=Nt, cheaters_prop=z, criteria_num=criteria_num)
         acc_in = np.mean(acc[1])
         acc_out = np.mean(acc[0])
+        acc_avg = np.mean([acc_in, acc_out])
         for J in [2, 3, 5, 10]:
-            Jt_opt, loss = find_jt_criteria_confm(theta, J, acc_in, acc_out, cost)
+            Jt_opt_confm, loss_confm = find_jt_criteria_confm(theta, J, acc_in, acc_out, cost)
             budget = J * (Nt + papers_page) / float(papers_page)
-            data.append([Nt, J, Jt_opt, loss, budget, cost])
+            # data_confm.append([Nt, J, Jt_opt_confm, loss_confm, budget, cost, 'confm'])
 
-    pd.DataFrame(data, columns=['Nt', 'J', 'Jt_opt', 'loss', 'budget', 'cost']).\
-        to_csv('../data/criteria/loss_tests_criteria_confm.csv', index=False)
+            Jt_opt, loss = find_jt_criteria(theta, J, acc_avg, cost)
+            data.append([Nt, J, Jt_opt, loss, budget, cost, 'avg'])
+            data.append([Nt, J, Jt_opt_confm, loss_confm, budget, cost, 'confm'])
+
+    # pd.DataFrame(data_confm, columns=['Nt', 'J', 'Jt_opt', 'loss', 'budget', 'cost']).\
+    #     to_csv('../data/criteria/loss_tests_criteria_confm.csv', index=False)
+    pd.DataFrame(data, columns=['Nt', 'J', 'Jt_opt', 'loss', 'budget', 'cost', 'alg']). \
+        to_csv('../data/criteria/loss_tests_criteria.csv', index=False)
 
 
 if __name__ == '__main__':

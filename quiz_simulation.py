@@ -67,7 +67,7 @@ def do_quiz_criteria_confm(quiz_papers_n, cheaters_prop, criteria_num):
     else:
         worker_type = 'worker'
         worker_accuracy_in = 0.5 + (np.random.beta(1, 1) * 0.5)
-        worker_accuracy_out = 0.5 + (np.random.beta(1, 1) * 0.5)
+        worker_accuracy_out = worker_accuracy_in + 0.1 if worker_accuracy_in + 0.1 <= 1. else 1.
 
     for paper_id in range(quiz_papers_n):
         if paper_id % 2:
