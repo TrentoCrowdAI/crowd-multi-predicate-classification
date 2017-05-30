@@ -58,7 +58,7 @@ def do_quiz_criteria(quiz_papers_n, cheaters_prop, criteria_num):
     return [worker_accuracy, worker_type]
 
 
-def do_quiz_criteria_confm(quiz_papers_n, cheaters_prop, criteria_num):
+def do_quiz_criteria_confm(quiz_papers_n, cheaters_prop, criteria_num, theta):
     # decide if a worker a cheater
     if np.random.binomial(1, cheaters_prop):
         worker_type = 'rand_ch'
@@ -70,9 +70,9 @@ def do_quiz_criteria_confm(quiz_papers_n, cheaters_prop, criteria_num):
         worker_accuracy_out = worker_accuracy_in + 0.1 if worker_accuracy_in + 0.1 <= 1. else 1.
 
     for paper_id in range(quiz_papers_n):
-        if paper_id % 2:
+        if np.random.binomial(1, theta):
             for _ in range(criteria_num):
-                if not np.random.binomial(1, worker_accuracy_out):
+                if not np.random.binomial(1, worker_accuracy_in):
                     return [worker_type]
         else:
             for _ in range(criteria_num):

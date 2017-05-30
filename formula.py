@@ -27,10 +27,10 @@ def run_quiz_criteria(quiz_papers_n=4, cheaters_prop=0.3, criteria_num=4):
     return acc_passed_distr
 
 
-def run_quiz_criteria_confm(quiz_papers_n=4, cheaters_prop=0.3, criteria_num=4):
+def run_quiz_criteria_confm(quiz_papers_n, cheaters_prop, criteria_num, theta):
     acc_passed_distr = [[], []]
     for _ in range(100000):
-        result = do_quiz_criteria_confm(quiz_papers_n, cheaters_prop, criteria_num)
+        result = do_quiz_criteria_confm(quiz_papers_n, cheaters_prop, criteria_num, theta)
         if len(result) > 1:
             acc_passed_distr[0].append(result[0])
             acc_passed_distr[1].append(result[1])
@@ -178,14 +178,14 @@ def loss_vs_tests_scope():
 
 def loss_vs_tests_criteria_confm():
     z = 0.3
-    theta = 0.3
+    theta = 0.5
     cost = 5
     data_confm = []
     data = []
     papers_page = 10
     criteria_num = 4
     for Nt in range(1, 11, 1):
-        acc = run_quiz_criteria_confm(quiz_papers_n=Nt, cheaters_prop=z, criteria_num=criteria_num)
+        acc = run_quiz_criteria_confm(quiz_papers_n=Nt, cheaters_prop=z, criteria_num=criteria_num, theta=theta)
         acc_in = np.mean(acc[1])
         acc_out = np.mean(acc[0])
         acc_avg = np.mean([acc_in, acc_out])
@@ -201,7 +201,7 @@ def loss_vs_tests_criteria_confm():
     # pd.DataFrame(data_confm, columns=['Nt', 'J', 'Jt_opt', 'loss', 'budget', 'cost']).\
     #     to_csv('../data/criteria/loss_tests_criteria_confm.csv', index=False)
     pd.DataFrame(data, columns=['Nt', 'J', 'Jt_opt', 'loss', 'budget', 'cost', 'alg']). \
-        to_csv('../data/criteria/loss_tests_criteria.csv', index=False)
+        to_csv('../data/criteria/loss_tests_criteria_theta05.csv', index=False)
 
 
 if __name__ == '__main__':
