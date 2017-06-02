@@ -70,12 +70,19 @@ def do_quiz_criteria_confm(quiz_papers_n, cheaters_prop, criteria_num, theta):
         worker_accuracy_out = worker_accuracy_in + 0.1 if worker_accuracy_in + 0.1 <= 1. else 1.
 
     for paper_id in range(quiz_papers_n):
+        # p = np.random.uniform(0, 1)
+        # if p <= 0.1:
+        #     mult = 0.9
+        # elif p <= 0.5:
+        #     mult = 1.
+        # else:
+        #     mult = 1.1
         if np.random.binomial(1, theta):
-            for _ in range(criteria_num):
-                if not np.random.binomial(1, worker_accuracy_in):
+            for mult in [1., 1., 1.1, 0.9]:
+                if not np.random.binomial(1, worker_accuracy_in*mult if worker_accuracy_in*mult <= 1. else 1.):
                     return [worker_type]
         else:
-            for _ in range(criteria_num):
-                if not np.random.binomial(1, worker_accuracy_out):
+            for mult in [1., 1., 1.1, 0.9]:
+                if not np.random.binomial(1, worker_accuracy_out*mult if worker_accuracy_out*mult <= 1. else 1.):
                     return [worker_type]
     return [worker_accuracy_out, worker_accuracy_in, worker_type]
