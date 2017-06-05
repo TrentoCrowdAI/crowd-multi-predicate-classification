@@ -1,0 +1,60 @@
+import numpy as np
+from quiz_simulation import do_quiz_criteria_confm
+from generator import synthesize
+
+
+def run_quiz_criteria_confm(quiz_papers_n, cheaters_prop):
+    acc_passed_distr = [[], []]
+    for _ in range(100000):
+        result = do_quiz_criteria_confm(quiz_papers_n, cheaters_prop)
+        if len(result) > 1:
+            acc_passed_distr[0].append(result[0])
+            acc_passed_distr[1].append(result[1])
+    return acc_passed_distr
+
+#
+# def run_task_criteria():
+#     tests_page_params = [1, 1, 1, 2, 2, 3]
+#     papers_page_params = [1, 2, 3, 2, 3, 3]
+#     for test_page, papaers_page in zip(tests_page_params, papers_page_params):
+#         job_accuracy_list = []
+#         budget_spent_list = []
+#         for _ in range(10000):
+#             job_accuracy, budget_spent, paid_pages_n = synthesizer(trust_min=1., n_criteria=3,
+#                                                                    test_page=test_page, papers_page=papaers_page,
+#                                                                    quiz_papers_n=4, n_papers=18, budget=50,
+#                                                                    price_row=0.4, judgment_min=3, judgment_max=5,
+#                                                                    cheaters_prop=0.1)
+#             job_accuracy_list.append(job_accuracy)
+#             budget_spent_list.append(budget_spent)
+#
+#         job_accuracy_avg = np.mean(job_accuracy_list)
+#         job_accuracy_std = np.std(job_accuracy_list)
+#         budget_spent_avg = np.mean(budget_spent_list)
+#         budget_spent_std = np.std(budget_spent_list)
+#
+#         print '*********************'
+#         print 'tests_page: {}'.format(test_page)
+#         print 'papaers_page: {}'.format(papaers_page)
+#         print '---------------------'
+#         print 'job_accuracy_avg={}\n' \
+#               'job_accuracy_std={}\n' \
+#               'budget_spent_avg={}$\n' \
+#               'budget_spent_std={}$\n'.format(job_accuracy_avg, job_accuracy_std, budget_spent_avg, budget_spent_std)
+
+
+if __name__ == '__main__':
+    z = 0.3
+    theta = 0.5
+    cost = 5
+    data = []
+    papers_page = 10
+    criteria_power = [0.05, 0.05, 0.1, 0.15]
+    for Nt in range(1, 11, 1):
+        acc = run_quiz_criteria_confm(quiz_papers_n=Nt, cheaters_prop=z)
+        acc_in = np.mean(acc[1])
+        acc_out = np.mean(acc[0])
+        acc_avg = np.mean([acc_in, acc_out])
+        for J in [2, 3, 5, 10]:
+            synthesize(1000, criteria_power, papers_page)
+            pass
