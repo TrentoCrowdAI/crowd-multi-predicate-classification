@@ -57,7 +57,7 @@ Input:
 """
 
 
-def run(responses, tol=0.00001, max_iter=100, init='average'):
+def dawid_skene(responses, tol=0.00001, max_iter=100):
     # convert responses to counts
     (patients, observers, classes, counts) = responses_to_counts(responses)
     print "num Patients:", len(patients)
