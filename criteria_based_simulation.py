@@ -1,5 +1,6 @@
 from quiz_simulation import do_quiz_criteria_confm
 from generator import generate_responses_gt
+from fusion_algorithms.dawid_skene import dawid_skene
 
 
 def run_quiz_criteria_confm(quiz_papers_n, cheaters_prop, criteria_difficulty):
@@ -23,6 +24,7 @@ if __name__ == '__main__':
         acc = run_quiz_criteria_confm(Nt, z, criteria_difficulty)
         for J in [2, 3, 5, 10]:
             responses, GT = generate_responses_gt(n_papers, criteria_power, papers_page, J, acc, criteria_difficulty)
+            values_prob = dawid_skene(responses, tol=0.00001, max_iter=10)  # TO DO max_iter=100
             # - post processing
             # - get metrics
             pass
