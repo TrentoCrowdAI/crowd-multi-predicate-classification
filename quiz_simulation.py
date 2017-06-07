@@ -58,7 +58,7 @@ def do_quiz_criteria(quiz_papers_n, cheaters_prop, criteria_num):
     return [worker_accuracy, worker_type]
 
 
-def do_quiz_criteria_confm(quiz_papers_n, cheaters_prop):
+def do_quiz_criteria_confm(quiz_papers_n, cheaters_prop, criteria_difficulty):
     # decide if a worker a cheater
     if np.random.binomial(1, cheaters_prop):
         worker_type = 'rand_ch'
@@ -78,7 +78,7 @@ def do_quiz_criteria_confm(quiz_papers_n, cheaters_prop):
         #     mult = 1.1
         # 50% IN papers
         if np.random.binomial(1, 0.5):
-            for mult in [1., 1., 1.1, 0.9]:
+            for mult in criteria_difficulty:
                 if worker_type == 'rand_ch':
                     if not np.random.binomial(1, worker_accuracy_in):
                         return [worker_type]

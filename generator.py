@@ -13,44 +13,34 @@ def generate_gold_data(n_papers, criteria_power):
     return gold_data
 
 
-def synthesize(n_papers, criteria_power, papers_page):
-    n_criteria = len(criteria_power)
-    generate_gold_data(n_papers, criteria_power)
+def generate_responses_gt(n_papers, criteria_power, papers_page, J, acc, criteria_difficulty):
+    GT = generate_gold_data(n_papers, criteria_power)
+    acc_out_list = acc[0]
+    acc_in_list = acc[1]
 
-#
-#
-# def synthesize(acc_distribution, n_papers, papers_page, J, theta):
-#     '''
-#
-#     :param acc_distribution:
-#     :param n_papers:
-#     :param papers_page:
-#     :param J:
-#     :param theta:
-#     :return:GT- ground truth values
-#             GT = [obj_1_val, obj_2_val, ..]
-#             psi_obj - observations
-#             psi_obj = [[obj_1 values], []]
-#             psi_w - workers' judgments on papers
-#             psi_w = [{obj_id: val,..}, {}], index === worker's id
-#     '''
-#
-#     GT = [np.random.binomial(1, theta) for _ in range(n_papers)]
-#
-#     # generate observations
-#     pages_n = n_papers / papers_page
-#     psi_obj = [[] for obj in range(n_papers)]
-#     psi_w = [{} for _ in range(pages_n*J)]
-#     for page_id in range(pages_n):
-#         for _pointer in range(J):
-#             worker_id = page_id * J + _pointer
-#             worker_acc = random.choice(acc_distribution)
-#             for obj_id in range(page_id*papers_page, page_id*papers_page+papers_page, 1):
-#                 gold_value = GT[obj_id]
-#                 if gold_value:
-#                     worker_judgment = np.random.binomial(1, worker_acc)
-#                 else:
-#                     worker_judgment = np.random.binomial(1, 1-worker_acc)
-#                 psi_obj[obj_id].append(worker_judgment)
-#                 psi_w[worker_id].update({obj_id: worker_judgment})
-#     return GT, psi_obj, psi_w
+    # generate responses
+    pages_n = n_papers / papers_page
+    criteria_num = len(criteria_power)
+    responses = {}
+    for e_paper_id in range(pages_n*papers_page*criteria_num):
+        responses[e_paper_id] = {}
+    for page_id in range(pages_n):
+        for i in range(J):
+            worker_id = page_id * J + i
+            worker_acc_in = acc_in_list.pop()
+            worker_acc_out = acc_out_list.pop()
+            for paper_id in range(page_id * papers_page, page_id * papers_page + papers_page, 1):
+                criteria_vals_id = range(paper_id * criteria_num, paper_id * criteria_num + criteria_num, 1)
+                isPaperIN = sum([GT[i] for i in criteria_vals_id]) == 0
+                if isPaperIN:
+                    worker_acc = worker_acc_in
+                else:
+                    worker_acc = worker_acc_out
+                for e_paper_id, e_dif in zip(criteria_vals_id, criteria_difficulty):
+                    if np.random.binomial(1, worker_acc * e_dif if worker_acc * e_dif <= 1. else 1.):
+                        vote = GT[e_paper_id]
+                    else:
+                        vote = 1 - GT[e_paper_id]
+                    responses[e_paper_id][worker_id] = [vote]
+    return responses, GT
+
