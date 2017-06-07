@@ -4,13 +4,14 @@ run experiments
 
 import numpy as np
 import pandas as pd
-from cf_simulation_synthetic import synthesizer
+
+from algorithms.algorithms_utils import input_adapter, get_theta
+from algorithms.em import expectation_maximization
+from generator import synthesize
 from quiz_simulation import do_quiz_scope
 from task_simulation import do_task_scope, get_metrics
-from generator import synthesize
-from classifier_utils import classifier, estimate_accuracy, find_jt, get_loss
-from fusion_utils import input_adapter, get_theta
-from em import expectation_maximization
+from temp.cf_simulation_synthetic import synthesizer
+from temp.classifier_utils import classifier, estimate_accuracy, find_jt, get_loss
 
 
 def run_quiz_scope(trust_min=0.75, quiz_papers_n=4, cheaters_prop=0.5,  easy_add_acc = 0.2):

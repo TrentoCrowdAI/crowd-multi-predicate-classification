@@ -1,7 +1,7 @@
 import numpy as np
 import math
 from collections import defaultdict
-from fusion_utils import invert
+from algorithms_utils import invert
 
 
 def expectation_maximization(N, M, Psi, acc_prior):
