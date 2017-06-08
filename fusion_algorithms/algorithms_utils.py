@@ -1,14 +1,14 @@
-def input_adapter(psi_w, n_papers):
+def input_adapter(responses):
     '''
-    :param psi_w: 
-    :param n_papers: 
-    :return: 
+    :param responses:
+    :return: Psi, N
     '''
-
-    Psi = [[] for _ in range(n_papers)]
-    for w_id, worker_data in enumerate(psi_w):
-        for obj, val in worker_data.iteritems():
-            Psi[obj].append((w_id, val))
+    Psi = {}
+    for obj_id in responses.keys():
+        Psi[obj_id] = []
+    for obj_id, obj_responses in responses.iteritems():
+        for worker_id, worker_respons in obj_responses.iteritems():
+            Psi[obj_id].append((worker_id, worker_respons[0]))
     return Psi
 
 
@@ -25,28 +25,3 @@ def invert(N, M, Psi):
         for s, val in Psi[obj]:
             inv_Psi[s].append((obj, val))
     return inv_Psi
-
-
-def prob_binary_convert(data):
-    '''
-    :param data: 
-    :return: 
-    '''
-    data_b = []
-    for obj in data:
-        values = obj.keys()
-        probs = obj.values()
-        value_id = probs.index(max(probs))
-        data_b.append(values[value_id])
-    return data_b
-
-
-def get_theta(data):
-    theta = 0.
-    for obj_p in data:
-        if len(obj_p) == 1:
-            if obj_p.keys()[0] == 1:
-                theta += obj_p[1]
-        else:
-            theta += obj_p[1]
-    return theta/len(data)
