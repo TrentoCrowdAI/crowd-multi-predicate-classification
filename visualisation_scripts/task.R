@@ -176,13 +176,14 @@ ggplot(acc_plot, aes(x=papers_page, y=(fn_lose_avg+fp_lose_avg), group=judgment,
 library(ggplot2)
 # par(mfrow = c(2, 3))
 
-data <- loss_tests_criteria_theta05_dif
+data <- loss_tests_cr5_
 data$J <- factor(data$J)
-ggplot(data, aes(x=Nt, y=loss, colour=J, shape = alg, group=interaction(J, alg))) + 
+ggplot(data, aes(x=Nt, y=loss_mean, colour=J, shape = alg, group=interaction(J, alg))) + 
+  geom_errorbar(aes(ymin=loss_mean-loss_std, ymax=loss_mean+loss_std, width=.1)) +
   geom_line() +
   geom_point() +
   scale_x_continuous(breaks=c(1,2,3,4,5,6,7,8,9,10)) +
-  ggtitle("Loss VS Tests items (difficulty of criteria)\n z = 0.3, cr = 5, theta = 0.5") +
+  ggtitle("Loss VS Tests items, z = 0.3, cr = 5, theta = 0.3") +
   theme(plot.title = element_text(hjust = 0.5)) +
   xlab('Number of test items') +
   ylab('Average loss per paper')

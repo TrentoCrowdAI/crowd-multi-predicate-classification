@@ -4,6 +4,7 @@ from fusion_algorithms.algorithms_utils import input_adapter
 from fusion_algorithms.em import expectation_maximization
 from utils import run_quiz_criteria_confm, aggregate_papers, estimate_loss
 import pandas as pd
+import numpy as np
 
 
 def get_loss_dawid(responses):
@@ -30,8 +31,8 @@ def get_loss_dong(responses):
 
 if __name__ == '__main__':
     z = 0.3
-    cost = 5
-    n_papers = 500
+    cost = 2
+    n_papers = 1000
     papers_page = 10
     criteria_power = [0.14, 0.14, 0.28, 0.42]
     criteria_difficulty = [1., 1., 1.1, 0.9]
@@ -39,12 +40,16 @@ if __name__ == '__main__':
     data = []
     for Nt in range(1, 11, 1):
         print Nt
-        acc = run_quiz_criteria_confm(Nt, z, criteria_difficulty)
         for J in [2, 3, 5, 10]:
-            responses, GT = generate_responses_gt(n_papers, criteria_power, papers_page, J, acc, criteria_difficulty)
-            loss_dawid = get_loss_dawid(responses)
-            loss_dong = get_loss_dong(responses)
-            data.append([Nt, J, cost, loss_dawid, 'dawid'])
-            data.append([Nt, J, cost, loss_dong, 'dong'])
-    pd.DataFrame(data, columns=['Nt', 'J', 'cost', 'loss', 'alg']). \
-        to_csv('output/data/loss_tests_cr5.csv', index=False)
+            loss_dawid_list = []
+            loss_dong_liss = []
+            for _ in range(10):
+                acc = run_quiz_criteria_confm(Nt, z, criteria_difficulty)
+                responses, GT = generate_responses_gt(n_papers, criteria_power, papers_page,
+                                                      J, acc, criteria_difficulty)
+                loss_dawid_list.append(get_loss_dawid(responses))
+                loss_dong_liss.append(get_loss_dong(responses))
+            data.append([Nt, J, cost, np.mean(loss_dawid_list), np.std(loss_dawid_list), 'dawid'])
+            data.append([Nt, J, cost, np.mean(loss_dong_liss), np.std(loss_dong_liss), 'dong'])
+    pd.DataFrame(data, columns=['Nt', 'J', 'cost', 'loss_mean', 'loss_std', 'alg']). \
+        to_csv('output/data/loss_tests_cr2.csv', index=False)
