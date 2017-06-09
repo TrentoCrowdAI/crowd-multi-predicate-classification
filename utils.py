@@ -33,32 +33,32 @@ def estimate_loss(papers_prob_in, cost):
     return loss_per_paper
 
 
-# def get_loss(classified_papers, GT, cost, criteria_num):
-#     # obtain GT scope values for papers
-#     GT_scope = []
-#     for paper_id in range(len(classified_papers)):
-#         if sum([GT[paper_id * criteria_num + e_paper_id] for e_paper_id in range(criteria_num)]):
-#             GT_scope.append(0)
-#         else:
-#             GT_scope.append(1)
-#     i_gt = sum(GT_scope)
-#     e_gt = len(GT_scope) - i_gt
-#     fe_num = 0.
-#     fi_num = 0.
-#     for cl_val, gt_val in zip(classified_papers, GT_scope):
-#         if gt_val and not cl_val:
-#             fe_num += 1
-#         if not gt_val and cl_val:
-#             fi_num += 1
-#     loss = fe_num / i_gt * cost + fi_num / e
+def get_actual_loss(classified_papers, GT, cost, criteria_num):
+    # obtain GT scope values for papers
+    GT_scope = []
+    for paper_id in range(len(classified_papers)):
+        if sum([GT[paper_id * criteria_num + e_paper_id] for e_paper_id in range(criteria_num)]):
+            GT_scope.append(0)
+        else:
+            GT_scope.append(1)
+    fe_num = 0.
+    fi_num = 0.
+    for cl_val, gt_val in zip(classified_papers, GT_scope):
+        if gt_val and not cl_val:
+            fe_num += 1
+        if not gt_val and cl_val:
+            fi_num += 1
+    loss = (fe_num * cost + fi_num) / len(GT)
+    return loss
 
-# def classify_papers(n_papers, criteria_num, values_prob, cost):
-#     classified_papers = []
-#     exclusion_trsh = cost / (cost + 1.)
-#     for paper_id in range(n_papers):
-#         p_exclusion = 1.
-#         for e_paper_id in range(criteria_num):
-#             p_exclusion *= 1 - values_prob[paper_id*criteria_num+e_paper_id][1]
-#         p_exclusion = 1 - p_exclusion
-#         classified_papers.append(1) if p_exclusion > exclusion_trsh else classified_papers.append(0)
-#     return classified_papers
+
+def classify_papers(n_papers, criteria_num, values_prob, cost):
+    classified_papers = []
+    exclusion_trsh = cost / (cost + 1.)
+    for paper_id in range(n_papers):
+        p_exclusion = 1.
+        for e_paper_id in range(criteria_num):
+            p_exclusion *= 1 - values_prob[paper_id*criteria_num+e_paper_id][1]
+        p_exclusion = 1 - p_exclusion
+        classified_papers.append(0) if p_exclusion > exclusion_trsh else classified_papers.append(1)
+    return classified_papers
