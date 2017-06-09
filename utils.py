@@ -41,14 +41,24 @@ def get_actual_loss(classified_papers, GT, cost, criteria_num):
             GT_scope.append(0)
         else:
             GT_scope.append(1)
-    fe_num = 0.
-    fi_num = 0.
+    # FN == False Exclusion
+    # FP == False Inclusion
+    fn = 0.
+    fp = 0.
+    tp = 0.
+    tn = 0.
     for cl_val, gt_val in zip(classified_papers, GT_scope):
         if gt_val and not cl_val:
-            fe_num += 1
+            fn += 1
         if not gt_val and cl_val:
-            fi_num += 1
-    loss = (fe_num * cost + fi_num) / len(GT)
+            fp += 1
+        if gt_val and cl_val:
+            tp += 1
+        if not gt_val and not cl_val:
+            tn += 1
+    fp_rate = fp / (fp + tn)
+    fn_rate = fn / (fn + tp)
+    loss = fn_rate * cost + fp_rate
     return loss
 
 
