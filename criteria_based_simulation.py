@@ -36,6 +36,27 @@ def get_loss_dong(responses):
     return loss
 
 
+def estimate_cr_power_dif(responses, criteria_num):
+    values_prob = dawid_skene(responses, tol=0.001, max_iter=50)
+    cr_difficulty = [0. for _ in range(criteria_num)]
+    cr_power = [0. for _ in range(criteria_num)]
+    n_papers_round = len(responses)/criteria_num
+    for paper_id in range(n_papers_round):
+        for e_id in range(criteria_num):
+            prob_apply_e = values_prob[paper_id*criteria_num+e_id][1]
+            cr_power[e_id] += prob_apply_e
+            cr_difficulty[e_id] += abs(2*prob_apply_e-1)
+
+    cr_difficulty = map(lambda x: 1-x/n_papers_round, cr_difficulty)
+    cr_power = map(lambda x: x/n_papers_round, cr_power)
+    return cr_power, cr_difficulty
+
+
+def get_loss_mstrategy(responses):
+    responses_part = {k: responses[k] for k in range(int(len(responses)*0.1))}
+    cr_power_dif = estimate_cr_power_dif(responses_part, criteria_num)
+    pass
+
 if __name__ == '__main__':
     z = 0.3
     cost = 2
@@ -56,6 +77,7 @@ if __name__ == '__main__':
                                                       J, acc, criteria_difficulty)
                 loss_dawid_list.append(get_loss_dawid(responses))
                 loss_dong_liss.append(get_loss_dong(responses))
+                # get_loss_mstrategy(responses)
             data.append([Nt, J, cost, np.mean(loss_dawid_list), np.std(loss_dawid_list), 'dawid'])
             data.append([Nt, J, cost, np.mean(loss_dong_liss), np.std(loss_dong_liss), 'dong'])
     pd.DataFrame(data, columns=['Nt', 'J', 'cost', 'loss_mean', 'loss_std', 'alg']). \

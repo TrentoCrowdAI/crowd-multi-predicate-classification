@@ -56,9 +56,11 @@ def get_actual_loss(classified_papers, GT, cost, criteria_num):
             tp += 1
         if not gt_val and not cl_val:
             tn += 1
-    fp_rate = fp / (fp + tn)
-    fn_rate = fn / (fn + tp)
-    loss = fn_rate * cost + fp_rate
+    # fp_rate = fp / (fp + tn)
+    # fn_rate = fn / (fn + tp)
+    # loss = fn_rate * cost + fp_rate
+    # TO DO!!!
+    loss = (fn * cost + fp) / len(classified_papers)
     return loss
 
 
