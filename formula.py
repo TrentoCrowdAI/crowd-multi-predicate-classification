@@ -3,9 +3,12 @@ import pandas as pd
 
 
 def get_loss(order, criteria_power, criteria_acc, CR):
-    pfi = 1.
-    for j in order:
-        pfi *= criteria_power[j] * (1 - criteria_acc[j])
+    pfi = criteria_power[-1] * (1 - criteria_acc[-1])
+    for j in order[:-1]:
+        pfi_j = criteria_power[j] * (1 - criteria_acc[j])
+        pti_j = (1 - criteria_power[j]) * criteria_acc[j]
+        pin_j = pfi_j + pti_j
+        pfi *= pin_j
 
     pfe_0 = (1 - criteria_power[0]) * (1 - criteria_acc[0])
     pfe = pfe_0
@@ -31,15 +34,17 @@ def get_cost(order, criteria_power, criteria_acc):
             pfi_j = criteria_power[j] * (1 - criteria_acc[j])
             pti_j = (1 - criteria_power[j]) * criteria_acc[j]
             pin_j = pfi_j + pti_j
-            m += pin_j
+            m *= pin_j
         cost += m
     return cost
 
 
 if __name__ == '__main__':
-    CR = 2
-    criteria_power = [0.14, 0.14, 0.28, 0.42]
-    criteria_acc = [0.6, 0.7, 0.8, 0.9]
+    CR = 1
+    # criteria_power = [0.14, 0.14, 0.28, 0.42]
+    criteria_power = [0.14, 0.14, 0.14, 0.9]
+    # criteria_acc = [0.6, 0.7, 0.8, 0.9]
+    criteria_acc = [0.7, 0.7, 0.7, 0.9]
     criteria_num = len(criteria_power)
 
     print '----------------------------------'
