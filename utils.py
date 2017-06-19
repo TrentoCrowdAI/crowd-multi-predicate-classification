@@ -1,4 +1,7 @@
 from quiz_simulation import do_quiz_criteria_confm
+from fusion_algorithms.algorithms_utils import input_adapter
+from fusion_algorithms.em import expectation_maximization
+from fusion_algorithms.dawid_skene import dawid_skene
 
 
 def run_quiz_criteria_confm(quiz_papers_n, cheaters_prop, criteria_difficulty):
@@ -74,3 +77,31 @@ def classify_papers(n_papers, criteria_num, values_prob, cost):
         p_exclusion = 1 - p_exclusion
         classified_papers.append(0) if p_exclusion > exclusion_trsh else classified_papers.append(1)
     return classified_papers
+
+
+def get_loss_dong(responses, criteria_num, n_papers, papers_page, J, GT, cost):
+    Psi = input_adapter(responses)
+    N = (n_papers / papers_page) * J
+    p = expectation_maximization(N, n_papers*criteria_num, Psi)[1]
+    values_prob = []
+    for e in p:
+        e_prob = [0., 0.]
+        for e_id, e_p in e.iteritems():
+            e_prob[e_id] = e_p
+        values_prob.append(e_prob)
+    # papers_prob_in = aggregate_papers(n_papers, criteria_num, values_prob)
+    # loss = estimate_loss(papers_prob_in, cost)
+    # get actual loss
+    classified_papers = classify_papers(n_papers, criteria_num, values_prob, cost)
+    loss = get_actual_loss(classified_papers, GT, cost, criteria_num)
+    return loss
+
+
+def get_loss_dawid(responses, criteria_num, n_papers, papers_page, J, GT, cost):
+    values_prob = dawid_skene(responses, tol=0.001, max_iter=50)
+    # papers_prob_in = aggregate_papers(n_papers, criteria_num, values_prob)
+    # loss = estimate_loss(papers_prob_in, cost)
+    # get actual loss
+    classified_papers = classify_papers(n_papers, criteria_num, values_prob, cost)
+    loss = get_actual_loss(classified_papers, GT, cost, criteria_num)
+    return loss

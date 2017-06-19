@@ -41,12 +41,12 @@ def expectation_maximization(N, M, Psi):
                 for v in C.keys():
                     if v == val:
                         if A[s] == 0.:
-                            A[s] = 0.5
+                            A[s] = 0.01
                             C[v] += math.log(A[s])
 
                     else:
                         if A[s] == 1.:
-                            A[s] = 0.95
+                            A[s] = 0.99
                         C[v] += math.log((1-A[s])/(V-1))
 
             # compute probs

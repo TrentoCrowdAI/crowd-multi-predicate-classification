@@ -3,9 +3,7 @@ def input_adapter(responses):
     :param responses:
     :return: Psi, N
     '''
-    Psi = {}
-    for obj_id in responses.keys():
-        Psi[obj_id] = []
+    Psi = [[] for obj_id in responses.keys()]
     for obj_id, obj_responses in responses.iteritems():
         for worker_id, worker_respons in obj_responses.iteritems():
             Psi[obj_id].append((worker_id, worker_respons[0]))
