@@ -3,12 +3,17 @@ import pandas as pd
 
 
 def get_loss(order, criteria_power, criteria_acc, CR):
-    pfi = criteria_power[order[-1]] * (1 - criteria_acc[order[-1]])
-    for j in order[:-1]:
-        pfi_j = criteria_power[j] * (1 - criteria_acc[j])
-        pti_j = (1 - criteria_power[j]) * criteria_acc[j]
-        pin_j = pfi_j + pti_j
-        pfi *= pin_j
+    pfi = 0.
+    criteria_num = len(criteria_power)
+    vals_combinations = list(itertools.product([0, 1], repeat=criteria_num))
+    for vals in vals_combinations:
+        m = 1.
+        for i in order:
+            pow_i = criteria_power[i]
+            val_i = vals[i]
+            acc_i = criteria_acc[i]
+            m *= pow_i**val_i * (1-pow_i)**(1-val_i) * acc_i**(1-val_i) * (1-acc_i)**val_i
+        pfi += m
 
     pfe_0 = (1 - criteria_power[order[0]]) * (1 - criteria_acc[order[0]])
     pfe = pfe_0
@@ -58,4 +63,4 @@ if __name__ == '__main__':
         print '{} | loss: {} | cost: {}'.format(order, loss, cost)
         data.append([order, loss, cost])
     pd.DataFrame(data, columns=['order', 'loss', 'cost']). \
-        to_csv('output/data/loss_cost_test.csv', index=False)
+        to_csv('output/data/loss_cost_cr.csv', index=False)
