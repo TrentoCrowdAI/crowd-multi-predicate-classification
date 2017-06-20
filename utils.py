@@ -67,7 +67,18 @@ def get_actual_loss(classified_papers, GT, cost, criteria_num):
     return loss
 
 
-def classify_papers(n_papers, criteria_num, values_prob, cost):
+def classify_papers(n_papers, criteria_num, responses, papers_page, J, cost):
+    Psi = input_adapter(responses)
+    N = (n_papers / papers_page) * J
+    p = expectation_maximization(N, n_papers * criteria_num, Psi)[1]
+    values_prob = []
+    for e in p:
+        e_prob = [0., 0.]
+        for e_id, e_p in e.iteritems():
+            e_prob[e_id] = e_p
+        values_prob.append(e_prob)
+
+
     classified_papers = []
     exclusion_trsh = cost / (cost + 1.)
     for paper_id in range(n_papers):
@@ -80,28 +91,16 @@ def classify_papers(n_papers, criteria_num, values_prob, cost):
 
 
 def get_loss_dong(responses, criteria_num, n_papers, papers_page, J, GT, cost):
-    Psi = input_adapter(responses)
-    N = (n_papers / papers_page) * J
-    p = expectation_maximization(N, n_papers*criteria_num, Psi)[1]
-    values_prob = []
-    for e in p:
-        e_prob = [0., 0.]
-        for e_id, e_p in e.iteritems():
-            e_prob[e_id] = e_p
-        values_prob.append(e_prob)
-    # papers_prob_in = aggregate_papers(n_papers, criteria_num, values_prob)
-    # loss = estimate_loss(papers_prob_in, cost)
-    # get actual loss
-    classified_papers = classify_papers(n_papers, criteria_num, values_prob, cost)
+    classified_papers = classify_papers(n_papers, criteria_num, responses, papers_page, J, cost)
     loss = get_actual_loss(classified_papers, GT, cost, criteria_num)
     return loss
 
 
-def get_loss_dawid(responses, criteria_num, n_papers, papers_page, J, GT, cost):
-    values_prob = dawid_skene(responses, tol=0.001, max_iter=50)
-    # papers_prob_in = aggregate_papers(n_papers, criteria_num, values_prob)
-    # loss = estimate_loss(papers_prob_in, cost)
-    # get actual loss
-    classified_papers = classify_papers(n_papers, criteria_num, values_prob, cost)
-    loss = get_actual_loss(classified_papers, GT, cost, criteria_num)
-    return loss
+# def get_loss_dawid(responses, criteria_num, n_papers, papers_page, J, GT, cost):
+#     values_prob = dawid_skene(responses, tol=0.001, max_iter=50)
+#     # papers_prob_in = aggregate_papers(n_papers, criteria_num, values_prob)
+#     # loss = estimate_loss(papers_prob_in, cost)
+#     # get actual loss
+#     classified_papers = classify_papers(n_papers, criteria_num, values_prob, cost)
+#     loss = get_actual_loss(classified_papers, GT, cost, criteria_num)
+#     return loss
