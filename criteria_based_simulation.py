@@ -18,19 +18,23 @@ if __name__ == '__main__':
     for Nt in range(1, 11, 1):
         print Nt
         for J in [2, 3, 5, 10]:
-            loss_dawid_list = []
-            loss_dong_list = []
+            # loss_dawid_list = []
+            loss_baseline_list = []
+            cost_baseline = float(criteria_num) * J * (Nt + n_papers) / n_papers
+            loss_mrun_list = []
+            cost_mrun_list = []
             for _ in range(2):
                 acc = run_quiz_criteria_confm(Nt, z, criteria_difficulty)
                 responses, GT = generate_responses_gt(n_papers, criteria_power, papers_page,
                                                       J, acc, criteria_difficulty)
-                loss_dong_list.append(get_loss_dong(responses, criteria_num, n_papers, papers_page, J, GT, cost))
+                loss_baseline_list.append(get_loss_dong(responses, criteria_num, n_papers, papers_page, J, GT, cost))
                 # get_loss_cost_mrun(responses, criteria_num, n_papers, papers_page, J)
             # print "dawid: {}".format(np.mean(loss_dawid_list))
-            print "dong: {} std :{}".format(np.mean(loss_dong_list), np.std(loss_dong_list))
+            print 'dong loss: {} std :{}'.format(np.mean(loss_baseline_list), np.std(loss_baseline_list))
+            print 'dong cost: {}'.format(cost)
             print '---------------------'
 
             # data.append([Nt, J, cost, np.mean(loss_dawid_list), np.std(loss_dawid_list), 'dawid'])
-            data.append([Nt, J, cost, np.mean(loss_dong_list), np.std(loss_dong_list), 'dong'])
-    pd.DataFrame(data, columns=['Nt', 'J', 'cost', 'loss_mean', 'loss_std', 'alg']). \
+            data.append([Nt, J, cost, np.mean(loss_baseline_list), np.std(loss_baseline_list), cost_baseline, 0., 'baseline'])
+    pd.DataFrame(data, columns=['Nt', 'J', 'cost', 'loss_mean', 'loss_std', 'cost_mean', 'cost_std', 'alg']). \
         to_csv('output/data/loss_tests_cr5.csv', index=False)
