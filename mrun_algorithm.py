@@ -53,7 +53,7 @@ def get_loss_cost_mrun(criteria_num, n_papers, papers_page, J, cost, Nt,
                        acc, criteria_power, criteria_difficulty, GT):
     # first round responses
     # 10% papers
-    criteria_count = criteria_num * J * n_papers * 0.1
+    criteria_count = (Nt + papers_page * criteria_num) * J * (n_papers/10) / papers_page
     GT_fround = GT[: int(n_papers*criteria_num*0.1)]
     responses_fround = generate_responses_gt(n_papers/10, criteria_power, papers_page,
                                              J, acc, criteria_difficulty, GT_fround)
@@ -66,9 +66,10 @@ def get_loss_cost_mrun(criteria_num, n_papers, papers_page, J, cost, Nt,
     papers_worker = papers_page * criteria_num
     for cr in best_cr_order:
         n_rest = len(papers_ids_rest)
-        criteria_count += J * n_rest
         papers_ids_rest1 = papers_ids_rest[:n_rest - n_rest % papers_worker]
+        criteria_count += (Nt + papers_worker) * J * len(papers_ids_rest1) / float(papers_worker)
         papers_ids_rest2 = papers_ids_rest[n_rest - n_rest % papers_worker:]
+        criteria_count += (Nt + len(papers_ids_rest2)) * J
         classified_papers_cr = do_round(GT, cr, papers_ids_rest1, criteria_num, papers_worker, J,
                                         cost, acc, criteria_power, criteria_difficulty)
         # check if n_papers_rest % papers_page != 0 then run an additional round

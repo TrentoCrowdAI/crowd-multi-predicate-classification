@@ -19,7 +19,7 @@ if __name__ == '__main__':
         for J in [2, 3, 5, 10]:
             print 'Nt: {}. J: {}'.format(Nt, J)
             loss_baseline_list = []
-            cost_baseline = float(criteria_num) * J
+            cost_baseline = (Nt + papers_page * criteria_num) * J / float(papers_page)
             loss_mrun_list = []
             cost_mrun_list = []
             for _ in range(10):
@@ -34,8 +34,9 @@ if __name__ == '__main__':
                 cost_mrun_list.append(cost_mrun)
             print 'BASELINE loss: {} std :{}, cost: {}'.format(np.mean(loss_baseline_list),
                                                                np.std(loss_baseline_list), cost_baseline)
-            print 'M-RUN loss: loss: {} std :{}, cost: {}'.format(np.mean(loss_mrun_list),
-                                                               np.std(loss_mrun_list), np.mean(cost_mrun_list))
+            print 'M-RUN loss: loss: {} std :{}, cost: {}, std: {}'.format(np.mean(loss_mrun_list),
+                                                                    np.std(loss_mrun_list), np.mean(cost_mrun_list),
+                                                                    np.std(cost_mrun_list))
             print '---------------------'
 
             data.append([Nt, J, cr, np.mean(loss_baseline_list),
