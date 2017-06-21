@@ -23,7 +23,7 @@ if __name__ == '__main__':
             loss_mrun_list = []
             cost_mrun_list = []
             for _ in range(10):
-                acc = run_quiz_criteria_confm(Nt, z, criteria_difficulty)
+                acc = run_quiz_criteria_confm(Nt, z, [1.])
                 responses, GT = generate_responses_gt(n_papers, criteria_power, papers_page,
                                                       J, acc, criteria_difficulty)
                 loss_baseline = get_loss_dong(responses, criteria_num, n_papers, papers_page, J, GT, cr)

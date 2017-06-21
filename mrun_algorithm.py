@@ -39,13 +39,13 @@ def first_round(responses, criteria_num, n_papers, papers_page, J, cost):
     return classified_papers, best_cr_order
 
 
-def do_round(GT, cr, papers_ids_rest, criteria_num, papers_page, J,
+def do_round(GT, cr, papers_ids_rest, criteria_num, papers_worker, J,
              cost, acc, criteria_power, criteria_difficulty):
     n_papers = len(papers_ids_rest)
     GT_round = [GT[p_id*criteria_num+cr] for ind, p_id in enumerate(papers_ids_rest)]
-    responses_round = generate_responses_gt(n_papers, [criteria_power[cr]], papers_page,
+    responses_round = generate_responses_gt(n_papers, [criteria_power[cr]], papers_worker,
                                             J, acc, [criteria_difficulty[cr]], GT_round)
-    classified_papers = zip(papers_ids_rest, classify_papers(n_papers, 1, responses_round, papers_page, J, cost))
+    classified_papers = zip(papers_ids_rest, classify_papers(n_papers, 1, responses_round, papers_worker, J, cost))
     return classified_papers
 
 
@@ -63,16 +63,17 @@ def get_loss_cost_mrun(criteria_num, n_papers, papers_page, J, cost, Nt,
     papers_ids_rest = range(n_papers/10, n_papers, 1)
     classified_papers = classified_papers_fround + [1 for _ in papers_ids_rest]
 
+    papers_worker = papers_page * criteria_num
     for cr in best_cr_order:
         n_rest = len(papers_ids_rest)
         criteria_count += J * n_rest
-        papers_ids_rest1 = papers_ids_rest[:n_rest - n_rest % 10]
-        papers_ids_rest2 = papers_ids_rest[n_rest - n_rest % 10:]
-        classified_papers_cr = do_round(GT, cr, papers_ids_rest1, criteria_num, papers_page, J,
+        papers_ids_rest1 = papers_ids_rest[:n_rest - n_rest % papers_worker]
+        papers_ids_rest2 = papers_ids_rest[n_rest - n_rest % papers_worker:]
+        classified_papers_cr = do_round(GT, cr, papers_ids_rest1, criteria_num, papers_worker, J,
                                         cost, acc, criteria_power, criteria_difficulty)
         # check if n_papers_rest % papers_page != 0 then run an additional round
         if papers_ids_rest2:
-            classified_papers_cr += do_round(GT, cr, papers_ids_rest2, criteria_num, n_rest % 10, J,
+            classified_papers_cr += do_round(GT, cr, papers_ids_rest2, criteria_num, n_rest % papers_worker, J,
                                              cost, acc, criteria_power, criteria_difficulty)
         papers_ids_rest = []
         for p_id, p_cr in classified_papers_cr:
