@@ -13,8 +13,12 @@ def generate_gold_data(n_papers, criteria_power):
     return gold_data
 
 
-def generate_responses_gt(n_papers, criteria_power, papers_page, J, acc, criteria_difficulty):
-    GT = generate_gold_data(n_papers, criteria_power)
+def generate_responses_gt(n_papers, criteria_power, papers_page, J, acc, criteria_difficulty, GT=None):
+    if not GT:
+        GT = generate_gold_data(n_papers, criteria_power)
+        is_GT_genereated = True
+    else:
+        is_GT_genereated = False
     acc_out_list = acc[0]
     acc_in_list = acc[1]
 
@@ -28,7 +32,9 @@ def generate_responses_gt(n_papers, criteria_power, papers_page, J, acc, criteri
         for i in range(J):
             worker_id = page_id * J + i
             worker_acc_in = acc_in_list.pop()
+            acc[1].insert(0, worker_acc_in)
             worker_acc_out = acc_out_list.pop()
+            acc[0].insert(0, worker_acc_out)
             for paper_id in range(page_id * papers_page, page_id * papers_page + papers_page, 1):
                 criteria_vals_id = range(paper_id * criteria_num, paper_id * criteria_num + criteria_num, 1)
                 isPaperIN = sum([GT[i] for i in criteria_vals_id]) == 0
@@ -42,5 +48,7 @@ def generate_responses_gt(n_papers, criteria_power, papers_page, J, acc, criteri
                     else:
                         vote = 1 - GT[e_paper_id]
                     responses[e_paper_id][worker_id] = [vote]
-    return responses, GT
-
+    if is_GT_genereated:
+        return responses, GT
+    else:
+        return responses
