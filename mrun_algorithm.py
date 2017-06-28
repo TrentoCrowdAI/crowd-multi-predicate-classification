@@ -2,40 +2,44 @@ from fusion_algorithms.em import expectation_maximization
 from fusion_algorithms.algorithms_utils import input_adapter
 from utils import classify_papers, get_actual_loss
 from generator import generate_responses_gt
+# from formula import estimate_cr_order
+import numpy as np
 
 
+def get_best_cr_order(responses, criteria_num, n_papers, papers_page, J):
+    cr_power, cr_accuracy = estimate_cr_power_dif(responses, criteria_num, n_papers, papers_page, J)
+    # TO DO
+    # estimate_cr_order(cr_power, cr_accuracy)
+    best_cr_order = range(criteria_num)
+    return best_cr_order
 
-# def estimate_cr_power_dif(responses, criteria_num, n_papers, papers_page, J):
-#     Psi = input_adapter(responses)
-#     N = (n_papers / papers_page) * J
-#     p = expectation_maximization(N, n_papers * criteria_num, Psi)[1]
-#     values_prob = []
-#     for e in p:
-#         e_prob = [0., 0.]
-#         for e_id, e_p in e.iteritems():
-#             e_prob[e_id] = e_p
-#         values_prob.append(e_prob)
-#
-#     cr_difficulty = [0. for _ in range(criteria_num)]
-#     cr_power = [0. for _ in range(criteria_num)]
-#     for paper_id in range(len(responses)/criteria_num):
-#         for e_id in range(criteria_num):
-#             prob_apply_e = values_prob[paper_id*criteria_num+e_id][1]
-#             cr_power[e_id] += prob_apply_e
-#             cr_difficulty[e_id] += abs(2*prob_apply_e-1)
-#
-#     cr_dif_norm_const = sum(cr_difficulty)
-#     cr_difficulty = map(lambda x: 1-x/cr_dif_norm_const, cr_difficulty)
-#     cr_power_norm_const = sum(cr_power)
-#     cr_power = map(lambda x: x/cr_power_norm_const, cr_power)
-#     return cr_power, cr_difficulty
+
+def estimate_cr_power_dif(responses, criteria_num, n_papers, papers_page, J):
+    Psi = input_adapter(responses)
+    N = (n_papers / papers_page) * J
+
+    cr_power = []
+    cr_accuracy = []
+    for cr in range(criteria_num):
+        cr_responses = Psi[cr::criteria_num]
+        acc_list, p_cr = expectation_maximization(N, n_papers, cr_responses)
+        acc_cr = np.mean(acc_list)
+        pow_cr = 0.
+        for e in p_cr:
+            e_prob = [0., 0.]
+            for e_id, e_p in e.iteritems():
+                e_prob[e_id] = e_p
+            pow_cr += e_prob[1]
+        pow_cr /= float(n_papers)
+        cr_power.append(pow_cr)
+        cr_accuracy.append(acc_cr)
+
+    return cr_power, cr_accuracy
+
 
 def first_round(responses, criteria_num, n_papers, papers_page, J, cost):
     classified_papers = classify_papers(n_papers, criteria_num, responses, papers_page, J, cost)
-
-    # TO DO!!!
-    best_cr_order = range(criteria_num)
-
+    best_cr_order = get_best_cr_order(responses, criteria_num, n_papers, papers_page, J)
     return classified_papers, best_cr_order
 
 
