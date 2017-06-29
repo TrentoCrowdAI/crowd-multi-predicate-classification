@@ -44,10 +44,10 @@ def get_cost(order, criteria_power, criteria_acc):
     return cost
 
 
-if __name__ == '__main__':
+def estimate_cr_order(criteria_power, criteria_acc):
     CR = 5
-    criteria_power = [0.14, 0.14, 0.28, 0.42]
-    criteria_acc = [0.6, 0.7, 0.8, 0.9]
+    # criteria_power = [0.14, 0.14, 0.28, 0.42]
+    # criteria_acc = [0.6, 0.7, 0.8, 0.9]
     criteria_num = len(criteria_power)
 
     print '----------------------------------'
