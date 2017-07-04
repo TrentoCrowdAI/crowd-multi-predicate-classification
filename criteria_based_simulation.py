@@ -3,7 +3,7 @@ import pandas as pd
 
 from generator import generate_responses_gt
 from helpers.utils import run_quiz_criteria_confm, get_loss_dong
-from mrun_algorithm import get_loss_cost_mrun
+from m_run import get_loss_cost_mrun
 
 if __name__ == '__main__':
     z = 0.3
