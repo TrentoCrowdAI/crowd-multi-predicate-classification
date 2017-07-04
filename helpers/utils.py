@@ -1,7 +1,7 @@
 from quiz_simulation import do_quiz_criteria_confm
 from fusion_algorithms.algorithms_utils import input_adapter
 from fusion_algorithms.em import expectation_maximization
-from fusion_algorithms.dawid_skene import dawid_skene
+# from fusion_algorithms.dawid_skene import dawid_skene
 
 
 def run_quiz_criteria_confm(quiz_papers_n, cheaters_prop, criteria_difficulty):

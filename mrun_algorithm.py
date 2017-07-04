@@ -1,9 +1,9 @@
-from fusion_algorithms.em import expectation_maximization
-from fusion_algorithms.algorithms_utils import input_adapter
-from utils import classify_papers, get_actual_loss
-from generator import generate_responses_gt
-# from formula import estimate_cr_order
 import numpy as np
+
+from fusion_algorithms.algorithms_utils import input_adapter
+from fusion_algorithms.em import expectation_maximization
+from generator import generate_responses_gt
+from helpers.utils import classify_papers, get_actual_loss
 
 
 def get_best_cr_order(responses, criteria_num, n_papers, papers_page, J):
