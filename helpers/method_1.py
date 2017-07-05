@@ -1,6 +1,8 @@
 import itertools
 import pandas as pd
-
+'''
+find best criteria order
+'''
 
 def get_loss(order, criteria_power, criteria_acc, CR):
     pfi = 0.
