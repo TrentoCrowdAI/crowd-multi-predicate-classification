@@ -31,23 +31,8 @@ def do_first_round(n_papers, criteria_num, papers_worker, J, lr, GT,
         power_cr_list.append(np.mean(p_out_list))
         acc_cr_list.append(np.mean(a))
 
-    classified_papers, classified_papers_ids, rest_papers_ids = \
-        classify_papers(range(n_papers), criteria_num, values_prob, lr)
-    pass
-
-    # for paper_id in range(n_papers):
-    #     p_exclusion = 1.
-    #     for e_paper_id in range(criteria_num):
-    #         p_exclusion *= 1 - values_prob[paper_id * criteria_num + e_paper_id][1]
-    #     p_exclusion = 1 - p_exclusion
-    #     if p_exclusion > trsh:
-    #         classified_papers.append(0)
-    #         classified_papers_ids.append(paper_id)
-    #     elif 1 - p_exclusion > trsh:
-    #         classified_papers.append(1)
-    #         classified_papers_ids.append(paper_id)
-
-    return None
+    classified_p, classified_p_ids, rest_p_ids = classify_papers(range(n_papers), criteria_num, values_prob, lr)
+    return classified_p, classified_p_ids, rest_p_ids
 
 
 def get_loss_cost_smrun(criteria_num, n_papers, papers_worker, J, lr, Nt,
@@ -60,9 +45,8 @@ def get_loss_cost_smrun(criteria_num, n_papers, papers_worker, J, lr, Nt,
     criteria_count = (Nt + papers_worker * criteria_num) * J * (n_papers / 10) / papers_worker
     first_round_res = do_first_round(n_papers/10, criteria_num, papers_worker, J, lr, GT,
                                      criteria_power, acc, criteria_difficulty, values_prob)
-
+    classified_p, classified_p_ids, rest_p_ids = first_round_res
 
     # Do Multi rounds
-
 
     pass
