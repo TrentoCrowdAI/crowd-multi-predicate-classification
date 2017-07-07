@@ -1,7 +1,7 @@
 import numpy as np
 
 from generator import generate_responses_gt
-from helpers.method_2 import classify_papers
+from helpers.method_2 import classify_papers, generate_responses
 from fusion_algorithms.algorithms_utils import input_adapter
 from fusion_algorithms.em import expectation_maximization
 
@@ -35,6 +35,27 @@ def do_first_round(n_papers, criteria_num, papers_worker, J, lr, GT,
     return classified_p, classified_p_ids, rest_p_ids
 
 
+def assign_criteria(papers_ids, criteria_num, values_prob):
+    return [0 for _ in papers_ids]
+
+
+def do_round(GT, lr, papers_ids, criteria_num, papers_worker, J,
+             acc, criteria_difficulty, cr_assigned):
+    # generate responses
+    n = len(papers_ids)
+    papers_ids_rest1 = papers_ids[:n - n % papers_worker]
+    papers_ids_rest2 = papers_ids[n - n % papers_worker:]
+    responses_rest1 = generate_responses(GT, papers_ids_rest1, criteria_num,
+                                         papers_worker, acc, criteria_difficulty,
+                                         cr_assigned)
+    responses_rest2 = generate_responses(GT, papers_ids_rest2, criteria_num,
+                                         papers_worker, acc, criteria_difficulty,
+                                         cr_assigned)
+    responses = responses_rest1 + responses_rest2
+    pass
+
+
+
 def get_loss_cost_smrun(criteria_num, n_papers, papers_worker, J, lr, Nt,
                         acc, criteria_power, criteria_difficulty, GT):
     # initialization
@@ -48,5 +69,8 @@ def get_loss_cost_smrun(criteria_num, n_papers, papers_worker, J, lr, Nt,
     classified_p, classified_p_ids, rest_p_ids = first_round_res
 
     # Do Multi rounds
+    rest_p_ids = rest_p_ids + range(n_papers/10, n_papers)
+    cr_assigned = assign_criteria(rest_p_ids, criteria_num, values_prob)
+    do_round(GT, lr, rest_p_ids, criteria_num, papers_worker*criteria_num, J,
+             acc, criteria_difficulty, cr_assigned)
 
-    pass
