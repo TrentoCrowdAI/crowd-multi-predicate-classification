@@ -1,7 +1,7 @@
 import numpy as np
 
 from generator import generate_responses_gt
-from helpers.method_2 import classify_papers, generate_responses
+from helpers.method_2 import classify_papers, generate_responses, update_v_prob
 from fusion_algorithms.algorithms_utils import input_adapter
 from fusion_algorithms.em import expectation_maximization
 
@@ -26,13 +26,17 @@ def do_first_round(n_papers, criteria_num, papers_worker, J, lr, GT,
         p_out_list = []
         for e_id, e in enumerate(p):
             for e_v, e_p in e.iteritems():
-                values_prob[e_id][e_v] = e_p
-            p_out_list.append(values_prob[e_id][1])
+                values_prob[len(GT_cr)*cr+e_id][e_v] = e_p
+            p_out_list.append(values_prob[len(GT_cr)*cr+e_id][1])
         power_cr_list.append(np.mean(p_out_list))
         acc_cr_list.append(np.mean(a))
 
+    # #  initialise values_prob with priors
+    # for p in values_prob[n_papers*criteria_num]:
+    #     pass
+
     classified_p, classified_p_ids, rest_p_ids = classify_papers(range(n_papers), criteria_num, values_prob, lr)
-    return classified_p, classified_p_ids, rest_p_ids
+    return classified_p, classified_p_ids, rest_p_ids, power_cr_list, acc_cr_list
 
 
 def assign_criteria(papers_ids, criteria_num, values_prob):
@@ -64,7 +68,7 @@ def get_loss_cost_smrun(criteria_num, n_papers, papers_worker, J, lr, Nt,
     criteria_count = (Nt + papers_worker * criteria_num) * J * (n_papers / 10) / papers_worker
     first_round_res = do_first_round(n_papers/10, criteria_num, papers_worker, J, lr, GT,
                                      criteria_power, acc, criteria_difficulty, values_prob)
-    classified_p, classified_p_ids, rest_p_ids = first_round_res
+    classified_p, classified_p_ids, rest_p_ids, power_cr_list, acc_cr_list = first_round_res
 
     rest_p_ids = rest_p_ids + range(n_papers / 10, n_papers)
     # Do Multi rounds
@@ -73,7 +77,6 @@ def get_loss_cost_smrun(criteria_num, n_papers, papers_worker, J, lr, Nt,
 
     responses = do_round(GT, rest_p_ids, criteria_num, papers_worker*criteria_num,
                          acc, criteria_difficulty, cr_assigned)
-    pass
-    # update values_prob
+    # # update values_prob
     # update_v_prob(values_prob, responses, )
 
