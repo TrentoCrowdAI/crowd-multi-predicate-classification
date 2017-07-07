@@ -176,16 +176,34 @@ ggplot(acc_plot, aes(x=papers_page, y=(fn_lose_avg+fp_lose_avg), group=judgment,
 library(ggplot2)
 # par(mfrow = c(2, 3))
 
-data <- loss_tests_cr5_
+data <- loss_tests_cr5_worst_100it
 data$J <- factor(data$J)
 ggplot(data, aes(x=Nt, y=loss_mean, colour=J, shape = alg, group=interaction(J, alg))) + 
   geom_errorbar(aes(ymin=loss_mean-loss_std, ymax=loss_mean+loss_std, width=.1)) +
   geom_line() +
   geom_point() +
   scale_x_continuous(breaks=c(1,2,3,4,5,6,7,8,9,10)) +
-  ggtitle("Loss VS Tests items, z = 0.3, cr = 5, theta = 0.3") +
+  # ggtitle("Loss VS Tests items, z = 0.3, cr = 1\ntheta = 0.3, best order") +
+  ggtitle("Loss vs Tests items (best order)") +
   theme(plot.title = element_text(hjust = 0.5)) +
   xlab('Number of test items') +
   ylab('Average loss per paper')
 
 
+
+# LOSS VS COST
+library(ggplot2)
+# par(mfrow = c(2, 3))
+
+data <- loss_tests_cr5_worst_100it
+data$J <- factor(data$J)
+ggplot(data, aes(x=cost_mean, y=loss_mean, colour=J, shape = alg, group=interaction(J, alg))) + 
+  # geom_errorbar(aes(ymin=loss_mean-loss_std, ymax=loss_mean+loss_std, width=.1)) +
+  geom_line() +
+  geom_point() +
+  # scale_x_continuous(breaks=c(1,2,3,4,5,6,7,8,9,10)) +
+  # ggtitle("Loss VS Cost, z = 0.3, cr = 5\ntheta = 0.3, best order") +
+  ggtitle("Loss vs Cost (worst order)") +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  xlab('Cost per paper') +
+  ylab('Average loss per paper')

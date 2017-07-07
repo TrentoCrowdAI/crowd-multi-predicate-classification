@@ -12,7 +12,6 @@ def classify_papers(papers_ids, criteria_num, values_prob, lr):
     classified_papers = []
     classified_papers_ids = []
     rest_papers_ids = []
-
     trsh = lr / (lr + 1.)
     for paper_id in papers_ids:
         p_inclusion = 1.

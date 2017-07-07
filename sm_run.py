@@ -39,8 +39,7 @@ def assign_criteria(papers_ids, criteria_num, values_prob):
     return [0 for _ in papers_ids]
 
 
-def do_round(GT, lr, papers_ids, criteria_num, papers_worker, J,
-             acc, criteria_difficulty, cr_assigned):
+def do_round(GT, papers_ids, criteria_num, papers_worker, acc, criteria_difficulty, cr_assigned):
     # generate responses
     n = len(papers_ids)
     papers_ids_rest1 = papers_ids[:n - n % papers_worker]
@@ -52,8 +51,7 @@ def do_round(GT, lr, papers_ids, criteria_num, papers_worker, J,
                                          papers_worker, acc, criteria_difficulty,
                                          cr_assigned)
     responses = responses_rest1 + responses_rest2
-    pass
-
+    return responses
 
 
 def get_loss_cost_smrun(criteria_num, n_papers, papers_worker, J, lr, Nt,
@@ -68,9 +66,14 @@ def get_loss_cost_smrun(criteria_num, n_papers, papers_worker, J, lr, Nt,
                                      criteria_power, acc, criteria_difficulty, values_prob)
     classified_p, classified_p_ids, rest_p_ids = first_round_res
 
+    rest_p_ids = rest_p_ids + range(n_papers / 10, n_papers)
     # Do Multi rounds
-    rest_p_ids = rest_p_ids + range(n_papers/10, n_papers)
+    criteria_count += len(rest_p_ids)
     cr_assigned = assign_criteria(rest_p_ids, criteria_num, values_prob)
-    do_round(GT, lr, rest_p_ids, criteria_num, papers_worker*criteria_num, J,
-             acc, criteria_difficulty, cr_assigned)
+
+    responses = do_round(GT, rest_p_ids, criteria_num, papers_worker*criteria_num,
+                         acc, criteria_difficulty, cr_assigned)
+    pass
+    # update values_prob
+    # update_v_prob(values_prob, responses, )
 
