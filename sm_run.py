@@ -8,9 +8,7 @@ from fusion_algorithms.em import expectation_maximization
 
 def do_first_round(n_papers, criteria_num, papers_worker, J, lr, GT,
                    criteria_power, acc, criteria_difficulty, values_prob):
-    # n workers
-    N = (n_papers / papers_worker) * J
-
+    N = (n_papers / papers_worker) * J   # N workers
     power_cr_list = []
     acc_cr_list = []
     for cr in range(criteria_num):
@@ -31,9 +29,11 @@ def do_first_round(n_papers, criteria_num, papers_worker, J, lr, GT,
         power_cr_list.append(np.mean(p_out_list))
         acc_cr_list.append(np.mean(a))
 
-    # #  initialise values_prob with priors
-    # for p in values_prob[n_papers*criteria_num]:
-    #     pass
+    #  initialise values_prob with priors=criteria power
+    for cr in range(criteria_num):
+        for cr_ind in range(n_papers*criteria_num+cr, len(values_prob), criteria_num):
+            values_prob[cr_ind][0] = 1 - power_cr_list[cr]
+            values_prob[cr_ind][1] = power_cr_list[cr]
 
     classified_p, classified_p_ids, rest_p_ids = classify_papers(range(n_papers), criteria_num, values_prob, lr)
     return classified_p, classified_p_ids, rest_p_ids, power_cr_list, acc_cr_list
