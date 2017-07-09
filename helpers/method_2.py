@@ -27,7 +27,7 @@ def classify_papers(papers_ids, criteria_num, values_prob, lr):
             classified_papers_ids.append(paper_id)
         else:
             rest_papers_ids.append(paper_id)
-    return classified_papers, classified_papers_ids, rest_papers_ids
+    return dict(zip(classified_papers_ids, classified_papers)), rest_papers_ids
 
 
 def generate_responses(GT, papers_ids, criteria_num, papers_worker, acc, criteria_difficulty, cr_assigned):

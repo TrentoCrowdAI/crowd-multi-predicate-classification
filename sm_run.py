@@ -35,8 +35,8 @@ def do_first_round(n_papers, criteria_num, papers_worker, J, lr, GT,
             values_prob[cr_ind][0] = 1 - power_cr_list[cr]
             values_prob[cr_ind][1] = power_cr_list[cr]
 
-    classified_p, classified_p_ids, rest_p_ids = classify_papers(range(n_papers), criteria_num, values_prob, lr)
-    return classified_p, classified_p_ids, rest_p_ids, power_cr_list, acc_cr_list
+    classified_papers, rest_p_ids = classify_papers(range(n_papers), criteria_num, values_prob, lr)
+    return classified_papers, rest_p_ids, power_cr_list, acc_cr_list
 
 
 def assign_criteria(papers_ids, criteria_num, values_prob):
@@ -68,14 +68,19 @@ def get_loss_cost_smrun(criteria_num, n_papers, papers_worker, J, lr, Nt,
     criteria_count = (Nt + papers_worker * criteria_num) * J * (n_papers / 10) / papers_worker
     first_round_res = do_first_round(n_papers/10, criteria_num, papers_worker, J, lr, GT,
                                      criteria_power, acc, criteria_difficulty, values_prob)
-    classified_p, classified_p_ids, rest_p_ids, power_cr_list, acc_cr_list = first_round_res
+    classified_papers, rest_p_ids, power_cr_list, acc_cr_list = first_round_res
 
     rest_p_ids = rest_p_ids + range(n_papers / 10, n_papers)
     # Do Multi rounds
-    criteria_count += len(rest_p_ids)
-    cr_assigned = assign_criteria(rest_p_ids, criteria_num, values_prob)
+    while True:
+        criteria_count += len(rest_p_ids)
+        cr_assigned = assign_criteria(rest_p_ids, criteria_num, values_prob)
 
-    responses = do_round(GT, rest_p_ids, criteria_num, papers_worker*criteria_num,
-                         acc, criteria_difficulty, cr_assigned)
-    # update values_prob
-    update_v_prob(values_prob, responses, rest_p_ids, cr_assigned, criteria_num, acc_cr_list)
+        responses = do_round(GT, rest_p_ids, criteria_num, papers_worker*criteria_num,
+                             acc, criteria_difficulty, cr_assigned)
+        # update values_prob
+        update_v_prob(values_prob, responses, rest_p_ids, cr_assigned, criteria_num, acc_cr_list)
+
+        # classify papers
+        classified_p_round, rest_p_ids = classify_papers(rest_p_ids, criteria_num, values_prob, lr)
+        classified_papers.update(classified_p_round)
