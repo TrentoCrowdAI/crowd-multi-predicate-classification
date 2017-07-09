@@ -77,6 +77,5 @@ def get_loss_cost_smrun(criteria_num, n_papers, papers_worker, J, lr, Nt,
 
     responses = do_round(GT, rest_p_ids, criteria_num, papers_worker*criteria_num,
                          acc, criteria_difficulty, cr_assigned)
-    # # update values_prob
-    # update_v_prob(values_prob, responses, )
-
+    # update values_prob
+    update_v_prob(values_prob, responses, rest_p_ids, cr_assigned, criteria_num, acc_cr_list)

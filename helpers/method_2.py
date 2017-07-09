@@ -56,3 +56,16 @@ def generate_responses(GT, papers_ids, criteria_num, papers_worker, acc, criteri
                 vote = 1 - GT_cr
             responses.append(vote)
     return responses
+
+
+def update_v_prob(values_prob, responses, p_ids, cr_assigned, criteria_num, acc_cr_list):
+    for cr, vote, p_id in zip(cr_assigned, responses, p_ids):
+        p_prob = values_prob[p_id*criteria_num+cr]
+        acc_cr = acc_cr_list[cr]
+        prop_cr_in = p_prob[0]*(1-acc_cr) if vote else p_prob[0]*acc_cr
+        prop_cr_out = p_prob[1]*acc_cr if vote else p_prob[1]*(1-acc_cr)
+        norm_const = prop_cr_in + prop_cr_out
+        prob_cr_in = prop_cr_in / norm_const
+        prob_cr_out = prop_cr_out / norm_const
+        values_prob[p_id * criteria_num + cr][0] = prob_cr_in
+        values_prob[p_id * criteria_num + cr][1] = prob_cr_out
