@@ -1,11 +1,18 @@
 import numpy as np
 
-def assign_best_criteria():
-    pass
 
-
-def filter_papers():
-    pass
+def assign_criteria(papers_ids, criteria_num, values_prob, acc_cr_list):
+    cr_assigned = []
+    cr_list = range(criteria_num)
+    for p_id in papers_ids:
+        p_classify = []
+        for cr in cr_list:
+            prior_out = values_prob[p_id * criteria_num + cr][1]
+            acc_cr = acc_cr_list[cr]
+            p_classify.append(prior_out * acc_cr)
+        cr_assign = p_classify.index(max(p_classify))
+        cr_assigned.append(cr_assign)
+    return cr_assigned
 
 
 def classify_papers(papers_ids, criteria_num, values_prob, lr):
