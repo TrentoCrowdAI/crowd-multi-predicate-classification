@@ -46,7 +46,7 @@ def first_round(responses, criteria_num, n_papers, papers_page, J, cost):
 def do_round(GT, cr, papers_ids_rest, criteria_num, papers_worker, J,
              cost, acc, criteria_power, criteria_difficulty):
     n_papers = len(papers_ids_rest)
-    GT_round = [GT[p_id*criteria_num+cr] for p_id in papers_ids_rest]
+    GT_round = [GT[p_id*criteria_num+cr] for ind, p_id in enumerate(papers_ids_rest)]
     responses_round = generate_responses_gt(n_papers, [criteria_power[cr]], papers_worker,
                                             J, acc, [criteria_difficulty[cr]], GT_round)
     classified_papers = zip(papers_ids_rest, classify_papers(n_papers, 1, responses_round, papers_worker, J, cost))

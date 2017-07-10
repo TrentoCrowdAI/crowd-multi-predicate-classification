@@ -4,6 +4,7 @@ import pandas as pd
 from generator import generate_responses_gt
 from helpers.utils import run_quiz_criteria_confm, get_loss_dong
 from m_run import get_loss_cost_mrun
+from sm_run import get_loss_cost_smrun
 
 if __name__ == '__main__':
     z = 0.3
@@ -21,26 +22,42 @@ if __name__ == '__main__':
             cost_baseline = (Nt + papers_page * criteria_num) * J / float(papers_page)
             loss_mrun_list = []
             cost_mrun_list = []
+            loss_smrun_list = []
+            cost_smrun_list = []
             for _ in range(10):
+                # quiz, generation responses
                 acc = run_quiz_criteria_confm(Nt, z, [1.])
                 responses, GT = generate_responses_gt(n_papers, criteria_power, papers_page,
                                                       J, acc, criteria_difficulty)
+                # baseline
                 loss_baseline = get_loss_dong(responses, criteria_num, n_papers, papers_page, J, GT, cr)
                 loss_baseline_list.append(loss_baseline)
+                # m-run
                 loss_mrun, cost_mrun = get_loss_cost_mrun(criteria_num, n_papers, papers_page, J, cr, Nt,
                                                           acc, criteria_power, criteria_difficulty, GT)
                 loss_mrun_list.append(loss_mrun)
                 cost_mrun_list.append(cost_mrun)
-            print 'BASELINE loss: {} std :{}, cost: {}'.format(np.mean(loss_baseline_list),
+                # sm-run
+                loss_smrun, cost_smrun = get_loss_cost_smrun(criteria_num, n_papers, papers_page, J, cr, Nt,
+                                                             acc, criteria_power, criteria_difficulty, GT)
+                loss_smrun_list.append(loss_smrun)
+                cost_smrun_list.append(cost_smrun)
+            print 'BASELINE  loss: {} std :{}, price: {}'.format(np.mean(loss_baseline_list),
                                                                np.std(loss_baseline_list), cost_baseline)
-            print 'M-RUN loss: loss: {} std :{}, cost: {}, std: {}'.format(np.mean(loss_mrun_list),
-                                                                    np.std(loss_mrun_list), np.mean(cost_mrun_list),
-                                                                    np.std(cost_mrun_list))
+            print 'M-RUN  loss: {} std :{}, price: {}, std: {}'.format(np.mean(loss_mrun_list),
+                                                                np.std(loss_mrun_list), np.mean(cost_mrun_list),
+                                                                np.std(cost_mrun_list))
+            print 'SM-RUN  loss: {} std :{}, price: {}, std: {}'.format(np.mean(loss_smrun_list),
+                                                                    np.std(loss_smrun_list),
+                                                                    np.mean(cost_smrun_list),
+                                                                    np.std(cost_smrun_list))
             print '---------------------'
 
             data.append([Nt, J, cr, np.mean(loss_baseline_list),
                          np.std(loss_baseline_list), cost_baseline, 0., 'Baseline'])
-            data.append([Nt, J, cr, np.mean(loss_mrun_list),
-                         np.std(loss_mrun_list), np.mean(cost_mrun_list), np.std(cost_mrun_list), 'M-runs'])
-    pd.DataFrame(data, columns=['Nt', 'J', 'cost', 'loss_mean', 'loss_std', 'cost_mean', 'cost_std', 'alg']). \
+            data.append([Nt, J, cr, np.mean(loss_mrun_list), np.std(loss_mrun_list), np.mean(cost_mrun_list),
+                         np.std(cost_mrun_list), 'M-runs'])
+            data.append([Nt, J, cr, np.mean(loss_smrun_list), np.std(loss_smrun_list),
+                         np.mean(cost_smrun_list), np.std(cost_smrun_list), 'SM-runs'])
+    pd.DataFrame(data, columns=['Nt', 'J', 'lr', 'loss_mean', 'loss_std', 'price_mean', 'price_std', 'alg']). \
         to_csv('output/data/loss_tests_cr5.csv', index=False)

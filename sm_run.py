@@ -3,6 +3,7 @@ import numpy as np
 from generator import generate_responses_gt
 from helpers.method_2 import classify_papers, generate_responses, \
     update_v_prob, assign_criteria
+from helpers.utils import get_actual_loss
 from fusion_algorithms.algorithms_utils import input_adapter
 from fusion_algorithms.em import expectation_maximization
 
@@ -69,7 +70,7 @@ def get_loss_cost_smrun(criteria_num, n_papers, papers_worker, J, lr, Nt,
 
     rest_p_ids = rest_p_ids + range(n_papers / 10, n_papers)
     # Do Multi rounds
-    while True:
+    while len(rest_p_ids):
         criteria_count += len(rest_p_ids)
         cr_assigned = assign_criteria(rest_p_ids, criteria_num, values_prob, acc_cr_list)
 
@@ -81,3 +82,8 @@ def get_loss_cost_smrun(criteria_num, n_papers, papers_worker, J, lr, Nt,
         # classify papers
         classified_p_round, rest_p_ids = classify_papers(rest_p_ids, criteria_num, values_prob, lr)
         classified_papers.update(classified_p_round)
+    # TO DO
+    classified_papers = [classified_papers[p_id] for p_id in sorted(classified_papers.keys())]
+    loss = get_actual_loss(classified_papers, GT, lr, criteria_num)
+    price_per_paper = float(criteria_count) / n_papers
+    return loss, price_per_paper
