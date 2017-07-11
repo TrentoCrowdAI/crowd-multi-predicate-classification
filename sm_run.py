@@ -2,7 +2,7 @@ import numpy as np
 
 from generator import generate_responses_gt
 from helpers.method_2 import classify_papers_baseline, generate_responses, \
-    update_v_prob, assign_criteria
+    update_v_count, assign_criteria
 from helpers.utils import get_actual_loss
 from fusion_algorithms.algorithms_utils import input_adapter
 from fusion_algorithms.em import expectation_maximization
@@ -89,8 +89,8 @@ def get_loss_cost_smrun(criteria_num, n_papers, papers_worker, J, lr, Nt,
 
         responses = do_round(GT, rest_p_ids, criteria_num, papers_worker*criteria_num,
                              acc, criteria_difficulty, cr_assigned)
-        # update values_prob
-        update_v_prob(values_prob, responses, rest_p_ids, cr_assigned, criteria_num, acc_cr_list)
+        # update values_count
+        update_v_count(values_count, criteria_num, cr_assigned, responses, rest_p_ids)
 
         # classify papers
         classified_p_round, rest_p_ids = classify_papers(rest_p_ids, criteria_num, values_prob, 30)
