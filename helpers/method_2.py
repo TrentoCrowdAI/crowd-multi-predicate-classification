@@ -53,6 +53,36 @@ def classify_papers_baseline(papers_ids, criteria_num, values_prob, lr):
     return dict(zip(classified_papers_ids, classified_papers)), rest_papers_ids
 
 
+def classify_papers(papers_ids, criteria_num, values_count, p_thrs, acc_cr_list, power_cr_list):
+    classified_papers = []
+    classified_papers_ids = []
+    rest_papers_ids = []
+
+    for p_id in papers_ids:
+        p_inclusion = 1.
+        for cr in range(criteria_num):
+            acc_cr = acc_cr_list[cr]
+            power_cr = power_cr_list[cr]
+            cr_count = values_count[p_id * criteria_num + cr]
+            in_c = cr_count[0]
+            out_c = cr_count[1]
+            prop_p_in = binom(in_c+out_c, in_c)*acc_cr**in_c*(1-acc_cr)**out_c*(1-power_cr)
+            prop_p_out = binom(in_c+out_c, out_c)*acc_cr**out_c*(1-acc_cr)**in_c*power_cr
+            prob_cr_in = prop_p_in / (prop_p_in + prop_p_out)
+            p_inclusion *= prob_cr_in
+        p_exclusion = 1 - p_inclusion
+
+        if p_exclusion > p_thrs:
+            classified_papers.append(0)
+            classified_papers_ids.append(p_id)
+        elif p_inclusion > p_thrs:
+            classified_papers.append(1)
+            classified_papers_ids.append(p_id)
+        else:
+            rest_papers_ids.append(p_id)
+    return dict(zip(classified_papers_ids, classified_papers)), rest_papers_ids
+
+
 def generate_responses(GT, papers_ids, criteria_num, papers_worker, acc, criteria_difficulty, cr_assigned):
     responses = []
     n = len(papers_ids)
