@@ -1,18 +1,31 @@
 import numpy as np
+from scipy.special import binom
 
 
-def assign_criteria(papers_ids, criteria_num, values_prob, acc_cr_list):
+def assign_criteria(papers_ids, criteria_num, values_count, power_cr_list, acc_cr_list):
     cr_assigned = []
     cr_list = range(criteria_num)
     for p_id in papers_ids:
         p_classify = []
         for cr in cr_list:
-            prior_out = values_prob[p_id * criteria_num + cr][1]
-            prior_in = values_prob[p_id * criteria_num + cr][0]
             acc_cr = acc_cr_list[cr]
-            prop_out = prior_out * acc_cr
-            prop_in = prior_in * (1 - acc_cr)
-            p_classify.append()
+            power_cr = power_cr_list[cr]
+            cr_count = values_count[p_id * criteria_num + cr]
+            in_c = cr_count[0]
+            out_c = cr_count[1]
+
+            # new value is out
+            term1_p_out = binom(in_c+out_c+1, out_c+1)*acc_cr**(out_c+1)*(1-acc_cr)**in_c*power_cr
+            term1_p_in = binom(in_c+out_c+1, in_c)*acc_cr**(in_c)*(1-acc_cr)**(out_c+1)*(1-power_cr)
+            prob_pout_vout = term1_p_out/(term1_p_out+term1_p_in)
+
+            # new value is in
+            term2_p_out = binom(in_c+out_c+1, out_c)*acc_cr**out_c*(1-acc_cr)**(in_c+1)*power_cr
+            term2_p_in = binom(in_c+out_c+1, in_c+1)*acc_cr**(in_c+1)*(1-acc_cr)**out_c*(1-power_cr)
+            prob_pout_vin = term2_p_out/(term2_p_out+term2_p_in)
+
+            p_out_cr = prob_pout_vout*power_cr + prob_pout_vin*(1-power_cr)
+            p_classify.append(p_out_cr)
         cr_assign = p_classify.index(max(p_classify))
         cr_assigned.append(cr_assign)
     return cr_assigned

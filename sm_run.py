@@ -85,7 +85,7 @@ def get_loss_cost_smrun(criteria_num, n_papers, papers_worker, J, lr, Nt,
     break_list = []
     while True:
         criteria_count += len(rest_p_ids)
-        cr_assigned = assign_criteria(rest_p_ids, criteria_num, values_prob, acc_cr_list)
+        cr_assigned = assign_criteria(rest_p_ids, criteria_num, values_count, power_cr_list, acc_cr_list)
 
         responses = do_round(GT, rest_p_ids, criteria_num, papers_worker*criteria_num,
                              acc, criteria_difficulty, cr_assigned)
