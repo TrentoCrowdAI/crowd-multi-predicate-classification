@@ -71,13 +71,14 @@ def get_loss_cost_mrun(criteria_num, n_papers, papers_page, J, cost, Nt,
     for cr in best_cr_order:
         n_rest = len(papers_ids_rest)
         papers_ids_rest1 = papers_ids_rest[:n_rest - n_rest % papers_worker]
-        criteria_count += (Nt + papers_worker) * J * len(papers_ids_rest1) / float(papers_worker)
         papers_ids_rest2 = papers_ids_rest[n_rest - n_rest % papers_worker:]
-        criteria_count += (Nt + len(papers_ids_rest2)) * J
-        classified_papers_cr = do_round(GT, cr, papers_ids_rest1, criteria_num, papers_worker, J,
-                                        cost, acc, criteria_power, criteria_difficulty)
+        if papers_ids_rest1:
+            criteria_count += (Nt + papers_worker) * J * len(papers_ids_rest1) / float(papers_worker)
+            classified_papers_cr = do_round(GT, cr, papers_ids_rest1, criteria_num, papers_worker, J,
+                                            cost, acc, criteria_power, criteria_difficulty)
         # check if n_papers_rest % papers_page != 0 then run an additional round
         if papers_ids_rest2:
+            criteria_count += (Nt + len(papers_ids_rest2)) * J
             classified_papers_cr += do_round(GT, cr, papers_ids_rest2, criteria_num, n_rest % papers_worker, J,
                                              cost, acc, criteria_power, criteria_difficulty)
         papers_ids_rest = []
