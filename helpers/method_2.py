@@ -8,14 +8,17 @@ def assign_criteria(papers_ids, criteria_num, values_prob, acc_cr_list):
         p_classify = []
         for cr in cr_list:
             prior_out = values_prob[p_id * criteria_num + cr][1]
+            prior_in = values_prob[p_id * criteria_num + cr][0]
             acc_cr = acc_cr_list[cr]
-            p_classify.append(prior_out * acc_cr)
+            prop_out = prior_out * acc_cr
+            prop_in = prior_in * (1 - acc_cr)
+            p_classify.append()
         cr_assign = p_classify.index(max(p_classify))
         cr_assigned.append(cr_assign)
     return cr_assigned
 
 
-def classify_papers(papers_ids, criteria_num, values_prob, lr):
+def classify_papers_baseline(papers_ids, criteria_num, values_prob, lr):
     classified_papers = []
     classified_papers_ids = []
     rest_papers_ids = []
