@@ -61,8 +61,10 @@ def get_actual_loss(classified_papers, GT, cost, criteria_num):
             tn += 1
     fp_rate = fp / (fp + tn)
     fn_rate = fn / (fn + tp)
+    recall = tn / (len(GT_scope) - sum(GT_scope))
+    precision = tn / (tn + fn)
     loss = (fn * cost + fp) / len(classified_papers)
-    return loss, fp_rate, fn_rate
+    return loss, fp_rate, fn_rate, recall, precision
 
 
 def classify_papers(n_papers, criteria_num, responses, papers_page, J, cost):
@@ -90,8 +92,8 @@ def classify_papers(n_papers, criteria_num, responses, papers_page, J, cost):
 
 def get_loss_dong(responses, criteria_num, n_papers, papers_page, J, GT, cost):
     classified_papers = classify_papers(n_papers, criteria_num, responses, papers_page, J, cost)
-    loss, fp_rate, fn_rate = get_actual_loss(classified_papers, GT, cost, criteria_num)
-    return loss, fp_rate, fn_rate
+    loss, fp_rate, fn_rate, recall, precision = get_actual_loss(classified_papers, GT, cost, criteria_num)
+    return loss, fp_rate, fn_rate, recall, precision
 
 
 # def get_loss_dawid(responses, criteria_num, n_papers, papers_page, J, GT, cost):
