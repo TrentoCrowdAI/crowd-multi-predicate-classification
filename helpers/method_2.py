@@ -66,9 +66,12 @@ def classify_papers(papers_ids, criteria_num, values_count, p_thrs, acc_cr_list,
             cr_count = values_count[p_id * criteria_num + cr]
             in_c = cr_count[0]
             out_c = cr_count[1]
-            prop_p_in = binom(in_c+out_c, in_c)*acc_cr**in_c*(1-acc_cr)**out_c*(1-power_cr)
-            prop_p_out = binom(in_c+out_c, out_c)*acc_cr**out_c*(1-acc_cr)**in_c*power_cr
-            prob_cr_in = prop_p_in / (prop_p_in + prop_p_out)
+            if in_c == 0 and out_c == 0:
+                prob_cr_in = 1 - power_cr
+            else:
+                prop_p_in = binom(in_c+out_c, in_c)*acc_cr**in_c*(1-acc_cr)**out_c*(1-power_cr)
+                prop_p_out = binom(in_c+out_c, out_c)*acc_cr**out_c*(1-acc_cr)**in_c*power_cr
+                prob_cr_in = prop_p_in / (prop_p_in + prop_p_out)
             p_inclusion *= prob_cr_in
         p_exclusion = 1 - p_inclusion
 
