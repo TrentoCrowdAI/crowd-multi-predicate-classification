@@ -87,6 +87,6 @@ def get_loss_cost_mrun(criteria_num, n_papers, papers_page, J, cost, Nt,
                 papers_ids_rest.append(p_id)
             else:
                 classified_papers[p_id] = 0
-    loss = get_actual_loss(classified_papers, GT, cost, criteria_num)
+    loss, fp_rate, fn_rate = get_actual_loss(classified_papers, GT, cost, criteria_num)
     cost = criteria_count / float(n_papers)
-    return loss, cost
+    return loss, cost, fp_rate, fn_rate

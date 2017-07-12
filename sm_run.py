@@ -110,6 +110,6 @@ def get_loss_cost_smrun(criteria_num, n_papers, papers_worker, J, lr, Nt,
         classified_papers.update(classified_p_round)
     # TO DO
     classified_papers = [classified_papers[p_id] for p_id in sorted(classified_papers.keys())]
-    loss = get_actual_loss(classified_papers, GT, lr, criteria_num)
+    loss, fp_rate, fn_rate = get_actual_loss(classified_papers, GT, lr, criteria_num)
     price_per_paper = float(criteria_count) / n_papers
-    return loss, price_per_paper
+    return loss, price_per_paper, fp_rate, fn_rate
