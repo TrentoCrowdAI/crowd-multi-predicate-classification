@@ -66,7 +66,7 @@ def do_round(GT, papers_ids, criteria_num, papers_worker, acc, criteria_difficul
 def get_loss_cost_smrun(criteria_num, n_papers, papers_worker, J, lr, Nt,
                         acc, criteria_power, criteria_difficulty, GT):
     # initialization
-    p_thrs = 0.95
+    p_thrs = 0.99
     values_count = [[0, 0] for _ in range(n_papers*criteria_num)]
 
     # Baseline round
@@ -83,7 +83,9 @@ def get_loss_cost_smrun(criteria_num, n_papers, papers_worker, J, lr, Nt,
     # print len(rest_p_ids)
     # Do Multi rounds
     break_list = []
-    while True:
+    while len(rest_p_ids) != 0:
+        # print len(rest_p_ids)
+
         criteria_count += len(rest_p_ids)
         cr_assigned = assign_criteria(rest_p_ids, criteria_num, values_count, power_cr_list, acc_cr_list)
 
@@ -102,7 +104,7 @@ def get_loss_cost_smrun(criteria_num, n_papers, papers_worker, J, lr, Nt,
         # print len(rest_p_ids)
         n_rest = len(rest_p_ids)
         break_list.append(n_rest)
-        if break_list.count(n_rest) >= 20:
+        if break_list.count(n_rest) >= 5:
             break
 
         classified_papers.update(classified_p_round)
