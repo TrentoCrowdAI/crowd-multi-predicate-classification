@@ -117,3 +117,22 @@ def update_v_count(values_count, criteria_num, cr_assigned, responses, p_ids):
             values_count[p_id * criteria_num + cr][1] += 1
         else:
             values_count[p_id * criteria_num + cr][0] += 1
+
+
+def update_cr_power(n_papers, criteria_num, acc_cr_list, power_cr_list, values_count):
+    power_cr_new = []
+    apply_criteria_list = [[] for _ in range(criteria_num)]
+    for p_id in range(n_papers):
+        for cr in range(criteria_num):
+            acc_cr = acc_cr_list[cr]
+            power_cr = power_cr_list[cr]
+            cr_count = values_count[p_id * criteria_num + cr]
+            in_c = cr_count[0]
+            out_c = cr_count[1]
+            prop_p_in = binom(in_c+out_c, in_c)*acc_cr**in_c*(1-acc_cr)**out_c*(1-power_cr)
+            prop_p_out = binom(in_c+out_c, out_c)*acc_cr**out_c*(1-acc_cr)**in_c*power_cr
+            prob_cr_out = prop_p_out / (prop_p_in + prop_p_out)
+            apply_criteria_list[cr].append(prob_cr_out)
+    for probs in apply_criteria_list:
+        power_cr_new.append(np.mean(probs))
+    return power_cr_new
