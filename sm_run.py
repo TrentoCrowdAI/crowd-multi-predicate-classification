@@ -66,21 +66,20 @@ def do_round(GT, papers_ids, criteria_num, papers_worker, acc, criteria_difficul
 def get_loss_cost_smrun(criteria_num, n_papers, papers_worker, J, lr, Nt,
                         acc, criteria_power, criteria_difficulty, GT):
     # initialization
+    fr_p_part = 0.1
     p_thrs = 0.99
     values_count = [[0, 0] for _ in range(n_papers*criteria_num)]
 
     # Baseline round
-    # 10% papers
-    criteria_count = (Nt + papers_worker * criteria_num) * J * (n_papers / 10) / papers_worker
-    first_round_res = do_first_round(n_papers/10, criteria_num, papers_worker, J, lr, GT,
+    # in% papers
+    criteria_count = (Nt + papers_worker * criteria_num) * J * n_papers*fr_p_part / papers_worker
+    first_round_res = do_first_round(int(n_papers*fr_p_part), criteria_num, papers_worker, J, lr, GT,
                                      criteria_power, acc, criteria_difficulty, values_count)
-
     classified_papers = dict(zip(range(n_papers), [1]*n_papers))
     classified_papers_fr, rest_p_ids, power_cr_list, acc_cr_list = first_round_res
     classified_papers.update(classified_papers_fr)
+    rest_p_ids = rest_p_ids + range(int(n_papers*fr_p_part), n_papers)
 
-    rest_p_ids = rest_p_ids + range(n_papers / 10, n_papers)
-    # print len(rest_p_ids)
     # Do Multi rounds
     break_list = []
     while len(rest_p_ids) != 0:
@@ -106,9 +105,7 @@ def get_loss_cost_smrun(criteria_num, n_papers, papers_worker, J, lr, Nt,
         break_list.append(n_rest)
         if break_list.count(n_rest) >= 5:
             break
-
         classified_papers.update(classified_p_round)
-    # TO DO
     classified_papers = [classified_papers[p_id] for p_id in sorted(classified_papers.keys())]
     loss, fp_rate, fn_rate = get_actual_loss(classified_papers, GT, lr, criteria_num)
     price_per_paper = float(criteria_count) / n_papers
