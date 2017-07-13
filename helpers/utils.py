@@ -3,6 +3,8 @@ from fusion_algorithms.algorithms_utils import input_adapter
 from fusion_algorithms.em import expectation_maximization
 # from fusion_algorithms.dawid_skene import dawid_skene
 
+import numpy as np
+
 
 def run_quiz_criteria_confm(quiz_papers_n, cheaters_prop, criteria_difficulty):
     acc_passed_distr = [[], []]
@@ -78,7 +80,6 @@ def classify_papers(n_papers, criteria_num, responses, papers_page, J, cost):
             e_prob[e_id] = e_p
         values_prob.append(e_prob)
 
-
     classified_papers = []
     exclusion_trsh = cost / (cost + 1.)
     for paper_id in range(n_papers):
@@ -94,6 +95,29 @@ def get_loss_dong(responses, criteria_num, n_papers, papers_page, J, GT, cost):
     classified_papers = classify_papers(n_papers, criteria_num, responses, papers_page, J, cost)
     loss, fp_rate, fn_rate, recall, precision = get_actual_loss(classified_papers, GT, cost, criteria_num)
     return loss, fp_rate, fn_rate, recall, precision
+
+
+def estimate_cr_power_dif(responses, criteria_num, n_papers, papers_page, J):
+    Psi = input_adapter(responses)
+    N = (n_papers / papers_page) * J
+
+    cr_power = []
+    cr_accuracy = []
+    for cr in range(criteria_num):
+        cr_responses = Psi[cr::criteria_num]
+        acc_list, p_cr = expectation_maximization(N, n_papers, cr_responses)
+        acc_cr = np.mean(acc_list)
+        pow_cr = 0.
+        for e in p_cr:
+            e_prob = [0., 0.]
+            for e_id, e_p in e.iteritems():
+                e_prob[e_id] = e_p
+            pow_cr += e_prob[1]
+        pow_cr /= float(n_papers)
+        cr_power.append(pow_cr)
+        cr_accuracy.append(acc_cr)
+
+    return cr_power, cr_accuracy
 
 
 # def get_loss_dawid(responses, criteria_num, n_papers, papers_page, J, GT, cost):
