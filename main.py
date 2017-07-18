@@ -89,6 +89,6 @@ if __name__ == '__main__':
             data.append([Nt, J, cr, np.mean(loss_smrun_list), np.std(loss_smrun_list), np.mean(fp_sm),
                          np.mean(tp_sm), np.mean(cost_smrun_list), np.std(cost_smrun_list), 'SM-runs',
                          np.mean(rec_sm), np.mean(pre_sm)])
-    pd.DataFrame(data, columns=['Nt', 'J', 'lr', 'loss_mean', 'loss_std', 'fi_rate', 'fe_rate',
+    pd.DataFrame(data, columns=['Nt', 'J', 'lr', 'loss_mean', 'loss_std', 'FPR', 'TPR',
                                 'price_mean', 'price_std', 'alg', 'recall', 'precision']). \
                                 to_csv('output/data/loss_tests_cr5.csv', index=False)
