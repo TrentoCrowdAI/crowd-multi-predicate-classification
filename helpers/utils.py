@@ -46,26 +46,26 @@ def get_actual_loss(classified_papers, GT, cost, criteria_num):
             GT_scope.append(0)
         else:
             GT_scope.append(1)
-    # FN == False Exclusion
-    # FP == False Inclusion
-    fn = 0.
+    # FP == False Exclusion
+    # FN == False Inclusion
     fp = 0.
+    fn = 0.
     tp = 0.
     tn = 0.
     for cl_val, gt_val in zip(classified_papers, GT_scope):
         if gt_val and not cl_val:
-            fn += 1
-        if not gt_val and cl_val:
             fp += 1
+        if not gt_val and cl_val:
+            fn += 1
         if gt_val and cl_val:
-            tp += 1
-        if not gt_val and not cl_val:
             tn += 1
-    fp_rate = fp / (fp + tn)
+        if not gt_val and not cl_val:
+            tp += 1
     fn_rate = fn / (fn + tp)
-    recall = tn / (len(GT_scope) - sum(GT_scope))
-    precision = tn / (tn + fn)
-    loss = (fn * cost + fp) / len(classified_papers)
+    fp_rate = fp / (fp + tn)
+    recall = tp / (tp + fn)
+    precision = tp / (tp + fp)
+    loss = (fp * cost + fn) / len(classified_papers)
     return loss, fp_rate, fn_rate, recall, precision
 
 
@@ -83,10 +83,10 @@ def classify_papers(n_papers, criteria_num, responses, papers_page, J, cost):
     classified_papers = []
     exclusion_trsh = cost / (cost + 1.)
     for paper_id in range(n_papers):
-        p_exclusion = 1.
+        p_inclusion = 1.
         for e_paper_id in range(criteria_num):
-            p_exclusion *= 1 - values_prob[paper_id*criteria_num+e_paper_id][1]
-        p_exclusion = 1 - p_exclusion
+            p_inclusion *= values_prob[paper_id*criteria_num+e_paper_id][0]
+        p_exclusion = 1 - p_inclusion
         classified_papers.append(0) if p_exclusion > exclusion_trsh else classified_papers.append(1)
     return classified_papers
 
@@ -100,7 +100,6 @@ def get_loss_dong(responses, criteria_num, n_papers, papers_page, J, GT, cost):
 def estimate_cr_power_dif(responses, criteria_num, n_papers, papers_page, J):
     Psi = input_adapter(responses)
     N = (n_papers / papers_page) * J
-
     cr_power = []
     cr_accuracy = []
     for cr in range(criteria_num):
