@@ -2,9 +2,10 @@ import numpy as np
 import pandas as pd
 
 from generator import generate_responses_gt
-from helpers.utils import run_quiz_criteria_confm, get_loss_dong
-from m_run import get_loss_cost_mrun
-from sm_run import get_loss_cost_smrun
+from helpers.utils import run_quiz_criteria_confm
+from baseline import baseline
+from m_run import m_run
+from sm_run import sm_run
 
 if __name__ == '__main__':
     z = 0.3
@@ -19,7 +20,7 @@ if __name__ == '__main__':
     for Nt in range(1, 11, 1):
         for J in [2, 3, 5, 10]:
     # for Nt in [3]:
-    #     for J in [5]:
+    #     for J in [3, 5, 10]:
             print 'Nt: {}. J: {}'.format(Nt, J)
             cost_baseline = (Nt + papers_page * criteria_num) * J / float(papers_page)
             loss_baseline_list = []
@@ -36,8 +37,8 @@ if __name__ == '__main__':
                 responses, GT = generate_responses_gt(n_papers, criteria_power, papers_page,
                                                       J, acc, criteria_difficulty)
                 # baseline
-                loss_baseline, fi_rate_b, fe_rate_b, rec_b_, pre_b_ = get_loss_dong(responses, criteria_num, n_papers,
-                                                                                    papers_page, J, GT, cr)
+                loss_baseline, fi_rate_b, fe_rate_b, rec_b_, pre_b_ = baseline(responses, criteria_num, n_papers,
+                                                                               papers_page, J, GT, cr)
                 loss_baseline_list.append(loss_baseline)
                 fi_b.append(fi_rate_b)
                 fe_b.append(fe_rate_b)
@@ -45,8 +46,8 @@ if __name__ == '__main__':
                 pre_b.append(pre_b_)
                 # m-run
                 loss_mrun, cost_mrun, fi_rate_m, fe_rate_m, rec_m_, \
-                pre_m_ = get_loss_cost_mrun(criteria_num, n_papers, papers_page, J, cr, Nt, acc,
-                                            criteria_power, criteria_difficulty, GT, fr_p_part)
+                pre_m_ = m_run(criteria_num, n_papers, papers_page, J, cr, Nt, acc,
+                               criteria_power, criteria_difficulty, GT, fr_p_part)
                 loss_mrun_list.append(loss_mrun)
                 cost_mrun_list.append(cost_mrun)
                 fi_m.append(fi_rate_m)
@@ -55,8 +56,8 @@ if __name__ == '__main__':
                 pre_m.append(pre_m_)
                 # sm-run
                 loss_smrun, cost_smrun, fi_rate_sm, fe_rate_sm, \
-                rec_sm_, pre_sm_ = get_loss_cost_smrun(criteria_num, n_papers, papers_page, J, cr, Nt, acc,
-                                                       criteria_power, criteria_difficulty, GT, fr_p_part)
+                rec_sm_, pre_sm_ = sm_run(criteria_num, n_papers, papers_page, J, cr, Nt, acc,
+                                          criteria_power, criteria_difficulty, GT, fr_p_part)
                 loss_smrun_list.append(loss_smrun)
                 cost_smrun_list.append(cost_smrun)
                 fi_sm.append(fi_rate_sm)

@@ -3,7 +3,7 @@ import numpy as np
 from fusion_algorithms.algorithms_utils import input_adapter
 from fusion_algorithms.em import expectation_maximization
 from generator import generate_responses_gt
-from helpers.utils import classify_papers, get_actual_loss, estimate_cr_power_dif
+from helpers.utils import classify_papers, compute_metrics, estimate_cr_power_dif
 
 
 def get_best_cr_order(responses, criteria_num, n_papers, papers_page, J):
@@ -30,8 +30,8 @@ def do_round(GT, cr, papers_ids_rest, criteria_num, papers_worker, J,
     return classified_papers
 
 
-def get_loss_cost_mrun(criteria_num, n_papers, papers_page, J, cost, Nt,
-                       acc, criteria_power, criteria_difficulty, GT, fr_p_part):
+def m_run(criteria_num, n_papers, papers_page, J, cost, Nt, acc,
+          criteria_power, criteria_difficulty, GT, fr_p_part):
     # first round responses
     fr_n_papers = int(n_papers*fr_p_part)
     criteria_count = (Nt + papers_page * criteria_num) * J * fr_n_papers / papers_page
@@ -64,6 +64,6 @@ def get_loss_cost_mrun(criteria_num, n_papers, papers_page, J, cost, Nt,
                 papers_ids_rest.append(p_id)
             else:
                 classified_papers[p_id] = 0
-    loss, fp_rate, fn_rate, recall, precision = get_actual_loss(classified_papers, GT, cost, criteria_num)
+    loss, fp_rate, fn_rate, recall, precision = compute_metrics(classified_papers, GT, cost, criteria_num)
     cost = criteria_count / float(n_papers)
     return loss, cost, fp_rate, fn_rate, recall, precision

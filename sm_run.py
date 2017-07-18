@@ -1,7 +1,7 @@
 from generator import generate_responses_gt
 from helpers.method_2 import classify_papers_baseline, generate_responses, \
     update_v_count, assign_criteria, classify_papers, update_cr_power
-from helpers.utils import get_actual_loss, estimate_cr_power_dif
+from helpers.utils import compute_metrics, estimate_cr_power_dif
 from fusion_algorithms.algorithms_utils import input_adapter
 from fusion_algorithms.em import expectation_maximization
 
@@ -47,8 +47,8 @@ def do_round(GT, papers_ids, criteria_num, papers_worker, acc, criteria_difficul
     return responses
 
 
-def get_loss_cost_smrun(criteria_num, n_papers, papers_worker, J, lr, Nt,
-                        acc, criteria_power, criteria_difficulty, GT, fr_p_part):
+def sm_run(criteria_num, n_papers, papers_worker, J, lr, Nt, acc,
+           criteria_power, criteria_difficulty, GT, fr_p_part):
     # initialization
     p_thrs = 0.99
     values_count = [[0, 0] for _ in range(n_papers*criteria_num)]
@@ -91,6 +91,6 @@ def get_loss_cost_smrun(criteria_num, n_papers, papers_worker, J, lr, Nt,
             break
         classified_papers.update(classified_p_round)
     classified_papers = [classified_papers[p_id] for p_id in sorted(classified_papers.keys())]
-    loss, fp_rate, fn_rate, recall, precision = get_actual_loss(classified_papers, GT, lr, criteria_num)
+    loss, fp_rate, fn_rate, recall, precision = compute_metrics(classified_papers, GT, lr, criteria_num)
     price_per_paper = float(criteria_count) / n_papers
     return loss, price_per_paper, fp_rate, fn_rate, recall, precision

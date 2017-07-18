@@ -38,7 +38,7 @@ def estimate_loss(papers_prob_in, cost):
     return loss_per_paper
 
 
-def get_actual_loss(classified_papers, GT, cost, criteria_num):
+def compute_metrics(classified_papers, GT, cost, criteria_num):
     # obtain GT scope values for papers
     GT_scope = []
     for paper_id in range(len(classified_papers)):
@@ -89,12 +89,6 @@ def classify_papers(n_papers, criteria_num, responses, papers_page, J, cost):
         p_exclusion = 1 - p_inclusion
         classified_papers.append(0) if p_exclusion > exclusion_trsh else classified_papers.append(1)
     return classified_papers
-
-
-def get_loss_dong(responses, criteria_num, n_papers, papers_page, J, GT, cost):
-    classified_papers = classify_papers(n_papers, criteria_num, responses, papers_page, J, cost)
-    loss, fp_rate, fn_rate, recall, precision = get_actual_loss(classified_papers, GT, cost, criteria_num)
-    return loss, fp_rate, fn_rate, recall, precision
 
 
 def estimate_cr_power_dif(responses, criteria_num, n_papers, papers_page, J):
