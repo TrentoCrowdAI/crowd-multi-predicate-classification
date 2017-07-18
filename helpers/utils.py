@@ -61,12 +61,12 @@ def compute_metrics(classified_papers, GT, cost, criteria_num):
             tn += 1
         if not gt_val and not cl_val:
             tp += 1
-    fn_rate = fn / (fn + tp)
+    tp_rate = tp / (fn + tp)
     fp_rate = fp / (fp + tn)
     recall = tp / (tp + fn)
     precision = tp / (tp + fp)
     loss = (fp * cost + fn) / len(classified_papers)
-    return loss, fp_rate, fn_rate, recall, precision
+    return loss, fp_rate, tp_rate, recall, precision
 
 
 def classify_papers(n_papers, criteria_num, responses, papers_page, J, cost):
