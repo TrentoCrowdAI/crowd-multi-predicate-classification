@@ -9,16 +9,17 @@ from sm_run import get_loss_cost_smrun
 if __name__ == '__main__':
     z = 0.3
     cr = 5
-    n_papers = 1000
+    n_papers = 500
     papers_page = 10
     criteria_power = [0.14, 0.14, 0.28, 0.42]
     criteria_difficulty = [1., 1., 1.1, 0.9]
     criteria_num = len(criteria_power)
+    fr_p_part = 0.1
     data = []
     for Nt in range(1, 11, 1):
         for J in [2, 3, 5, 10]:
-    # for Nt in [4]:
-    #     for J in [2, 3, 5, 10]:
+    # for Nt in [3]:
+    #     for J in [5]:
             print 'Nt: {}. J: {}'.format(Nt, J)
             cost_baseline = (Nt + papers_page * criteria_num) * J / float(papers_page)
             loss_baseline_list = []
@@ -45,7 +46,7 @@ if __name__ == '__main__':
                 # m-run
                 loss_mrun, cost_mrun, fi_rate_m, fe_rate_m, rec_m_, \
                 pre_m_ = get_loss_cost_mrun(criteria_num, n_papers, papers_page, J, cr, Nt, acc,
-                                            criteria_power, criteria_difficulty, GT)
+                                            criteria_power, criteria_difficulty, GT, fr_p_part)
                 loss_mrun_list.append(loss_mrun)
                 cost_mrun_list.append(cost_mrun)
                 fi_m.append(fi_rate_m)
@@ -54,8 +55,8 @@ if __name__ == '__main__':
                 pre_m.append(pre_m_)
                 # sm-run
                 loss_smrun, cost_smrun, fi_rate_sm, fe_rate_sm, \
-                rec_sm_, pre_sm_ = get_loss_cost_smrun(criteria_num, n_papers, papers_page, J, cr,
-                                                       Nt, acc, criteria_power, criteria_difficulty, GT)
+                rec_sm_, pre_sm_ = get_loss_cost_smrun(criteria_num, n_papers, papers_page, J, cr, Nt, acc,
+                                                       criteria_power, criteria_difficulty, GT, fr_p_part)
                 loss_smrun_list.append(loss_smrun)
                 cost_smrun_list.append(cost_smrun)
                 fi_sm.append(fi_rate_sm)

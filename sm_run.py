@@ -29,7 +29,6 @@ def do_first_round(n_papers, criteria_num, papers_worker, J, lr, GT,
         cr_resp = responses[key]
         for v in cr_resp.values():
             values_count[key][v[0]] += 1
-
     return classified_papers, rest_p_ids, power_cr_list, acc_cr_list
 
 
@@ -49,21 +48,21 @@ def do_round(GT, papers_ids, criteria_num, papers_worker, acc, criteria_difficul
 
 
 def get_loss_cost_smrun(criteria_num, n_papers, papers_worker, J, lr, Nt,
-                        acc, criteria_power, criteria_difficulty, GT):
+                        acc, criteria_power, criteria_difficulty, GT, fr_p_part):
     # initialization
-    fr_p_part = 0.1
     p_thrs = 0.99
     values_count = [[0, 0] for _ in range(n_papers*criteria_num)]
 
     # Baseline round
     # in% papers
-    criteria_count = (Nt + papers_worker * criteria_num) * J * n_papers*fr_p_part / papers_worker
-    first_round_res = do_first_round(int(n_papers*fr_p_part), criteria_num, papers_worker, J, lr, GT,
+    fr_n_papers = int(n_papers * fr_p_part)
+    criteria_count = (Nt + papers_worker * criteria_num) * J * fr_n_papers / papers_worker
+    first_round_res = do_first_round(fr_n_papers, criteria_num, papers_worker, J, lr, GT,
                                      criteria_power, acc, criteria_difficulty, values_count)
     classified_papers_fr, rest_p_ids, power_cr_list, acc_cr_list = first_round_res
     classified_papers = dict(zip(range(n_papers), [1]*n_papers))
     classified_papers.update(classified_papers_fr)
-    rest_p_ids = rest_p_ids + range(int(n_papers*fr_p_part), n_papers)
+    rest_p_ids = rest_p_ids + range(fr_n_papers, n_papers)
 
     # Do Multi rounds
     break_list = []

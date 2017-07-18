@@ -31,17 +31,17 @@ def do_round(GT, cr, papers_ids_rest, criteria_num, papers_worker, J,
 
 
 def get_loss_cost_mrun(criteria_num, n_papers, papers_page, J, cost, Nt,
-                       acc, criteria_power, criteria_difficulty, GT):
+                       acc, criteria_power, criteria_difficulty, GT, fr_p_part):
     # first round responses
-    # 10% papers
-    criteria_count = (Nt + papers_page * criteria_num) * J * (n_papers/10) / papers_page
+    fr_n_papers = int(n_papers*fr_p_part)
+    criteria_count = (Nt + papers_page * criteria_num) * J * fr_n_papers / papers_page
     GT_fround = GT[: int(n_papers*criteria_num*0.1)]
-    responses_fround = generate_responses_gt(n_papers/10, criteria_power, papers_page,
+    responses_fround = generate_responses_gt(fr_n_papers, criteria_power, papers_page,
                                              J, acc, criteria_difficulty, GT_fround)
     classified_papers_fround, best_cr_order = first_round(responses_fround, criteria_num,
-                                                          n_papers/10, papers_page, J, cost)
+                                                          fr_n_papers, papers_page, J, cost)
     # Do Multi rounds
-    papers_ids_rest = range(n_papers/10, n_papers, 1)
+    papers_ids_rest = range(fr_n_papers, n_papers, 1)
     classified_papers = classified_papers_fround + [1 for _ in papers_ids_rest]
 
     papers_worker = papers_page * criteria_num
