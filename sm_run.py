@@ -1,50 +1,35 @@
-import numpy as np
-
 from generator import generate_responses_gt
 from helpers.method_2 import classify_papers_baseline, generate_responses, \
     update_v_count, assign_criteria, classify_papers, update_cr_power
-from helpers.utils import get_actual_loss
+from helpers.utils import get_actual_loss, estimate_cr_power_dif
 from fusion_algorithms.algorithms_utils import input_adapter
 from fusion_algorithms.em import expectation_maximization
 
 
 def do_first_round(n_papers, criteria_num, papers_worker, J, lr, GT,
                    criteria_power, acc, criteria_difficulty, values_count):
-    values_prob = [[0., 0.] for _ in range(n_papers * criteria_num)]
-    N = (n_papers / papers_worker) * J   # N workers
-    power_cr_list = []
-    acc_cr_list = []
-    for cr in range(criteria_num):
-        # generate responses
-        GT_cr = [GT[p_id * criteria_num + cr] for p_id in range(n_papers)]
-        responses_cr = generate_responses_gt(n_papers, [criteria_power[cr]], papers_worker,
-                                             J, acc, [criteria_difficulty[cr]], GT_cr)
-        for paper_id in responses_cr.keys():
-            for v in responses_cr[paper_id].values():
-                if v[0]:
-                    values_count[paper_id*criteria_num+cr][1] += 1
-                else:
-                    values_count[paper_id*criteria_num+cr][0] += 1
-        # aggregate responses
-        Psi = input_adapter(responses_cr)
-        a, p = expectation_maximization(N, n_papers, Psi)
+    # generate responses
+    responses = generate_responses_gt(n_papers, criteria_power, papers_worker,
+                                      J, acc, criteria_difficulty, GT)
+    # aggregate responses
+    Psi = input_adapter(responses)
+    N = (n_papers / papers_worker) * J
+    p = expectation_maximization(N, n_papers * criteria_num, Psi)[1]
+    values_prob = []
+    for e in p:
+        e_prob = [0., 0.]
+        for e_id, e_p in e.iteritems():
+            e_prob[e_id] = e_p
+        values_prob.append(e_prob)
 
-        # update values_prob, copmute cr_power, cr_accuracy
-        p_out_list = []
-        for e_id, e in enumerate(p):
-            for e_v, e_p in e.iteritems():
-                values_prob[len(GT_cr)*cr+e_id][e_v] = e_p
-            p_out_list.append(values_prob[len(GT_cr)*cr+e_id][1])
-        power_cr_list.append(np.mean(p_out_list))
-        acc_cr_list.append(np.mean(a))
-
-    #  initialise values_prob with priors=criteria power
-    for cr in range(criteria_num):
-        for cr_ind in range(n_papers*criteria_num+cr, len(values_prob), criteria_num):
-            values_prob[cr_ind][0] = 1 - power_cr_list[cr]
-            values_prob[cr_ind][1] = power_cr_list[cr]
-
+    power_cr_list, acc_cr_list = estimate_cr_power_dif(responses, criteria_num, n_papers, papers_worker, J)
     classified_papers, rest_p_ids = classify_papers_baseline(range(n_papers), criteria_num, values_prob, lr)
+    # count value counts
+    for key in range(n_papers*criteria_num):
+        cr_resp = responses[key]
+        for v in cr_resp.values():
+            values_count[key][v[0]] += 1
+
     return classified_papers, rest_p_ids, power_cr_list, acc_cr_list
 
 
@@ -75,8 +60,8 @@ def get_loss_cost_smrun(criteria_num, n_papers, papers_worker, J, lr, Nt,
     criteria_count = (Nt + papers_worker * criteria_num) * J * n_papers*fr_p_part / papers_worker
     first_round_res = do_first_round(int(n_papers*fr_p_part), criteria_num, papers_worker, J, lr, GT,
                                      criteria_power, acc, criteria_difficulty, values_count)
-    classified_papers = dict(zip(range(n_papers), [1]*n_papers))
     classified_papers_fr, rest_p_ids, power_cr_list, acc_cr_list = first_round_res
+    classified_papers = dict(zip(range(n_papers), [1]*n_papers))
     classified_papers.update(classified_papers_fr)
     rest_p_ids = rest_p_ids + range(int(n_papers*fr_p_part), n_papers)
 
