@@ -35,7 +35,7 @@ def m_run(criteria_num, n_papers, papers_page, J, cost, Nt, acc,
     # first round responses
     fr_n_papers = int(n_papers*fr_p_part)
     criteria_count = (Nt + papers_page * criteria_num) * J * fr_n_papers / papers_page
-    GT_fround = GT[: int(n_papers*criteria_num*0.1)]
+    GT_fround = GT[: fr_n_papers*criteria_num]
     responses_fround = generate_responses_gt(fr_n_papers, criteria_power, papers_page,
                                              J, acc, criteria_difficulty, GT_fround)
     classified_papers_fround, best_cr_order = first_round(responses_fround, criteria_num,
