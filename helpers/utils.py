@@ -112,12 +112,3 @@ def estimate_cr_power_dif(responses, criteria_num, n_papers, papers_page, J):
 
     return cr_power, cr_accuracy
 
-
-# def get_loss_dawid(responses, criteria_num, n_papers, papers_page, J, GT, cost):
-#     values_prob = dawid_skene(responses, tol=0.001, max_iter=50)
-#     # papers_prob_in = aggregate_papers(n_papers, criteria_num, values_prob)
-#     # loss = estimate_loss(papers_prob_in, cost)
-#     # get actual loss
-#     classified_papers = classify_papers(n_papers, criteria_num, values_prob, cost)
-#     loss = get_actual_loss(classified_papers, GT, cost, criteria_num)
-#     return loss
