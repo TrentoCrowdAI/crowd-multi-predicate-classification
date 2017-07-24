@@ -91,6 +91,6 @@ def sm_run(criteria_num, n_papers, papers_worker, J, lr, Nt, acc,
             break
         classified_papers.update(classified_p_round)
     classified_papers = [classified_papers[p_id] for p_id in sorted(classified_papers.keys())]
-    loss, fp_rate, fn_rate, recall, precision = compute_metrics(classified_papers, GT, lr, criteria_num)
+    loss, fp_rate, fn_rate, recall, precision, f_beta = compute_metrics(classified_papers, GT, lr, criteria_num)
     price_per_paper = float(criteria_count) / n_papers
-    return loss, price_per_paper, fp_rate, fn_rate, recall, precision
+    return loss, price_per_paper, fp_rate, fn_rate, recall, precision, f_beta

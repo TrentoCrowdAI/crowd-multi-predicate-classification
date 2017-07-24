@@ -64,6 +64,6 @@ def m_run(criteria_num, n_papers, papers_page, J, cost, Nt, acc,
                 papers_ids_rest.append(p_id)
             else:
                 classified_papers[p_id] = 0
-    loss, fp_rate, fn_rate, recall, precision = compute_metrics(classified_papers, GT, cost, criteria_num)
+    loss, fp_rate, fn_rate, recall, precision, f_beta = compute_metrics(classified_papers, GT, cost, criteria_num)
     cost = criteria_count / float(n_papers)
-    return loss, cost, fp_rate, fn_rate, recall, precision
+    return loss, cost, fp_rate, fn_rate, recall, precision, f_beta

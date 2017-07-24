@@ -38,7 +38,7 @@ def estimate_loss(papers_prob_in, cost):
     return loss_per_paper
 
 
-def compute_metrics(classified_papers, GT, cost, criteria_num):
+def compute_metrics(classified_papers, GT, lr, criteria_num):
     # obtain GT scope values for papers
     GT_scope = []
     for paper_id in range(len(classified_papers)):
@@ -65,11 +65,13 @@ def compute_metrics(classified_papers, GT, cost, criteria_num):
     fp_rate = fp / (fp + tn)
     recall = tp / (tp + fn)
     precision = tp / (tp + fp)
-    loss = (fp * cost + fn) / len(classified_papers)
-    return loss, fp_rate, tp_rate, recall, precision
+    loss = (fp * lr + fn) / len(classified_papers)
+    beta = 1. / lr
+    f_beta = (beta + 1) * precision * recall / (beta * recall + precision)
+    return loss, fp_rate, tp_rate, recall, precision, f_beta
 
 
-def classify_papers(n_papers, criteria_num, responses, papers_page, J, cost):
+def classify_papers(n_papers, criteria_num, responses, papers_page, J, lr):
     Psi = input_adapter(responses)
     N = (n_papers / papers_page) * J
     p = expectation_maximization(N, n_papers * criteria_num, Psi)[1]
@@ -81,7 +83,7 @@ def classify_papers(n_papers, criteria_num, responses, papers_page, J, cost):
         values_prob.append(e_prob)
 
     classified_papers = []
-    exclusion_trsh = cost / (cost + 1.)
+    exclusion_trsh = lr / (lr + 1.)
     for paper_id in range(n_papers):
         p_inclusion = 1.
         for e_paper_id in range(criteria_num):
@@ -113,11 +115,11 @@ def estimate_cr_power_dif(responses, criteria_num, n_papers, papers_page, J):
     return cr_power, cr_accuracy
 
 
-# def get_loss_dawid(responses, criteria_num, n_papers, papers_page, J, GT, cost):
+# def get_loss_dawid(responses, criteria_num, n_papers, papers_page, J, GT, lr):
 #     values_prob = dawid_skene(responses, tol=0.001, max_iter=50)
 #     # papers_prob_in = aggregate_papers(n_papers, criteria_num, values_prob)
-#     # loss = estimate_loss(papers_prob_in, cost)
+#     # loss = estimate_loss(papers_prob_in, lr)
 #     # get actual loss
-#     classified_papers = classify_papers(n_papers, criteria_num, values_prob, cost)
-#     loss = get_actual_loss(classified_papers, GT, cost, criteria_num)
+#     classified_papers = classify_papers(n_papers, criteria_num, values_prob, lr)
+#     loss = get_actual_loss(classified_papers, GT, lr, criteria_num)
 #     return loss
