@@ -5,6 +5,8 @@ from helpers.utils import compute_metrics, estimate_cr_power_dif
 from fusion_algorithms.algorithms_utils import input_adapter
 from fusion_algorithms.em import expectation_maximization
 
+import numpy as np
+
 
 def do_first_round(n_papers, criteria_num, papers_worker, J, lr, GT,
                    criteria_power, acc, criteria_difficulty, values_count):
@@ -48,7 +50,7 @@ def do_round(GT, papers_ids, criteria_num, papers_worker, acc, criteria_difficul
 
 
 def sm_run(criteria_num, n_papers, papers_worker, J, lr, Nt, acc,
-           criteria_power, criteria_difficulty, GT, fr_p_part):
+           criteria_power, criteria_difficulty, GT, fr_p_part, pow_term):
     # initialization
     p_thrs = 0.99
     values_count = [[0, 0] for _ in range(n_papers*criteria_num)]
@@ -59,7 +61,29 @@ def sm_run(criteria_num, n_papers, papers_worker, J, lr, Nt, acc,
     criteria_count = (Nt + papers_worker * criteria_num) * J * fr_n_papers / papers_worker
     first_round_res = do_first_round(fr_n_papers, criteria_num, papers_worker, J, lr, GT,
                                      criteria_power, acc, criteria_difficulty, values_count)
-    classified_papers_fr, rest_p_ids, power_cr_list, acc_cr_list = first_round_res
+    classified_papers_fr, rest_p_ids, power_cr_list_old, acc_cr_list = first_round_res
+    acc_cr_list = []
+    acc_mean = np.mean(acc)
+    for multiplier in criteria_difficulty:
+        if acc_mean * multiplier > 1.:
+            acc_cr_list.append(1.)
+        else:
+            acc_cr_list.append(acc_mean * multiplier)
+
+    power_cr_list = []
+    if isinstance(pow_term, basestring):
+        pow_term = 0.1
+        for power_c in power_cr_list_old:
+            if np.random.binomial(1, 0.5):
+                power_cr_list.append(power_c + pow_term)
+            else:
+                power_cr_list.append(power_c - pow_term)
+    elif pow_term:
+        for power_c in power_cr_list_old:
+            power_cr_list.append(power_c + pow_term)
+    else:
+        power_cr_list = power_cr_list_old
+
     classified_papers = dict(zip(range(n_papers), [1]*n_papers))
     classified_papers.update(classified_papers_fr)
     rest_p_ids = rest_p_ids + range(fr_n_papers, n_papers)
