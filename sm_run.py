@@ -61,23 +61,36 @@ def sm_run(criteria_num, n_papers, papers_worker, J, lr, Nt, acc,
     first_round_res = do_first_round(fr_n_papers, criteria_num, papers_worker, J, lr, GT,
                                      criteria_power, acc, criteria_difficulty, values_count)
     classified_papers_fr, rest_p_ids, power_cr_list, acc_cr_list_old = first_round_res
+    # create acc criteria GT list
+    acc_mean = np.mean(acc)
+    acc_cr_list_gt = []
+    for acc_dif in criteria_difficulty:
+        if acc_mean * acc_dif > 1.:
+            acc_cr_list_gt.append(1.)
+        else:
+            acc_cr_list_gt.append(acc_mean * acc_dif)
+
+    # change criteria accuracy estimation
     acc_cr_list = []
     if isinstance(acc_term, basestring):
-        acc_term = 0.1
-        for acc_c in acc_cr_list_old:
+        for acc_c in acc_cr_list_gt:
             if np.random.binomial(1, 0.5):
-                if acc_c + acc_term > 1.:
+                acc_term = 0.1
+            else:
+                acc_term = 0.05
+            if np.random.binomial(1, 0.5):
+                if acc_c + acc_c * acc_term > 1.:
                     acc_cr_list.append(1.)
                 else:
-                    acc_cr_list.append(acc_c + acc_term)
+                    acc_cr_list.append(acc_c + acc_c * acc_term)
             else:
-                acc_cr_list.append(acc_c - acc_term)
+                acc_cr_list.append(acc_c - acc_c * acc_term)
     elif acc_term:
-        for acc_c in acc_cr_list_old:
-            if acc_c + acc_term > 1.:
+        for acc_c in acc_cr_list_gt:
+            if acc_c + acc_c * acc_term > 1.:
                 acc_cr_list.append(1.)
             else:
-                acc_cr_list.append(acc_c + acc_term)
+                acc_cr_list.append(acc_c + acc_c * acc_term)
     else:
         acc_cr_list = acc_cr_list_old
 

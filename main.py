@@ -21,8 +21,8 @@ if __name__ == '__main__':
     data = []
     for Nt in [3, 5]:
         for J in [3, 5]:
+            print 'Nt: {}. J: {}'.format(Nt, J)
             for acc_term in [0.05, -0.05, 0.1, -0.1, 'random', None]:
-                print 'Nt: {}. J: {}'.format(Nt, J)
                 for theta in criteria_power.keys():
                     cost_baseline = (Nt + papers_page * criteria_num) * J / float(papers_page)
                     loss_baseline_list = []
@@ -68,7 +68,7 @@ if __name__ == '__main__':
                     #            np.mean(rec_m), np.mean(pre_m), np.mean(f_m))
 
                     print 'SM-RUN  acc_term: {}, theta: {}, loss: {:1.2f}, price: {:1.2f}, fp_rate: {:1.2f}, tp_rate: {:1.2f}, ' \
-                          'recall: {:1.2f}, precision: {:1.2f}, f_b: {}'.\
+                          'recall: {:1.2f}, precision: {:1.2f}, f_b: {}'. \
                         format(str(acc_term), theta, np.mean(loss_smrun_list), np.mean(cost_smrun_list), np.mean(fp_sm), np.mean(tp_sm),
                                np.mean(rec_sm), np.mean(pre_sm), np.mean(f_sm))
                     # data.append([Nt, J, lr, np.mean(loss_mrun_list), np.std(loss_mrun_list), np.mean(fp_m),
