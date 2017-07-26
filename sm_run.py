@@ -72,15 +72,18 @@ def sm_run(criteria_num, n_papers, papers_worker, J, lr, Nt, acc,
 
     power_cr_list = []
     if isinstance(pow_term, basestring):
-        pow_term = 0.1
-        for power_c in power_cr_list_old:
+        for power_c in criteria_power:
             if np.random.binomial(1, 0.5):
-                power_cr_list.append(power_c + pow_term)
+                pow_term = 0.1
             else:
-                power_cr_list.append(power_c - pow_term)
+                pow_term = 0.05
+            if np.random.binomial(1, 0.5):
+                power_cr_list.append(power_c + power_c * pow_term)
+            else:
+                power_cr_list.append(power_c - power_c * pow_term)
     elif pow_term:
-        for power_c in power_cr_list_old:
-            power_cr_list.append(power_c + pow_term)
+        for power_c in criteria_power:
+            power_cr_list.append(power_c + power_c * pow_term)
     else:
         power_cr_list = power_cr_list_old
 
@@ -103,7 +106,7 @@ def sm_run(criteria_num, n_papers, papers_worker, J, lr, Nt, acc,
 
         # classify papers
         classified_p_round, rest_p_ids = classify_papers(rest_p_ids, criteria_num, values_count,
-                                                                              p_thrs, acc_cr_list, power_cr_list)
+                                                         p_thrs, acc_cr_list, power_cr_list)
 
         # update criteria power
         power_cr_list = update_cr_power(n_papers, criteria_num, acc_cr_list, power_cr_list, values_count)
