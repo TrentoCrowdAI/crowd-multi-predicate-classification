@@ -19,8 +19,8 @@ if __name__ == '__main__':
     criteria_num = 4
     fr_p_part = 0.05
     data = []
-    for Nt in [3, 5]:
-        for J in [3, 5]:
+    for Nt in range(1, 11, 1):
+        for J in [3, 5, 10]:
             print 'Nt: {}. J: {}'.format(Nt, J)
             for acc_term in [0.05, -0.05, 0.1, -0.1, 'random', None]:
                 for theta in criteria_power.keys():
