@@ -19,10 +19,8 @@ if __name__ == '__main__':
     criteria_num = len(criteria_power)
     fr_p_part = 0.05
     data = []
-    # for Nt in range(1, 11, 1):
-    #     for J in [2, 3, 5, 10]:
-    for Nt in [3, 5]:
-        for J in [3, 5]:
+    for Nt in range(1, 11, 1):
+        for J in [3, 5, 10]:
             print 'Nt: {}. J: {}'.format(Nt, J)
             for pow_term in [0.05, -0.05, 0.1, -0.1, 'random', None]:
                 for theta in criteria_power.keys():
@@ -69,7 +67,7 @@ if __name__ == '__main__':
                     #     format(np.mean(loss_mrun_list), np.mean(cost_mrun_list), np.mean(fp_m), np.mean(tp_m),
                     #            np.mean(rec_m), np.mean(pre_m), np.mean(f_m))
 
-                    print 'SM-RUN  pow_term: {}, theta" {}, loss: {:1.2f}, price: {:1.2f}, fp_rate: {:1.2f}, tp_rate: {:1.2f}, ' \
+                    print 'SM-RUN  pow_term: {}, theta {}, loss: {:1.2f}, price: {:1.2f}, fp_rate: {:1.2f}, tp_rate: {:1.2f}, ' \
                           'recall: {:1.2f}, precision: {:1.2f}, f_b: {}'.\
                         format(pow_term, theta, np.mean(loss_smrun_list), np.mean(cost_smrun_list), np.mean(fp_sm), np.mean(tp_sm),
                                np.mean(rec_sm), np.mean(pre_sm), np.mean(f_sm))
