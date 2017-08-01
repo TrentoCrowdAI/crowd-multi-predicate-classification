@@ -72,27 +72,31 @@ def sm_run(criteria_num, n_papers, papers_worker, J, lr, Nt, acc,
 
     # change criteria accuracy estimation
     acc_cr_list = []
-    if isinstance(acc_term, basestring):
+    # Random error
+    # if isinstance(acc_term, basestring):
+    #     for acc_c in acc_cr_list_gt:
+    #         if np.random.binomial(1, 0.5):
+    #             acc_term = 0.1
+    #         else:
+    #             acc_term = 0.05
+    #         if np.random.binomial(1, 0.5):
+    #             if acc_c + acc_c * acc_term > 1.:
+    #                 acc_cr_list.append(1.)
+    #             else:
+    #                 acc_cr_list.append(acc_c + acc_c * acc_term)
+    #         else:
+    #             acc_cr_list.append(acc_c - acc_c * acc_term)
+
+    if acc_term == 'est':
+        acc_cr_list = acc_cr_list_old
+    elif acc_term == 'gt':
+        acc_cr_list = acc_cr_list_gt
+    else:
         for acc_c in acc_cr_list_gt:
-            if np.random.binomial(1, 0.5):
-                acc_term = 0.1
-            else:
-                acc_term = 0.05
-            if np.random.binomial(1, 0.5):
-                if acc_c + acc_c * acc_term > 1.:
-                    acc_cr_list.append(1.)
-                else:
-                    acc_cr_list.append(acc_c + acc_c * acc_term)
-            else:
-                acc_cr_list.append(acc_c - acc_c * acc_term)
-    elif acc_term:
-        for acc_c in acc_cr_list_gt:
-            if acc_c + acc_c * acc_term > 1.:
+            if acc_c + acc_c * acc_term / 100. > 1.:
                 acc_cr_list.append(1.)
             else:
-                acc_cr_list.append(acc_c + acc_c * acc_term)
-    else:
-        acc_cr_list = acc_cr_list_old
+                acc_cr_list.append(acc_c + acc_c * acc_term / 100.)
 
     classified_papers = dict(zip(range(n_papers), [1]*n_papers))
     classified_papers.update(classified_papers_fr)

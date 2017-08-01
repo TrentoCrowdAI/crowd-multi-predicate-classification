@@ -22,7 +22,7 @@ if __name__ == '__main__':
     for Nt in range(1, 11, 1):
         for J in [3, 5, 10]:
             print 'Nt: {}. J: {}'.format(Nt, J)
-            for acc_term in [0.05, -0.05, 0.1, -0.1, 'random', None]:
+            for acc_term in [5, -5, 10, -10, 'gt', 'est']:
                 for theta in criteria_power.keys():
                     cost_baseline = (Nt + papers_page * criteria_num) * J / float(papers_page)
                     loss_baseline_list = []
@@ -33,7 +33,7 @@ if __name__ == '__main__':
                     loss_smrun_list = []
                     cost_smrun_list = []
                     fp_sm, tp_sm, rec_sm, pre_sm, f_sm, f_sm = [], [], [], [], [], []
-                    for _ in range(10):
+                    for _ in range(30):
                         # quiz, generation responses
                         acc = run_quiz_criteria_confm(Nt, z, [1.])
                         responses, GT = generate_responses_gt(n_papers, criteria_power[theta], papers_page,
@@ -80,4 +80,4 @@ if __name__ == '__main__':
                 print '---------------------'
     pd.DataFrame(data, columns=['Nt', 'J', 'lr', 'loss_mean', 'loss_std', 'FPR', 'TPR',
                                 'price_mean', 'price_std', 'alg', 'recall', 'precision', 'f_beta', 'acc_term', 'theta']). \
-                                to_csv('output/data/accurcy_criteria_experiment.csv', index=False)
+                                to_csv('output/data/accurcy_criteria_experiment2.csv', index=False)
