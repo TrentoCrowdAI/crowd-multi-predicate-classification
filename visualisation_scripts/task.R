@@ -207,3 +207,29 @@ ggplot(data, aes(x=cost_mean, y=loss_mean, colour=J, shape = alg, group=interact
   theme(plot.title = element_text(hjust = 0.5)) +
   xlab('Cost per paper') +
   ylab('Average loss per paper')
+
+
+# CLASSIFICATION FUNCTION Loss Vs Theta
+library(ggplot2)
+data <- loss_theta_cr100_p1000_b
+data <- data[data$J == 10,]
+
+pd <- position_dodge(0.01) # move them .05 to the left and right
+
+ggplot(data, aes(x=theta)) + 
+  geom_line(aes(y = loss_mv, colour = "MV")) + geom_point(aes(y = loss_mv, colour = "MV"), position=pd) +
+  geom_errorbar(aes(ymin=loss_mv-std_mv, ymax=loss_mv+std_mv, width=.01, colour = "MV"), position=pd)+
+  geom_line(aes(y = loss_scr, colour = "SCR")) + geom_point(aes(y = loss_scr, colour = "SCR"), shape=1, position=pd) +
+  geom_errorbar(aes(ymin=loss_scr-std_scr, ymax=loss_scr+std_scr, width=.01, colour = "SCR"), position=pd)+
+  geom_line(aes(y = loss_bpe, colour = "BPE")) + geom_point(aes(y = loss_bpe, colour = "BPE"), shape=2, position=pd) +
+  geom_errorbar(aes(ymin=loss_bpe-std_bpe, ymax=loss_bpe+std_bpe, width=.01, colour = "BPE"), position=pd)+
+  geom_line(aes(y = loss_eme, colour = "EME")) + geom_point(aes(y = loss_eme, colour = "EME"), shape=3, position=pd) +
+  geom_errorbar(aes(ymin=loss_eme-std_eme, ymax=loss_eme+std_eme, width=.01, colour = "EME"), position=pd)+
+  scale_x_continuous(breaks=c(0.1, 0.3, 0.5, 0.7, 0.9)) +
+  # ggtitle(expression("Loss VS Theta\nNt = 5, J = 5, cr = 10, z = 0.3, N"['l']*" = 10")) +
+  ggtitle("Loss VS Theta (J = 10, cr = 100)") +
+  theme(plot.title = element_text(hjust = 0.5), text = element_text(size=15)) +
+  xlab('Theta') +
+  ylab('Loss per paper') +
+  labs(color = "Algorithm")
+
