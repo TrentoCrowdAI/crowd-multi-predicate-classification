@@ -71,21 +71,24 @@ def sm_run(criteria_num, n_papers, papers_worker, J, lr, Nt, acc,
             acc_cr_list.append(acc_mean * multiplier)
 
     power_cr_list = []
-    if isinstance(pow_term, basestring):
-        for power_c in criteria_power:
-            if np.random.binomial(1, 0.5):
-                pow_term = 0.1
-            else:
-                pow_term = 0.05
-            if np.random.binomial(1, 0.5):
-                power_cr_list.append(power_c + power_c * pow_term)
-            else:
-                power_cr_list.append(power_c - power_c * pow_term)
-    elif pow_term:
-        for power_c in criteria_power:
-            power_cr_list.append(power_c + power_c * pow_term)
-    else:
+    # Random error
+    # if isinstance(pow_term, basestring):
+    #     for power_c in criteria_power:
+    #         if np.random.binomial(1, 0.5):
+    #             pow_term = 0.1
+    #         else:
+    #             pow_term = 0.05
+    #         if np.random.binomial(1, 0.5):
+    #             power_cr_list.append(power_c + power_c * pow_term)
+    #         else:
+    #             power_cr_list.append(power_c - power_c * pow_term)
+    if pow_term == 'est':
         power_cr_list = power_cr_list_old
+    elif pow_term == 'gt':
+        power_cr_list = criteria_power
+    else:
+        for power_c in criteria_power:
+            power_cr_list.append(power_c + power_c * pow_term / 100.)
 
     classified_papers = dict(zip(range(n_papers), [1]*n_papers))
     classified_papers.update(classified_papers_fr)
