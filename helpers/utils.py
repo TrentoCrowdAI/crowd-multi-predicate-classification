@@ -157,13 +157,12 @@ def get_roc_points(GT, probs, classified_papers, criteria_num):
     p_prev = -1.
     for id, p_ex in probs:
         gt = GT_scope[id]
-        cl_val = classified_papers[id]
         if p_ex != p_prev:
             points[0].append(FP/N)
             points[1].append(TP/P)
             print FP/N, TP/P
             p_prev = p_ex
-        if (not gt and not cl_val) or (not gt and cl_val):
+        if not gt:
             TP += 1
         else:
             FP += 1
