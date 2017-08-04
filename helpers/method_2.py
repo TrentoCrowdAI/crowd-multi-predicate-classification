@@ -36,6 +36,7 @@ def classify_papers_baseline(papers_ids, criteria_num, values_prob, lr):
     classified_papers_ids = []
     rest_papers_ids = []
     trsh = lr / (lr + 1.)
+    papers_prob = {}
     for paper_id in papers_ids:
         p_inclusion = 1.
         for e_paper_id in range(criteria_num):
@@ -45,19 +46,21 @@ def classify_papers_baseline(papers_ids, criteria_num, values_prob, lr):
         if p_exclusion > trsh:
             classified_papers.append(0)
             classified_papers_ids.append(paper_id)
+            papers_prob[paper_id] = p_exclusion
         elif p_inclusion > trsh:
             classified_papers.append(1)
             classified_papers_ids.append(paper_id)
+            papers_prob[paper_id] = p_exclusion
         else:
             rest_papers_ids.append(paper_id)
-    return dict(zip(classified_papers_ids, classified_papers)), rest_papers_ids
+    return dict(zip(classified_papers_ids, classified_papers)), rest_papers_ids, papers_prob
 
 
 def classify_papers(papers_ids, criteria_num, values_count, p_thrs, acc_cr_list, power_cr_list):
     classified_papers = []
     classified_papers_ids = []
     rest_papers_ids = []
-
+    papers_prob = {}
     for p_id in papers_ids:
         p_inclusion = 1.
         for cr in range(criteria_num):
@@ -78,12 +81,14 @@ def classify_papers(papers_ids, criteria_num, values_count, p_thrs, acc_cr_list,
         if p_exclusion > p_thrs:
             classified_papers.append(0)
             classified_papers_ids.append(p_id)
+            papers_prob[p_id] = p_exclusion
         elif p_inclusion > p_thrs:
             classified_papers.append(1)
             classified_papers_ids.append(p_id)
+            papers_prob[p_id] = p_exclusion
         else:
             rest_papers_ids.append(p_id)
-    return dict(zip(classified_papers_ids, classified_papers)), rest_papers_ids
+    return dict(zip(classified_papers_ids, classified_papers)), rest_papers_ids, papers_prob
 
 
 def generate_responses(GT, papers_ids, criteria_num, papers_worker, acc, criteria_difficulty, cr_assigned):
