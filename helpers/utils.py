@@ -83,14 +83,16 @@ def classify_papers(n_papers, criteria_num, responses, papers_page, J, lr):
         values_prob.append(e_prob)
 
     classified_papers = []
+    papers_prob = {}
     exclusion_trsh = lr / (lr + 1.)
     for paper_id in range(n_papers):
         p_inclusion = 1.
         for e_paper_id in range(criteria_num):
             p_inclusion *= values_prob[paper_id*criteria_num+e_paper_id][0]
         p_exclusion = 1 - p_inclusion
+        papers_prob[paper_id] = p_exclusion
         classified_papers.append(0) if p_exclusion > exclusion_trsh else classified_papers.append(1)
-    return classified_papers
+    return classified_papers, papers_prob
 
 
 def estimate_cr_power_dif(responses, criteria_num, n_papers, papers_page, J):
@@ -123,3 +125,48 @@ def estimate_cr_power_dif(responses, criteria_num, n_papers, papers_page, J):
 #     classified_papers = classify_papers(n_papers, criteria_num, values_prob, lr)
 #     loss = get_actual_loss(classified_papers, GT, lr, criteria_num)
 #     return loss
+
+def get_roc_points(GT, probs, classified_papers, criteria_num):
+    GT_scope = []
+    for paper_id in range(len(probs)):
+        if sum([GT[paper_id * criteria_num + e_paper_id] for e_paper_id in range(criteria_num)]):
+            GT_scope.append(0)
+        else:
+            GT_scope.append(1)
+    # FP == False Exclusion
+    # FN == False Inclusion
+    fp = 0.
+    fn = 0.
+    tp = 0.
+    tn = 0.
+    for cl_val, gt_val in zip(classified_papers, GT_scope):
+        if gt_val and not cl_val:
+            fp += 1
+        if not gt_val and cl_val:
+            fn += 1
+        if gt_val and cl_val:
+            tn += 1
+        if not gt_val and not cl_val:
+            tp += 1
+    N = tn + fp
+    P = tp + fn
+
+    points = [[], []]
+    FP = 0.
+    TP = 0.
+    p_prev = -1.
+    for id, p_ex in probs:
+        gt = GT_scope[id]
+        cl_val = classified_papers[id]
+        if p_ex != p_prev:
+            points[0].append(FP/N)
+            points[1].append(TP/P)
+            print FP/N, TP/P
+            p_prev = p_ex
+        if (not gt and not cl_val) or (not gt and cl_val):
+            TP += 1
+        else:
+            FP += 1
+    points[0].append(FP / N)
+    points[1].append(TP / P)
+    return points

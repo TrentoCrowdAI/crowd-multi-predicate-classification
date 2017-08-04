@@ -12,15 +12,16 @@ if __name__ == '__main__':
     lr = 5
     n_papers = 1000
     papers_page = 10
-    criteria_power = [0.14, 0.14, 0.28, 0.42]
+    # criteria_power = [0.14, 0.14, 0.28, 0.42]
+    criteria_power = [0.09, 0.09, 0.18, 0.27]
     criteria_difficulty = [1., 1., 1.1, 0.9]
     criteria_num = len(criteria_power)
     fr_p_part = 0.05
     data = []
-    for Nt in range(1, 11, 1):
-        for J in [3, 5, 10]:
-    # for Nt in [3]:
+    # for Nt in range(1, 11, 1):
     #     for J in [3, 5, 10]:
+    for Nt in [4]:
+        for J in [5]:
             print 'Nt: {}. J: {}'.format(Nt, J)
             cost_baseline = (Nt + papers_page * criteria_num) * J / float(papers_page)
             loss_baseline_list = []
@@ -37,14 +38,7 @@ if __name__ == '__main__':
                 responses, GT = generate_responses_gt(n_papers, criteria_power, papers_page,
                                                       J, acc, criteria_difficulty)
                 # baseline
-                loss_baseline, fp_rate_b, tp_rate_b, rec_b_, pre_b_, f_beta_b = baseline(responses, criteria_num, n_papers,
-                                                                               papers_page, J, GT, lr)
-                loss_baseline_list.append(loss_baseline)
-                fp_b.append(fp_rate_b)
-                tp_b.append(tp_rate_b)
-                rec_b.append(rec_b_)
-                pre_b.append(pre_b_)
-                f_b.append(f_beta_b)
+                roc_b = baseline(responses, criteria_num, n_papers, papers_page, J, GT, lr)
 
                 # m-run
                 loss_mrun, cost_mrun, fp_rate_m, tp_rate_m, rec_m_, \
