@@ -95,6 +95,30 @@ def classify_papers(n_papers, criteria_num, responses, papers_page, J, lr):
     return classified_papers, papers_prob
 
 
+def classify_papers_m(n_papers, criteria_num, responses, papers_page, J, lr):
+    Psi = input_adapter(responses)
+    N = (n_papers / papers_page) * J
+    p = expectation_maximization(N, n_papers * criteria_num, Psi)[1]
+    values_prob = []
+    for e in p:
+        e_prob = [0., 0.]
+        for e_id, e_p in e.iteritems():
+            e_prob[e_id] = e_p
+        values_prob.append(e_prob)
+
+    classified_papers = []
+    papers_prob = []
+    exclusion_trsh = lr / (lr + 1.)
+    for paper_id in range(n_papers):
+        p_inclusion = 1.
+        for e_paper_id in range(criteria_num):
+            p_inclusion *= values_prob[paper_id*criteria_num+e_paper_id][0]
+        p_exclusion = 1 - p_inclusion
+        papers_prob.append(p_exclusion)
+        classified_papers.append(0) if p_exclusion > exclusion_trsh else classified_papers.append(1)
+    return classified_papers, papers_prob
+
+
 def estimate_cr_power_dif(responses, criteria_num, n_papers, papers_page, J):
     Psi = input_adapter(responses)
     N = (n_papers / papers_page) * J

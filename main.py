@@ -13,6 +13,7 @@ if __name__ == '__main__':
     n_papers = 1000
     papers_page = 10
     # criteria_power = [0.14, 0.14, 0.28, 0.42]
+    # theta = 0.5
     criteria_power = [0.09, 0.09, 0.18, 0.27]
     criteria_difficulty = [1., 1., 1.1, 0.9]
     criteria_num = len(criteria_power)
@@ -40,17 +41,9 @@ if __name__ == '__main__':
                 baseline
                 roc_b = baseline(responses, criteria_num, n_papers, papers_page, J, GT, lr)
 
-                # # m-run
-                # loss_mrun, cost_mrun, fp_rate_m, tp_rate_m, rec_m_, \
-                # pre_m_, f_beta_m = m_run(criteria_num, n_papers, papers_page, J, lr, Nt, acc,
-                #                          criteria_power, criteria_difficulty, GT, fr_p_part)
-                # loss_mrun_list.append(loss_mrun)
-                # cost_mrun_list.append(cost_mrun)
-                # fp_m.append(fp_rate_m)
-                # tp_m.append(tp_rate_m)
-                # rec_m.append(rec_m_)
-                # pre_m.append(pre_m_)
-                # f_m.append(f_beta_m)
+                # m-run
+                roc_m = m_run(criteria_num, n_papers, papers_page, J, lr, Nt, acc,
+                              criteria_power, criteria_difficulty, GT, fr_p_part)
 
                 # sm-run
                 roc_sm = sm_run(criteria_num, n_papers, papers_page, J, lr, Nt, acc,
