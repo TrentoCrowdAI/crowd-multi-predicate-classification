@@ -193,3 +193,30 @@ def get_roc_points(GT, probs, classified_papers, criteria_num):
     points[0].append(FP / N)
     points[1].append(TP / P)
     return points
+
+
+def prepare_roc_data(GT, classified_papers, probs, criteria_num):
+    papers_prob = []
+    GT_scope = []
+    for paper_id in range(len(probs)):
+        if sum([GT[paper_id * criteria_num + e_paper_id] for e_paper_id in range(criteria_num)]):
+            GT_scope.append(0)
+        else:
+            GT_scope.append(1)
+    # FP == False Exclusion
+    # FN == False Inclusion
+    fp, fn, tp, tn = 0., 0., 0., 0.
+    for cl_val, gt_val in zip(classified_papers, GT_scope):
+        if gt_val and not cl_val:
+            fp += 1
+        if not gt_val and cl_val:
+            fn += 1
+        if gt_val and cl_val:
+            tn += 1
+        if not gt_val and not cl_val:
+            tp += 1
+    N = tn + fp
+    P = tp + fn
+    for id, prob in probs.iteritems():
+        papers_prob.append((GT_scope[id], prob))
+    return N, P, papers_prob

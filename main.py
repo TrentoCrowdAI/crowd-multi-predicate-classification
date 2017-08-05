@@ -25,21 +25,14 @@ if __name__ == '__main__':
         for J in [5]:
             print 'Nt: {}. J: {}'.format(Nt, J)
             cost_baseline = (Nt + papers_page * criteria_num) * J / float(papers_page)
-            loss_baseline_list = []
-            fp_b, tp_b, rec_b, pre_b, f_b = [], [], [], [], []
-            loss_mrun_list = []
-            cost_mrun_list = []
-            fp_m, tp_m, rec_m, pre_m, f_m, f_m = [], [], [], [], [], []
-            loss_smrun_list = []
-            cost_smrun_list = []
             fp_sm, tp_sm, rec_sm, pre_sm, f_sm, f_sm = [], [], [], [], [], []
             for _ in range(30):
                 # quiz, generation responses
                 acc = run_quiz_criteria_confm(Nt, z, [1.])
                 responses, GT = generate_responses_gt(n_papers, criteria_power, papers_page,
                                                       J, acc, criteria_difficulty)
-                baseline
-                roc_b = baseline(responses, criteria_num, n_papers, papers_page, J, GT, lr)
+                # baseline
+                N_b, P_b, roc_b = baseline(responses, criteria_num, n_papers, papers_page, J, GT, lr)
 
                 # m-run
                 roc_m = m_run(criteria_num, n_papers, papers_page, J, lr, Nt, acc,
