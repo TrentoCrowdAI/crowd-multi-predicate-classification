@@ -65,7 +65,7 @@ def sm_run(criteria_num, n_papers, papers_worker, J, lr, Nt, acc,
     rest_p_ids = rest_p_ids + range(fr_n_papers, n_papers)
 
     # Do Multi rounds
-    break_list = []
+    # break_list = []
     while len(rest_p_ids) != 0:
         # print len(rest_p_ids)
 
@@ -91,7 +91,7 @@ def sm_run(criteria_num, n_papers, papers_worker, J, lr, Nt, acc,
         # if break_list.count(n_rest) >= 10:
         #     break
         classified_papers.update(classified_p_round)
-    classified_papers = [classified_papers[p_id] for p_id in sorted(classified_papers.keys())]
-    N, P, papers_prob = prepare_roc_data(GT, classified_papers, papers_prob, criteria_num)
-    return N, P, papers_prob
+    # classified_papers = [classified_papers[p_id] for p_id in sorted(classified_papers.keys())]
+    papers_prob = prepare_roc_data(GT, papers_prob, criteria_num)[2]
+    return papers_prob
 

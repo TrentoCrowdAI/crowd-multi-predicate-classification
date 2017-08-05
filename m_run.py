@@ -65,5 +65,5 @@ def m_run(criteria_num, n_papers, papers_page, J, cost, Nt, acc,
                 papers_ids_rest.append(p_id)
             else:
                 classified_papers[p_id] = 0
-    N, P, papers_prob = prepare_roc_data(GT, classified_papers, papers_prob, criteria_num)
-    return N, P, papers_prob
+    papers_prob = prepare_roc_data(GT, papers_prob, criteria_num)[2]
+    return papers_prob
