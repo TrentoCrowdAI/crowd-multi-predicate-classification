@@ -150,49 +150,48 @@ def estimate_cr_power_dif(responses, criteria_num, n_papers, papers_page, J):
 #     loss = get_actual_loss(classified_papers, GT, lr, criteria_num)
 #     return loss
 
-def get_roc_points(GT, probs, classified_papers, criteria_num):
-    GT_scope = []
-    for paper_id in range(len(probs)):
-        if sum([GT[paper_id * criteria_num + e_paper_id] for e_paper_id in range(criteria_num)]):
-            GT_scope.append(0)
-        else:
-            GT_scope.append(1)
-    # FP == False Exclusion
-    # FN == False Inclusion
-    fp = 0.
-    fn = 0.
-    tp = 0.
-    tn = 0.
-    for cl_val, gt_val in zip(classified_papers, GT_scope):
-        if gt_val and not cl_val:
-            fp += 1
-        if not gt_val and cl_val:
-            fn += 1
-        if gt_val and cl_val:
-            tn += 1
-        if not gt_val and not cl_val:
-            tp += 1
-    N = tn + fp
-    P = tp + fn
-
-    points = [[], []]
-    FP = 0.
-    TP = 0.
-    p_prev = -1.
-    for id, p_ex in probs:
-        gt = GT_scope[id]
-        if p_ex != p_prev:
-            points[0].append(FP/N)
-            points[1].append(TP/P)
-            print FP/N, TP/P
-            p_prev = p_ex
-        if not gt:
-            TP += 1
-        else:
-            FP += 1
-    points[0].append(FP / N)
-    points[1].append(TP / P)
-    return points
+# def get_roc_points(GT, probs, classified_papers, criteria_num):
+#     GT_scope = []
+#     for paper_id in range(len(probs)):
+#         if sum([GT[paper_id * criteria_num + e_paper_id] for e_paper_id in range(criteria_num)]):
+#             GT_scope.append(0)
+#         else:
+#             GT_scope.append(1)
+#     # FP == False Exclusion
+#     # FN == False Inclusion
+#     fp = 0.
+#     fn = 0.
+#     tp = 0.
+#     tn = 0.
+#     for cl_val, gt_val in zip(classified_papers, GT_scope):
+#         if gt_val and not cl_val:
+#             fp += 1
+#         if not gt_val and cl_val:
+#             fn += 1
+#         if gt_val and cl_val:
+#             tn += 1
+#         if not gt_val and not cl_val:
+#             tp += 1
+#     N = tn + fp
+#     P = tp + fn
+#
+#     points = [[], []]
+#     FP = 0.
+#     TP = 0.
+#     p_prev = -1.
+#     for id, p_ex in probs:
+#         gt = GT_scope[id]
+#         if p_ex != p_prev:
+#             points[0].append(FP/N)
+#             points[1].append(TP/P)
+#             p_prev = p_ex
+#         if not gt:
+#             TP += 1
+#         else:
+#             FP += 1
+#     points[0].append(FP / N)
+#     points[1].append(TP / P)
+#     return points
 
 
 def prepare_roc_data(GT, classified_papers, probs, criteria_num):
@@ -220,3 +219,22 @@ def prepare_roc_data(GT, classified_papers, probs, criteria_num):
     for id, prob in probs.iteritems():
         papers_prob.append((GT_scope[id], prob))
     return N, P, papers_prob
+
+
+def get_roc_points(N, P, probs):
+    points = [[], []]
+    FP = 0.
+    TP = 0.
+    p_prev = -1.
+    for gt, p_ex in probs:
+        if p_ex != p_prev:
+            points[0].append(FP/N)
+            points[1].append(TP/P)
+            p_prev = p_ex
+        if not gt:
+            TP += 1
+        else:
+            FP += 1
+    points[0].append(FP / N)
+    points[1].append(TP / P)
+    return points

@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 
 from generator import generate_responses_gt
-from helpers.utils import run_quiz_criteria_confm
+from helpers.utils import run_quiz_criteria_confm, get_roc_points
 from baseline import baseline
 from m_run import m_run
 from sm_run import sm_run
@@ -25,48 +25,48 @@ if __name__ == '__main__':
         for J in [5]:
             print 'Nt: {}. J: {}'.format(Nt, J)
             cost_baseline = (Nt + papers_page * criteria_num) * J / float(papers_page)
-            fp_sm, tp_sm, rec_sm, pre_sm, f_sm, f_sm = [], [], [], [], [], []
+            Nb, Pb, Nm, Pm, Nsm, Psm = 0., 0., 0., 0., 0., 0.
+            probs_b_list, probs_m_list, probs_sm_list = [], [], []
             for _ in range(30):
                 # quiz, generation responses
                 acc = run_quiz_criteria_confm(Nt, z, [1.])
                 responses, GT = generate_responses_gt(n_papers, criteria_power, papers_page,
                                                       J, acc, criteria_difficulty)
                 # baseline
-                N_b, P_b, roc_b = baseline(responses, criteria_num, n_papers, papers_page, J, GT, lr)
+                N_b, P_b, probs_b = baseline(responses, criteria_num, n_papers, papers_page, J, GT, lr)
+                Nb += N_b
+                Pb += P_b
+                probs_b_list += probs_b
 
                 # m-run
-                roc_m = m_run(criteria_num, n_papers, papers_page, J, lr, Nt, acc,
-                              criteria_power, criteria_difficulty, GT, fr_p_part)
+                N_m, P_m, probs_m = m_run(criteria_num, n_papers, papers_page, J, lr, Nt, acc,
+                                          criteria_power, criteria_difficulty, GT, fr_p_part)
+                Nm += N_m
+                Pm += P_m
+                probs_m_list += probs_m
 
                 # sm-run
-                roc_sm = sm_run(criteria_num, n_papers, papers_page, J, lr, Nt, acc,
-                                criteria_power, criteria_difficulty, GT, fr_p_part)
+                N_sm, P_sm, probs_sm = sm_run(criteria_num, n_papers, papers_page, J, lr, Nt, acc,
+                                              criteria_power, criteria_difficulty, GT, fr_p_part)
+                Nsm += N_sm
+                Psm += P_sm
+                probs_sm_list += probs_sm
 
-            # print 'BASELINE  loss: {:1.2f}, price: {:1.2f}, fp_rate: {:1.2f}, tp_rate: {:1.2f}, ' \
-            #       'recall: {:1.2f}, precision: {:1.2f}, f_b: {}'.\
-            #     format(np.mean(loss_baseline_list), cost_baseline, np.mean(fp_b), np.mean(tp_b),
-            #            np.mean(rec_b), np.mean(pre_b), np.mean(f_b))
-            #
-            # print 'M-RUN     loss: {:1.2f}, price: {:1.2f}, fp_rate: {:1.2f}, tp_rate: {:1.2f}, ' \
-            #       'recall: {:1.2f}, precision: {:1.2f}, f_b: {}'.\
-            #     format(np.mean(loss_mrun_list), np.mean(cost_mrun_list), np.mean(fp_m), np.mean(tp_m),
-            #            np.mean(rec_m), np.mean(pre_m), np.mean(f_m))
-            #
-            # print 'SM-RUN    loss: {:1.2f}, price: {:1.2f}, fp_rate: {:1.2f}, tp_rate: {:1.2f}, ' \
-            #       'recall: {:1.2f}, precision: {:1.2f}, f_b: {}'.\
-            #     format(np.mean(loss_smrun_list), np.mean(cost_smrun_list), np.mean(fp_sm), np.mean(tp_sm),
-            #            np.mean(rec_sm), np.mean(pre_sm), np.mean(f_sm))
-            # print '---------------------'
+            sorted_probs_b = sorted(probs_b_list, key=lambda x: x[1], reverse=True)
+            roc_points_b = get_roc_points(Nb, Pb, sorted_probs_b)
 
-    #         data.append([Nt, J, lr, np.mean(loss_baseline_list), np.std(loss_baseline_list),
-    #                      np.mean(fp_b), np.mean(tp_b), cost_baseline, 0., 'Baseline',
-    #                      np.mean(rec_b), np.mean(pre_b), np.mean(f_b)])
-    #         data.append([Nt, J, lr, np.mean(loss_mrun_list), np.std(loss_mrun_list), np.mean(fp_m),
-    #                      np.mean(tp_m), np.mean(cost_mrun_list), np.std(cost_mrun_list), 'M-runs',
-    #                      np.mean(rec_m), np.mean(pre_m), np.mean(f_m)])
-    #         data.append([Nt, J, lr, np.mean(loss_smrun_list), np.std(loss_smrun_list), np.mean(fp_sm),
-    #                      np.mean(tp_sm), np.mean(cost_smrun_list), np.std(cost_smrun_list), 'SM-runs',
-    #                      np.mean(rec_sm), np.mean(pre_sm), np.mean(f_sm)])
-    # pd.DataFrame(data, columns=['Nt', 'J', 'lr', 'loss_mean', 'loss_std', 'FPR', 'TPR',
-    #                             'price_mean', 'price_std', 'alg', 'recall', 'precision', 'f_beta']). \
-    #                             to_csv('output/data/loss_tests_cr5_reproducibility.csv', index=False)
+            sorted_probs_m = sorted(probs_m_list, key=lambda x: x[1], reverse=True)
+            roc_points_m = get_roc_points(Nm, Pm, sorted_probs_m)
+
+            sorted_probs_sm = sorted(probs_sm_list, key=lambda x: x[1], reverse=True)
+            roc_points_sm = get_roc_points(Nsm, Psm, sorted_probs_sm)
+
+            # np_df = pd.DataFrame({'Nb': [Nb], 'Pb': [Pb],
+            #                       'Nm': [Nm], 'Pm': [Pm],
+            #                       'Nsm': [Nsm], 'Psm': [Psm]})
+            roc_b_df = pd.DataFrame({'x_b': roc_points_b[0], 'y_b': roc_points_b[1]})
+            roc_m_df = pd.DataFrame({'x_m': roc_points_m[0], 'y_m': roc_points_m[1]})
+            roc_sm_df = pd.DataFrame({'x_sm': roc_points_sm[0], 'y_sm': roc_points_sm[1]})
+            data = pd.concat([roc_b_df, roc_m_df, roc_sm_df], ignore_index=True)
+            data.to_csv('output/data/roc_curves.csv', index=False)
+

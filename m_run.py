@@ -1,10 +1,5 @@
-import numpy as np
-
-from fusion_algorithms.algorithms_utils import input_adapter
-from fusion_algorithms.em import expectation_maximization
 from generator import generate_responses_gt
-from helpers.utils import classify_papers, classify_papers_m, compute_metrics, estimate_cr_power_dif, get_roc_points
-import operator
+from helpers.utils import classify_papers, classify_papers_m, estimate_cr_power_dif, prepare_roc_data
 
 
 def get_best_cr_order(responses, criteria_num, n_papers, papers_page, J):
@@ -70,6 +65,5 @@ def m_run(criteria_num, n_papers, papers_page, J, cost, Nt, acc,
                 papers_ids_rest.append(p_id)
             else:
                 classified_papers[p_id] = 0
-    sorted_papers_prob = sorted(papers_prob.items(), key=operator.itemgetter(1), reverse=True)
-    roc_points = get_roc_points(GT, sorted_papers_prob, classified_papers, criteria_num)
-    return roc_points
+    N, P, papers_prob = prepare_roc_data(GT, classified_papers, papers_prob, criteria_num)
+    return N, P, papers_prob

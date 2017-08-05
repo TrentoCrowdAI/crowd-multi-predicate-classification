@@ -1,10 +1,9 @@
 from generator import generate_responses_gt
 from helpers.method_2 import classify_papers_baseline, generate_responses, \
     update_v_count, assign_criteria, classify_papers, update_cr_power
-from helpers.utils import compute_metrics, estimate_cr_power_dif, get_roc_points
+from helpers.utils import estimate_cr_power_dif, prepare_roc_data
 from fusion_algorithms.algorithms_utils import input_adapter
 from fusion_algorithms.em import expectation_maximization
-import operator
 
 
 def do_first_round(n_papers, criteria_num, papers_worker, J, lr, GT,
@@ -87,13 +86,12 @@ def sm_run(criteria_num, n_papers, papers_worker, J, lr, Nt, acc,
         power_cr_list = update_cr_power(n_papers, criteria_num, acc_cr_list, power_cr_list, values_count)
 
         # print len(rest_p_ids)
-        n_rest = len(rest_p_ids)
-        break_list.append(n_rest)
-        if break_list.count(n_rest) >= 5:
-            break
+        # n_rest = len(rest_p_ids)
+        # break_list.append(n_rest)
+        # if break_list.count(n_rest) >= 10:
+        #     break
         classified_papers.update(classified_p_round)
-    #     TO DO: rest papers
     classified_papers = [classified_papers[p_id] for p_id in sorted(classified_papers.keys())]
-    sorted_papers_prob = sorted(papers_prob.items(), key=operator.itemgetter(1), reverse=True)
-    roc_points = get_roc_points(GT, sorted_papers_prob, classified_papers, criteria_num)
-    return roc_points
+    N, P, papers_prob = prepare_roc_data(GT, classified_papers, papers_prob, criteria_num)
+    return N, P, papers_prob
+
