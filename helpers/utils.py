@@ -226,3 +226,32 @@ def get_roc_points(N, P, probs):
     points[0].append(FP / N)
     points[1].append(TP / P)
     return points
+
+
+def get_auc(N, P, probs):
+    FP = 0.
+    TP = 0.
+    FP_prev = 0.
+    TP_prev = 0.
+    p_prev = -1.
+    A = 0.
+    for gt, p_ex in probs:
+        if p_ex != p_prev:
+            A += trapezoid_area(FP, FP_prev, TP, TP_prev)
+            p_prev = p_ex
+            FP_prev = FP
+            TP_prev = TP
+        if not gt:
+            TP += 1
+        else:
+            FP += 1
+    A += trapezoid_area(N, FP_prev, N, TP_prev)
+    A = A / (P * N)
+    return A
+
+
+def trapezoid_area(x1, x2, y1, y2):
+    base = abs(x1 - x2)
+    height_avg = (y1 + y2) / 2
+    return base * height_avg
+
