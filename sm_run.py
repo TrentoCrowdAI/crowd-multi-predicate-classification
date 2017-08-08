@@ -50,7 +50,7 @@ def do_round(GT, papers_ids, criteria_num, papers_worker, acc, criteria_difficul
 
 
 def sm_run(criteria_num, n_papers, papers_worker, J, lr, Nt, acc,
-           criteria_power, criteria_difficulty, GT, fr_p_part, pow_term):
+           criteria_power, criteria_difficulty, GT, fr_p_part, pow_term, M):
     # initialization
     p_thrs = 0.99
     values_count = [[0, 0] for _ in range(n_papers*criteria_num)]
@@ -117,7 +117,7 @@ def sm_run(criteria_num, n_papers, papers_worker, J, lr, Nt, acc,
         # print len(rest_p_ids)
         n_rest = len(rest_p_ids)
         break_list.append(n_rest)
-        if break_list.count(n_rest) >= 5:
+        if break_list.count(n_rest) >= M:
             break
         classified_papers.update(classified_p_round)
     classified_papers = [classified_papers[p_id] for p_id in sorted(classified_papers.keys())]
