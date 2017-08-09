@@ -1,2 +1,2 @@
-# in-out-tagging-algorithm
-Crowdsourcing strategies for systematic literature reviews
+# Criteria-based-tagging-algorithm
+Modelling of tagging scientific papers by crowd users for literature reviews
