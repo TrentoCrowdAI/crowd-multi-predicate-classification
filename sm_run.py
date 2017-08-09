@@ -94,7 +94,7 @@ def sm_run(criteria_num, n_papers, papers_worker, J, lr, Nt, acc,
     else:
         for acc_c in acc_cr_list_gt:
             if acc_c + acc_c * acc_term / 100. > 1.:
-                acc_cr_list.append(1.)
+                acc_cr_list.append(.999)
             else:
                 acc_cr_list.append(acc_c + acc_c * acc_term / 100.)
 
