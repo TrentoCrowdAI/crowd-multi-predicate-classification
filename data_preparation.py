@@ -14,6 +14,7 @@ n_criteria = 3
 n_papers = len(data) / J
 workers_data = [[] for _ in workers_ids_ch]
 c_votes = [[] for _ in range(n_criteria * n_papers)]
+paper_ids_dict = dict(zip(set(data['paper ID']), range(n_papers)))
 
 # property of the data file
 criteria = {0: 'intervention Vote',
@@ -27,17 +28,21 @@ for w_id, w_ch in enumerate(workers_ids_ch):
         if not len(c_data):
             continue
         for row_index, row in c_data.iterrows():
-            paper_id = row['paper ID']
-            vote = row[c_name]
+            paper_id = paper_ids_dict[row['paper ID']]
+            if row[c_name] == -1 or row[c_name] == 0:
+                vote = 1
+            else:
+                vote = 0
             workers_data[w_id].append((paper_id, c_id, vote))
             # c_votes[paper_id * n_criteria + c_id] =
-pass
+
+# parse gold data
+GT = [None]*n_papers*n_criteria
+for paper_id_raw in paper_ids_dict.keys():
+    paper_id = paper_ids_dict[paper_id_raw]
+    for cr_id, cr_gold_colmn in zip(range(3), ['GOLD INTERVENTION', 'GOLD USE OF TECH', 'GOLD OLD']):
+        gold_value_raw = data[data['paper ID'] == paper_id_raw][cr_gold_colmn].values[0]
+        gold_value = 0 if gold_value_raw == 1 else 1
+        GT[paper_id * n_criteria + cr_id] = gold_value
 
 
-
-
-# data_summary = pd.DataFrame(data=data_summary_temp, columns=['n_correct', 'n_total'])
-# data_summary = data_summary.groupby(['n_correct', 'n_total']).size().reset_index(name="Time")
-
-# for _, row in data.iterrows():
-#     worker_id = int(row['worker_id'])
