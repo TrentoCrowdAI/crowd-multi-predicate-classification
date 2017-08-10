@@ -1,22 +1,19 @@
-import math
 import pandas as pd
-import numpy as np
+# import numpy as np
 
-data = pd.read_csv('output/amt_data/table_1.csv')
-
-workers_ids_ch = list(pd.unique(data['intervention worker ID']))\
-                      + list(pd.unique(data['use of tech worker ID']))\
-                      + list(pd.unique(data['older adult worker ID']))
-# iterate over data rows
-# compute statistic of answers
 J = 5
 n_criteria = 3
-n_papers = len(data) / J
-c_votes = [[] for _ in range(n_criteria * n_papers)]
+n_papers = 100
+# c_votes = [[] for _ in range(n_criteria * n_papers)]
 
 
 def get_data():
+    data = pd.read_csv('output/amt_data/table_1.csv')
+    workers_ids_ch = list(pd.unique(data['intervention worker ID'])) \
+                     + list(pd.unique(data['use of tech worker ID'])) \
+                     + list(pd.unique(data['older adult worker ID']))
     workers_data = [[] for _ in workers_ids_ch]
+
     paper_ids_dict = dict(zip(set(data['paper ID']), range(n_papers)))
     # property of the data file
     criteria = {0: 'intervention Vote',
@@ -46,22 +43,21 @@ def get_data():
             GT[paper_id * n_criteria + cr_id] = gold_value
     return workers_data, GT
 
-    # Filter unqualified workers Stattistics
-    # qualt_workers = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0}
-    # worker_counter = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0}
-    # for Nt in [1, 2, 3, 4, 5]:
-    #     for w in workers_data:
-    #         if len(w) >= Nt+5:
-    #             worker_counter[Nt] += 1
-    #             tests_correct = 0
-    #             for v_data in w[:Nt]:
-    #                 if v_data[2] == GT[v_data[0]*n_criteria + v_data[1]]:
-    #                     tests_correct += 1
-    #             if tests_correct == Nt:
-    #                 qualt_workers[Nt] += 1
+
+def do_quiz(data, GT, Nt):
+    workers_data = []
+    for w in data:
+        if len(w) >= Nt+5:
+            tests_correct = 0
+            for v_data in w[:Nt]:
+                if v_data[2] == GT[v_data[0]*n_criteria + v_data[1]]:
+                    tests_correct += 1
+            if tests_correct == Nt:
+                workers_data.append(w)
+    return workers_data
 
 
 if __name__ == '__main__':
-    data, GT = get_data()
+    w_data, GT = get_data()
+    w_data = do_quiz(w_data, GT, 3)
     pass
-
