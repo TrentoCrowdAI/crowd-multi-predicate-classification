@@ -14,9 +14,9 @@ def get_best_cr_order(responses, criteria_num, n_papers, papers_page, J):
     return best_cr_order
 
 
-def first_round(responses, criteria_num, n_papers, papers_page, J, cost):
-    classified_papers = classify_papers(n_papers, criteria_num, responses, papers_page, J, cost)
-    best_cr_order = get_best_cr_order(responses, criteria_num, n_papers, papers_page, J)
+def first_round(responses, criteria_num, n_papers, cost):
+    classified_papers = classify_papers(responses, criteria_num, n_papers, cost)
+    best_cr_order = range(criteria_num)
     return classified_papers, best_cr_order
 
 
@@ -30,22 +30,19 @@ def do_round(GT, cr, papers_ids_rest, criteria_num, papers_worker, J,
     return classified_papers
 
 
-def m_run(criteria_num, n_papers, papers_page, J, cost, Nt, acc,
-          criteria_power, criteria_difficulty, GT, fr_p_part):
+def m_run(c_votes, criteria_num, n_papers, J, cost, Nt, GT, fr_p_part):
     # first round responses
     fr_n_papers = int(n_papers*fr_p_part)
-    criteria_count = (Nt + papers_page * criteria_num) * J * fr_n_papers / papers_page
     GT_fround = GT[: fr_n_papers*criteria_num]
-    responses_fround = generate_responses_gt(fr_n_papers, criteria_power, papers_page,
-                                             J, acc, criteria_difficulty, GT_fround)
-    classified_papers_fround, best_cr_order = first_round(responses_fround, criteria_num,
-                                                          fr_n_papers, papers_page, J, cost)
+    responses_fround = c_votes[: fr_n_papers*criteria_num]
+    classified_papers_fround = first_round(responses_fround, criteria_num, fr_n_papers, cost)
     # Do Multi rounds
+    # TO DOOOOOOOOOOOOOOOO
     papers_ids_rest = range(fr_n_papers, n_papers, 1)
     classified_papers = classified_papers_fround + [1 for _ in papers_ids_rest]
 
-    papers_worker = papers_page * criteria_num
-    for cr in best_cr_order:
+
+    for cr in range(criteria_num):
         n_rest = len(papers_ids_rest)
         papers_ids_rest1 = papers_ids_rest[:n_rest - n_rest % papers_worker]
         papers_ids_rest2 = papers_ids_rest[n_rest - n_rest % papers_worker:]

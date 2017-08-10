@@ -71,10 +71,20 @@ def compute_metrics(classified_papers, GT, lr, criteria_num):
     return loss, fp_rate, tp_rate, recall, precision, f_beta
 
 
-def classify_papers(n_papers, criteria_num, responses, papers_page, J, lr):
-    Psi = input_adapter(responses)
-    N = (n_papers / papers_page) * J
-    p = expectation_maximization(N, n_papers * criteria_num, Psi)[1]
+def classify_papers(responses, criteria_num, n_papers, lr):
+    N = -1
+    # transform data
+    workers_ids = {}
+    for i in range(n_papers * criteria_num):
+        for j, c_data in enumerate(responses[i]):
+            if c_data[0] not in workers_ids.keys():
+                N += 1
+                workers_ids[c_data[0]] = N
+                responses[i][j] = (N, c_data[1])
+            else:
+                responses[i][j] = (workers_ids[c_data[0]], c_data[1])
+    N += 1
+    p = expectation_maximization(N, n_papers * criteria_num, responses)[1]
     values_prob = []
     for e in p:
         e_prob = [0., 0.]

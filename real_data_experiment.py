@@ -1,10 +1,10 @@
 import pandas as pd
-# import numpy as np
+from m_run import m_run
+
 
 J = 5
 n_criteria = 3
-n_papers = 100
-# c_votes = [[] for _ in range(n_criteria * n_papers)]
+n_papers = 93
 
 
 def get_data():
@@ -59,5 +59,13 @@ def do_quiz(data, GT, Nt):
 
 if __name__ == '__main__':
     w_data, GT = get_data()
-    w_data = do_quiz(w_data, GT, 3)
-    pass
+    Nt = 1
+    w_data = do_quiz(w_data, GT, Nt)
+    c_votes = [[] for _ in range(n_criteria * n_papers)]
+    for worker_id, worker_votes in enumerate(w_data):
+        for paper_id, c_id, vote in worker_votes:
+            c_votes[paper_id * n_criteria + c_id].append((worker_id, vote))
+
+    lr = 5
+    fr_p_part = 0.25
+    loss_mrun, price_mrun, rec_m_, re_m_, f_beta_m = m_run(c_votes, n_criteria, n_papers, J, lr, Nt, GT, fr_p_part)
