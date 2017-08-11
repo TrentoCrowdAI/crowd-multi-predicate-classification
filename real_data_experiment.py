@@ -30,7 +30,7 @@ def get_data():
                 paper_id = paper_ids_dict[row['paper ID']]
                 if row[c_name] == -1 or row[c_name] == 0:
                     vote = 1
-                else:
+                elif row[c_name] == 1:
                     vote = 0
                 workers_data[w_id].append((paper_id, c_id, vote))
     # parse gold data
@@ -59,7 +59,7 @@ def do_quiz(data, GT, Nt):
 
 if __name__ == '__main__':
     w_data, GT = get_data()
-    Nt = 1
+    Nt = 2
     w_data = do_quiz(w_data, GT, Nt)
     c_votes = [[] for _ in range(n_criteria * n_papers)]
     for worker_id, worker_votes in enumerate(w_data):
@@ -68,4 +68,4 @@ if __name__ == '__main__':
 
     lr = 5
     fr_p_part = 0.25
-    # loss_mrun, price_mrun, rec_m_, re_m_, f_beta_m = m_run(c_votes, n_criteria, n_papers, J, lr, Nt, GT, fr_p_part)
+    loss_mrun, price_mrun, rec_m_, re_m_, f_beta_m = m_run(c_votes, n_criteria, n_papers, lr, GT, fr_p_part)

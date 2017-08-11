@@ -20,47 +20,32 @@ def first_round(responses, criteria_num, n_papers, cost):
     return classified_papers, best_cr_order
 
 
-def do_round(GT, cr, papers_ids_rest, criteria_num, papers_worker, J,
-             cost, acc, criteria_power, criteria_difficulty):
+def do_round(c_votes, cr, papers_ids_rest, criteria_num, cost):
     n_papers = len(papers_ids_rest)
-    GT_round = [GT[p_id*criteria_num+cr] for ind, p_id in enumerate(papers_ids_rest)]
-    responses_round = generate_responses_gt(n_papers, [criteria_power[cr]], papers_worker,
-                                            J, acc, [criteria_difficulty[cr]], GT_round)
-    classified_papers = zip(papers_ids_rest, classify_papers(n_papers, 1, responses_round, papers_worker, J, cost))
+    responses_round = [c_votes[p_id*criteria_num+cr] for p_id in papers_ids_rest]
+    classified_papers = classify_papers(responses_round, 1, n_papers, cost)
+    classified_papers = zip(papers_ids_rest, classified_papers)
     return classified_papers
 
 
-def m_run(c_votes, criteria_num, n_papers, J, cost, Nt, GT, fr_p_part):
+def m_run(c_votes, criteria_num, n_papers, cost, GT, fr_p_part):
     # first round responses
     fr_n_papers = int(n_papers*fr_p_part)
-    GT_fround = GT[: fr_n_papers*criteria_num]
     responses_fround = c_votes[: fr_n_papers*criteria_num]
-    classified_papers_fround = first_round(responses_fround, criteria_num, fr_n_papers, cost)
+    classified_papers_fround, criteria_order = first_round(responses_fround, criteria_num, fr_n_papers, cost)
     # Do Multi rounds
-    # TO DOOOOOOOOOOOOOOOO
     papers_ids_rest = range(fr_n_papers, n_papers, 1)
     classified_papers = classified_papers_fround + [1 for _ in papers_ids_rest]
 
-
-    for cr in range(criteria_num):
-        n_rest = len(papers_ids_rest)
-        papers_ids_rest1 = papers_ids_rest[:n_rest - n_rest % papers_worker]
-        papers_ids_rest2 = papers_ids_rest[n_rest - n_rest % papers_worker:]
-        if papers_ids_rest1:
-            criteria_count += (Nt + papers_worker) * J * len(papers_ids_rest1) / float(papers_worker)
-            classified_papers_cr = do_round(GT, cr, papers_ids_rest1, criteria_num, papers_worker, J,
-                                            cost, acc, criteria_power, criteria_difficulty)
-        # check if n_papers_rest % papers_page != 0 then run an additional round
-        if papers_ids_rest2:
-            criteria_count += (Nt + len(papers_ids_rest2)) * J
-            classified_papers_cr += do_round(GT, cr, papers_ids_rest2, criteria_num, n_rest % papers_worker, J,
-                                             cost, acc, criteria_power, criteria_difficulty)
+    for cr in criteria_order:
+        if papers_ids_rest:
+            classified_papers_cr = do_round(c_votes, cr, papers_ids_rest, criteria_num, cost)
         papers_ids_rest = []
         for p_id, p_cr in classified_papers_cr:
             if p_cr:
                 papers_ids_rest.append(p_id)
             else:
                 classified_papers[p_id] = 0
+    # TO DO
     loss, fp_rate, fn_rate, recall, precision, f_beta = compute_metrics(classified_papers, GT, cost, criteria_num)
-    cost = criteria_count / float(n_papers)
-    return loss, cost, fp_rate, fn_rate, recall, precision, f_beta
+    return loss, fp_rate, fn_rate, recall, precision, f_beta
