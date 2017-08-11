@@ -4,11 +4,11 @@ from m_run import m_run
 
 J = 5
 n_criteria = 3
-n_papers = 93
+n_papers = 100
 
 
 def get_data():
-    data = pd.read_csv('output/amt_data/table_1.csv')
+    data = pd.read_csv('output/amt_data/crowd_data.csv')
     workers_ids_ch = list(pd.unique(data['intervention worker ID'])) \
                      + list(pd.unique(data['use of tech worker ID'])) \
                      + list(pd.unique(data['older adult worker ID']))
@@ -68,4 +68,4 @@ if __name__ == '__main__':
 
     lr = 5
     fr_p_part = 0.25
-    loss_mrun, price_mrun, rec_m_, re_m_, f_beta_m = m_run(c_votes, n_criteria, n_papers, J, lr, Nt, GT, fr_p_part)
+    # loss_mrun, price_mrun, rec_m_, re_m_, f_beta_m = m_run(c_votes, n_criteria, n_papers, J, lr, Nt, GT, fr_p_part)
