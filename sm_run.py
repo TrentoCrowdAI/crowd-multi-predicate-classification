@@ -4,6 +4,7 @@ from helpers.method_2 import classify_papers_baseline, generate_responses, \
 from helpers.utils import compute_metrics, estimate_cr_power_dif
 from fusion_algorithms.algorithms_utils import input_adapter
 from fusion_algorithms.em import expectation_maximization
+import numpy as np
 
 
 def do_first_round(responses, criteria_num, n_papers, lr, values_count):
@@ -37,18 +38,15 @@ def do_first_round(responses, criteria_num, n_papers, lr, values_count):
     return classified_papers, rest_p_ids, power_cr_list, acc_cr_list
 
 
-def do_round(GT, papers_ids, criteria_num, papers_worker, acc, criteria_difficulty, cr_assigned):
-    # generate responses
-    n = len(papers_ids)
-    papers_ids_rest1 = papers_ids[:n - n % papers_worker]
-    papers_ids_rest2 = papers_ids[n - n % papers_worker:]
-    responses_rest1 = generate_responses(GT, papers_ids_rest1, criteria_num,
-                                         papers_worker, acc, criteria_difficulty,
-                                         cr_assigned)
-    responses_rest2 = generate_responses(GT, papers_ids_rest2, criteria_num,
-                                         papers_worker, acc, criteria_difficulty,
-                                         cr_assigned)
-    responses = responses_rest1 + responses_rest2
+def do_round(c_votes, rest_p_ids, criteria_num, cr_assigned, values_count):
+    responses = []
+    for paper_id, cr in zip(rest_p_ids, cr_assigned):
+        if c_votes[paper_id * criteria_num + cr]:
+            vote = c_votes[paper_id * criteria_num + cr].pop()[1]
+        else:
+            p_out = float(values_count[paper_id * criteria_num + cr][1]) / sum(values_count[paper_id * criteria_num + cr])
+            vote = np.random.binomial(1, p_out)
+        responses.append(vote)
     return responses
 
 
@@ -67,23 +65,22 @@ def sm_run(c_votes, criteria_num, n_papers, lr, GT, fr_p_part):
     classified_papers = dict(zip(range(n_papers), [1]*n_papers))
     classified_papers.update(classified_papers_fr)
     rest_p_ids = rest_p_ids + range(fr_n_papers, n_papers)
-    # TO DO
+
     # Do Multi rounds
     break_list = []
     while len(rest_p_ids) != 0:
         # print len(rest_p_ids)
 
-        criteria_count += len(rest_p_ids)
+        # criteria_count += len(rest_p_ids)
         cr_assigned = assign_criteria(rest_p_ids, criteria_num, values_count, power_cr_list, acc_cr_list)
 
-        responses = do_round(GT, rest_p_ids, criteria_num, papers_worker*criteria_num,
-                             acc, criteria_difficulty, cr_assigned)
+        responses = do_round(c_votes, rest_p_ids, criteria_num, cr_assigned, values_count)
         # update values_count
         update_v_count(values_count, criteria_num, cr_assigned, responses, rest_p_ids)
 
         # classify papers
         classified_p_round, rest_p_ids = classify_papers(rest_p_ids, criteria_num, values_count,
-                                                                              p_thrs, acc_cr_list, power_cr_list)
+                                                         p_thrs, acc_cr_list, power_cr_list)
 
         # update criteria power
         power_cr_list = update_cr_power(n_papers, criteria_num, acc_cr_list, power_cr_list, values_count)
@@ -96,5 +93,4 @@ def sm_run(c_votes, criteria_num, n_papers, lr, GT, fr_p_part):
         classified_papers.update(classified_p_round)
     classified_papers = [classified_papers[p_id] for p_id in sorted(classified_papers.keys())]
     loss, fp_rate, fn_rate, recall, precision, f_beta = compute_metrics(classified_papers, GT, lr, criteria_num)
-    price_per_paper = float(criteria_count) / n_papers
-    return loss, price_per_paper, fp_rate, fn_rate, recall, precision, f_beta
+    return loss, fp_rate, fn_rate, recall, precision, f_beta

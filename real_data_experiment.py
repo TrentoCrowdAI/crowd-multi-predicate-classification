@@ -69,20 +69,22 @@ if __name__ == '__main__':
             for paper_id, c_id, vote in worker_votes:
                 c_votes[paper_id * n_criteria + c_id].append((worker_id, vote))
 
-        # loss, fp_rate, fn_rate, recall, precision, f_beta = baseline(c_votes, n_criteria, n_papers, lr, GT)
-        # print 'Nt: {}'.format(Nt)
-        # print 'Baseline'
-        # print "loss, fp_rate, fn_rate, recall, precision, f_beta"
-        # print loss, fp_rate, fn_rate, recall, precision, f_beta
+        loss, fp_rate, fn_rate, recall, precision, f_beta = baseline(c_votes, n_criteria, n_papers, lr, GT)
+        print 'Nt: {}'.format(Nt)
+        print 'Baseline'
+        print "loss, fp_rate, fn_rate, recall, precision, f_beta"
+        print loss, fp_rate, fn_rate, recall, precision, f_beta
         print '----------'
 
         fr_p_part = 0.25
-        # loss, fp_rate, fn_rate, recall, precision, f_beta = m_run(c_votes, n_criteria, n_papers, lr, GT, fr_p_part)
-        # print 'M-runs'
-        # print "loss, fp_rate, fn_rate, recall, precision, f_beta"
-        # print loss, fp_rate, fn_rate, recall, precision, f_beta
-        # print '----------'
+        loss, fp_rate, fn_rate, recall, precision, f_beta = m_run(c_votes, n_criteria, n_papers, lr, GT, fr_p_part)
+        print 'M-runs'
+        print "loss, fp_rate, fn_rate, recall, precision, f_beta"
+        print loss, fp_rate, fn_rate, recall, precision, f_beta
+        print '----------'
 
-
-        loss_smrun, cost_smrun, fp_rate_sm, tp_rate_sm, \
-        rec_sm_, pre_sm_, f_beta_sm = sm_run(c_votes, n_criteria, n_papers, lr, GT, fr_p_part)
+        loss, fp_rate, fn_rate, recall, precision, f_beta = sm_run(c_votes, n_criteria, n_papers, lr, GT, fr_p_part)
+        print 'SM-runs'
+        print "loss, fp_rate, fn_rate, recall, precision, f_beta"
+        print loss, fp_rate, fn_rate, recall, precision, f_beta
+        print '----------'
