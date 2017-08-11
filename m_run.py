@@ -46,6 +46,5 @@ def m_run(c_votes, criteria_num, n_papers, cost, GT, fr_p_part):
                 papers_ids_rest.append(p_id)
             else:
                 classified_papers[p_id] = 0
-    # TO DO
     loss, fp_rate, fn_rate, recall, precision, f_beta = compute_metrics(classified_papers, GT, cost, criteria_num)
     return loss, fp_rate, fn_rate, recall, precision, f_beta

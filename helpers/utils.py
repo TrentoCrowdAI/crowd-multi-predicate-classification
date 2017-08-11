@@ -97,7 +97,9 @@ def classify_papers(responses, criteria_num, n_papers, lr):
     for paper_id in range(n_papers):
         p_inclusion = 1.
         for e_paper_id in range(criteria_num):
-            p_inclusion *= values_prob[paper_id*criteria_num+e_paper_id][0]
+            # TO DO: now if we do not have votes we go on
+            if sum(values_prob[paper_id*criteria_num+e_paper_id]):
+                p_inclusion *= values_prob[paper_id*criteria_num+e_paper_id][0]
         p_exclusion = 1 - p_inclusion
         classified_papers.append(0) if p_exclusion > exclusion_trsh else classified_papers.append(1)
     return classified_papers
