@@ -6,15 +6,20 @@ from fusion_algorithms.algorithms_utils import input_adapter
 from fusion_algorithms.em import expectation_maximization
 
 
-def do_first_round(n_papers, criteria_num, papers_worker, J, lr, GT,
-                   criteria_power, acc, criteria_difficulty, values_count):
-    # generate responses
-    responses = generate_responses_gt(n_papers, criteria_power, papers_worker,
-                                      J, acc, criteria_difficulty, GT)
-    # aggregate responses
-    Psi = input_adapter(responses)
-    N = (n_papers / papers_worker) * J
-    p = expectation_maximization(N, n_papers * criteria_num, Psi)[1]
+def do_first_round(responses, criteria_num, n_papers, lr, values_count):
+    N = -1
+    # transform data
+    workers_ids = {}
+    for i in range(n_papers * criteria_num):
+        for j, c_data in enumerate(responses[i]):
+            if c_data[0] not in workers_ids.keys():
+                N += 1
+                workers_ids[c_data[0]] = N
+                responses[i][j] = (N, c_data[1])
+            else:
+                responses[i][j] = (workers_ids[c_data[0]], c_data[1])
+    N += 1
+    p = expectation_maximization(N, n_papers * criteria_num, responses)[1]
     values_prob = []
     for e in p:
         e_prob = [0., 0.]
@@ -22,13 +27,13 @@ def do_first_round(n_papers, criteria_num, papers_worker, J, lr, GT,
             e_prob[e_id] = e_p
         values_prob.append(e_prob)
 
-    power_cr_list, acc_cr_list = estimate_cr_power_dif(responses, criteria_num, n_papers, papers_worker, J)
+    power_cr_list, acc_cr_list = estimate_cr_power_dif(responses, criteria_num, n_papers)
     classified_papers, rest_p_ids = classify_papers_baseline(range(n_papers), criteria_num, values_prob, lr)
     # count value counts
     for key in range(n_papers*criteria_num):
         cr_resp = responses[key]
-        for v in cr_resp.values():
-            values_count[key][v[0]] += 1
+        for _, v in cr_resp:
+            values_count[key][v] += 1
     return classified_papers, rest_p_ids, power_cr_list, acc_cr_list
 
 
@@ -47,8 +52,7 @@ def do_round(GT, papers_ids, criteria_num, papers_worker, acc, criteria_difficul
     return responses
 
 
-def sm_run(criteria_num, n_papers, papers_worker, J, lr, Nt, acc,
-           criteria_power, criteria_difficulty, GT, fr_p_part):
+def sm_run(c_votes, criteria_num, n_papers, lr, GT, fr_p_part):
     # initialization
     p_thrs = 0.99
     values_count = [[0, 0] for _ in range(n_papers*criteria_num)]
@@ -56,14 +60,14 @@ def sm_run(criteria_num, n_papers, papers_worker, J, lr, Nt, acc,
     # Baseline round
     # in% papers
     fr_n_papers = int(n_papers * fr_p_part)
-    criteria_count = (Nt + papers_worker * criteria_num) * J * fr_n_papers / papers_worker
-    first_round_res = do_first_round(fr_n_papers, criteria_num, papers_worker, J, lr, GT,
-                                     criteria_power, acc, criteria_difficulty, values_count)
+    responses_fround = c_votes[: fr_n_papers * criteria_num]
+    first_round_res = do_first_round(responses_fround, criteria_num, fr_n_papers, lr, values_count)
+
     classified_papers_fr, rest_p_ids, power_cr_list, acc_cr_list = first_round_res
     classified_papers = dict(zip(range(n_papers), [1]*n_papers))
     classified_papers.update(classified_papers_fr)
     rest_p_ids = rest_p_ids + range(fr_n_papers, n_papers)
-
+    # TO DO
     # Do Multi rounds
     break_list = []
     while len(rest_p_ids) != 0:

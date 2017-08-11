@@ -105,13 +105,23 @@ def classify_papers(responses, criteria_num, n_papers, lr):
     return classified_papers
 
 
-def estimate_cr_power_dif(responses, criteria_num, n_papers, papers_page, J):
-    Psi = input_adapter(responses)
-    N = (n_papers / papers_page) * J
+def estimate_cr_power_dif(responses, criteria_num, n_papers):
     cr_power = []
     cr_accuracy = []
     for cr in range(criteria_num):
-        cr_responses = Psi[cr::criteria_num]
+        cr_responses = responses[cr::criteria_num]
+        N = -1
+        # transform data
+        workers_ids = {}
+        for i in range(n_papers):
+            for j, c_data in enumerate(cr_responses[i]):
+                if c_data[0] not in workers_ids.keys():
+                    N += 1
+                    workers_ids[c_data[0]] = N
+                    cr_responses[i][j] = (N, c_data[1])
+                else:
+                    cr_responses[i][j] = (workers_ids[c_data[0]], c_data[1])
+        N += 1
         acc_list, p_cr = expectation_maximization(N, n_papers, cr_responses)
         acc_cr = np.mean(acc_list)
         pow_cr = 0.
@@ -123,7 +133,6 @@ def estimate_cr_power_dif(responses, criteria_num, n_papers, papers_page, J):
         pow_cr /= float(n_papers)
         cr_power.append(pow_cr)
         cr_accuracy.append(acc_cr)
-
     return cr_power, cr_accuracy
 
 
