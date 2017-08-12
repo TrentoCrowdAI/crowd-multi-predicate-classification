@@ -1,4 +1,7 @@
 import pandas as pd
+import numpy as np
+import scipy as sp
+import scipy.stats
 # import random
 import math
 from m_run import m_run
@@ -64,32 +67,58 @@ def do_quiz(data, GT, Nt):
     return workers_data
 
 
+def mean_confidence_interval(data, confidence=0.95):
+    a = 1.0*np.array(data)
+    n = len(a)
+    m, se = np.mean(a), scipy.stats.sem(a)
+    h = se * sp.stats.t._ppf((1+confidence)/2., n-1)
+    return m, m-h, m+h
+
+
+def get_accuracy(c_votes, GT):
+    criteria_accuracy = []
+    for c in range(n_criteria):
+        votes = []
+        c_responses = c_votes[c::n_criteria]
+        c_gt = GT[c::n_criteria]
+        for p_c_votes, gt in zip(c_responses, c_gt):
+            for vote in p_c_votes:
+                if vote[1] == gt:
+                    votes.append(1)
+                else:
+                    votes.append(0)
+        criteria_accuracy.append(mean_confidence_interval(votes, confidence=0.95))
+    return criteria_accuracy
+
+
 if __name__ == '__main__':
     w_data, GT = get_data()
     lr = 5
-    for Nt in [1, 2, 3]:
+    for Nt in [1, 2, 3, 4, 5]:
         w_data = do_quiz(w_data, GT, Nt)
         c_votes = [[] for _ in range(n_criteria * n_papers)]
         for worker_id, worker_votes in enumerate(w_data):
             for paper_id, c_id, vote in worker_votes:
                 c_votes[paper_id * n_criteria + c_id].append((worker_id, vote))
+        criteria_accuracy = get_accuracy(c_votes, GT)
+        print 'Nt: {}, real criteria accuracy: {}'.format(Nt, criteria_accuracy)
 
-        loss, fp_rate, fn_rate, recall, precision, f_beta, price = baseline(c_votes, n_criteria, n_papers, lr, GT)
-        print 'Nt: {}'.format(Nt)
-        print 'Baseline'
-        print "price, loss, fp_rate, fn_rate, recall, precision, f_beta"
-        print price, loss, fp_rate, fn_rate, recall, precision, f_beta
-        print '----------'
-
-        fr_p_part = 0.25
-        loss, fp_rate, fn_rate, recall, precision, f_beta, price = m_run(c_votes, n_criteria, n_papers, lr, GT, fr_p_part)
-        print 'M-runs'
-        print "price, loss, fp_rate, fn_rate, recall, precision, f_beta"
-        print price, loss, fp_rate, fn_rate, recall, precision, f_beta
-        print '----------'
-
-        loss, fp_rate, fn_rate, recall, precision, f_beta, price = sm_run(c_votes, n_criteria, n_papers, lr, GT, fr_p_part)
-        print 'SM-runs'
-        print "price, loss, fp_rate, fn_rate, recall, precision, f_beta"
-        print price, loss, fp_rate, fn_rate, recall, precision, f_beta
-        print '----------'
+        # loss, fp_rate, fn_rate, recall, precision, f_beta, price = baseline(c_votes, n_criteria, n_papers, lr, GT)
+        # print 'Nt: {}'.format(Nt)
+        # print 'Baseline'
+        # print "price, loss, fp_rate, fn_rate, recall, precision, f_beta"
+        # print price, loss, fp_rate, fn_rate, recall, precision, f_beta
+        # print '----------'
+        #
+        # fr_p_part = 0.25
+        # loss, fp_rate, fn_rate, recall, precision, f_beta, price = m_run(c_votes, n_criteria, n_papers, lr, GT, fr_p_part)
+        # print 'M-runs'
+        # print "price, loss, fp_rate, fn_rate, recall, precision, f_beta"
+        # print price, loss, fp_rate, fn_rate, recall, precision, f_beta
+        # print '----------'
+        #
+        # loss, fp_rate, fn_rate, recall, precision, f_beta, price = sm_run(c_votes, n_criteria, n_papers, lr, GT, fr_p_part)
+        # print 'SM-runs'
+        # print "price, loss, fp_rate, fn_rate, recall, precision, f_beta"
+        # print price, loss, fp_rate, fn_rate, recall, precision, f_beta
+        # print '----------'
