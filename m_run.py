@@ -16,7 +16,9 @@ def get_best_cr_order(responses, criteria_num, n_papers, papers_page, J):
 
 def first_round(responses, criteria_num, n_papers, cost):
     classified_papers = classify_papers(responses, criteria_num, n_papers, cost)
-    best_cr_order = range(criteria_num)[::-1]
+    # best_cr_order = range(criteria_num)[::-1]
+    best_cr_order = [1, 2, 0]
+    # best_cr_order = [1, 0]
     return classified_papers, best_cr_order
 
 

@@ -125,8 +125,10 @@ def j_correction(c_votes, criteria_accuracy, GT, J):
 if __name__ == '__main__':
     lr = 5
     J = 5
-    fr_p_part = 0.25
-    for Nt in [1, 2, 4, 5]:
+    fr_p_part = .25
+    data = []
+    for Nt in [1, 2, 3, 4, 5]:
+    # for Nt in [5]:
         print 'Nt: {}, J: {}'.format(Nt, J)
         w_data, GT = get_data()
         w_data = do_quiz(w_data, GT, Nt)
@@ -135,12 +137,13 @@ if __name__ == '__main__':
             for paper_id, c_id, vote in worker_votes:
                 c_votes[paper_id * n_criteria + c_id].append((worker_id, vote))
         criteria_accuracy = get_accuracy(c_votes, GT)
+        # print criteria_accuracy[0][0], criteria_accuracy[1][0], criteria_accuracy[0][0]
 
         loss_b, rec_b, pre_b, f_b, price_b = [], [], [], [], []
         loss_m, rec_m, pre_m, f_m, price_m = [], [], [], [], []
         loss_sm, rec_sm, pre_sm, f_sm, price_sm, syn_prop_sm = [], [], [], [], [], []
 
-        for _ in range(10):
+        for _ in range(5):
             cj_votes, counter = j_correction(c_votes, criteria_accuracy, GT, J)
             syn_votes_prop = float(counter) / (len(c_votes) * J)
             # Baseline
@@ -169,14 +172,23 @@ if __name__ == '__main__':
             price_sm.append(price_sm_)
             syn_prop_sm.append(syn_prop_sm_)
 
-        print 'BASELINE syn_votes_prop: {}, loss: {:1.2f}, price: {:1.2f}, recall: {:1.2f}, precision: {:1.2f}, f_b: {}'. \
-            format(syn_votes_prop, np.mean(loss_b), np.mean(price_b), np.mean(rec_b), np.mean(pre_b), np.mean(f_b))
+        print 'BASELINE syn_votes_prop: {}, loss: {:1.2f}, price: {:1.2f}, recall: {:1.2f}, precision: {:1.2f}, f_b: {}, f_b_std: {}'. \
+            format(syn_votes_prop, np.mean(loss_b), np.mean(price_b), np.mean(rec_b), np.mean(pre_b), np.mean(f_b), np.std(f_b))
 
-        print 'M-RUN    syn_votes_prop: {}, loss: {:1.2f}, price: {:1.2f}, recall: {:1.2f}, precision: {:1.2f}, f_b: {}'. \
-            format(syn_votes_prop, np.mean(loss_m), np.mean(price_m), np.mean(rec_m), np.mean(pre_m), np.mean(f_m))
+        print 'M-RUN    syn_votes_prop: {}, loss: {:1.2f}, price: {:1.2f}, recall: {:1.2f}, precision: {:1.2f}, f_b: {}, f_b_std: {}'. \
+            format(syn_votes_prop, np.mean(loss_m), np.mean(price_m), np.mean(rec_m), np.mean(pre_m), np.mean(f_m), np.std(f_m))
 
-        print 'SM-RUN    syn_votes_prop: {}, loss: {:1.2f}, price: {:1.2f}, recall: {:1.2f}, precision: {:1.2f}, f_b: {}'. \
-            format(np.mean(syn_prop_sm), np.mean(loss_sm), np.mean(price_sm), np.mean(rec_sm), np.mean(pre_sm), np.mean(f_sm))
+        print 'SM-RUN    syn_votes_prop: {}, loss: {:1.2f}, price: {:1.2f}, recall: {:1.2f}, precision: {:1.2f}, f_b: {}, f_b_std: {}'. \
+            format(np.mean(syn_prop_sm), np.mean(loss_sm), np.mean(price_sm), np.mean(rec_sm), np.mean(pre_sm), np.mean(f_sm), np.std(f_sm))
 
         print '---------------------'
 
+        data.append([Nt, J, lr, np.mean(loss_b), np.std(loss_b), syn_votes_prop, np.mean(price_b), np.mean(rec_b),
+                     np.mean(pre_b), np.mean(f_b), np.std(f_b), 'Baseline'])
+        data.append([Nt, J, lr, np.mean(loss_m), np.std(loss_m), syn_votes_prop, np.mean(price_m), np.mean(rec_m),
+                     np.mean(pre_m), np.mean(f_m), np.std(f_m), 'M-runs'])
+        data.append([[Nt, J, lr, np.mean(loss_sm), np.std(loss_sm), np.mean(syn_prop_sm), np.mean(price_sm), np.mean(rec_sm),
+                     np.mean(pre_sm), np.mean(f_sm), np.std(f_sm), 'SM-runs']])
+    pd.DataFrame(data, columns=['Nt', 'J', 'lr', 'loss_mean', 'loss_std', 'syn_votes_prop',
+                                'price_mean', 'recall', 'precision', 'f_beta', 'f_beta_std', 'alg']). \
+        to_csv('output/data/experimental_results.csv', index=False)

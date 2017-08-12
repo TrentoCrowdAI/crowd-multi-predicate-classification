@@ -71,6 +71,7 @@ def sm_run(c_votes, criteria_num, n_papers, lr, GT, fr_p_part, criteria_accuracy
                 syn_v_counter += 1
     first_round_res = do_first_round(responses_fround, criteria_num, fr_n_papers, lr, values_count)
     classified_papers_fr, rest_p_ids, power_cr_list, acc_cr_list = first_round_res
+    acc_cr_list = [acc * 0.9 for acc in acc_cr_list]
     classified_papers = dict(zip(range(n_papers), [1]*n_papers))
     classified_papers.update(classified_papers_fr)
     rest_p_ids = rest_p_ids + range(fr_n_papers, n_papers)
@@ -97,7 +98,7 @@ def sm_run(c_votes, criteria_num, n_papers, lr, GT, fr_p_part, criteria_accuracy
         # print len(rest_p_ids)
         n_rest = len(rest_p_ids)
         break_list.append(n_rest)
-        if break_list.count(n_rest) >= 5:
+        if break_list.count(n_rest) >= 10:
             break
         classified_papers.update(classified_p_round)
     classified_papers = [classified_papers[p_id] for p_id in sorted(classified_papers.keys())]
