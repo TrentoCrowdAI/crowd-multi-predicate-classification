@@ -20,6 +20,8 @@ def get_data():
     workers_ids_ch = set(list(pd.unique(data['intervention worker ID'])) \
                                    + list(pd.unique(data['use of tech worker ID'])) \
                                    + list(pd.unique(data['older adult worker ID'])))
+    # workers_ids_ch = set(list(pd.unique(data['use of tech worker ID'])) \
+    #                      + list(pd.unique(data['older adult worker ID'])))
     workers_ids_ch = [id_ch for id_ch in workers_ids_ch if type(id_ch) != float]
     workers_data = [[] for _ in workers_ids_ch]
 
@@ -29,6 +31,10 @@ def get_data():
                 1: 'use of tech vote',
                 2: 'older adult vote'}
     column_workers_ids = ['intervention worker ID', 'use of tech worker ID', 'older adult worker ID']
+    # criteria = {
+    #             0: 'use of tech vote',
+    #             1: 'older adult vote'}
+    # column_workers_ids = ['use of tech worker ID', 'older adult worker ID']
     for w_id, w_ch in enumerate(workers_ids_ch):
         for c_id, c_name in criteria.iteritems():
             column_workers = column_workers_ids[c_id]
@@ -47,6 +53,7 @@ def get_data():
     for paper_id_raw in paper_ids_dict.keys():
         paper_id = paper_ids_dict[paper_id_raw]
         for cr_id, cr_gold_colmn in zip(range(n_criteria), ['GOLD INTERVENTION', 'GOLD USE OF TECH', 'GOLD OLD']):
+        # for cr_id, cr_gold_colmn in zip(range(n_criteria), ['GOLD USE OF TECH', 'GOLD OLD']):
             gold_value_raw = data[data['paper ID'] == paper_id_raw][cr_gold_colmn].values[0]
             gold_value = 0 if gold_value_raw == 1 else 1
             GT[paper_id * n_criteria + cr_id] = gold_value
@@ -116,12 +123,12 @@ def j_correction(c_votes, criteria_accuracy, GT, J):
 
 
 if __name__ == '__main__':
-    w_data, GT = get_data()
     lr = 5
     J = 5
     fr_p_part = 0.25
-    for Nt in [1, 2, 3, 4]:
+    for Nt in [1, 2, 4, 5]:
         print 'Nt: {}, J: {}'.format(Nt, J)
+        w_data, GT = get_data()
         w_data = do_quiz(w_data, GT, Nt)
         c_votes = [[] for _ in range(n_criteria * n_papers)]
         for worker_id, worker_votes in enumerate(w_data):
