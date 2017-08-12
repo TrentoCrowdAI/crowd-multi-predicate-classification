@@ -11,9 +11,9 @@ n_papers = 100
 
 def get_data():
     data = pd.read_csv('output/amt_data/crowd_data.csv')
-    workers_ids_ch = list(pd.unique(data['intervention worker ID'])) \
-                     + list(pd.unique(data['use of tech worker ID'])) \
-                     + list(pd.unique(data['older adult worker ID']))
+    workers_ids_ch = list(set(list(pd.unique(data['intervention worker ID'])) \
+                                   + list(pd.unique(data['use of tech worker ID'])) \
+                                   + list(pd.unique(data['older adult worker ID']))[:-1]))
     workers_data = [[] for _ in workers_ids_ch]
 
     paper_ids_dict = dict(zip(set(data['paper ID']), range(n_papers)))
