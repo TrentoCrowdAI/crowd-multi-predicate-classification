@@ -71,6 +71,7 @@ def sm_run(c_votes, criteria_num, n_papers, lr, GT, fr_p_part, criteria_accuracy
                 syn_v_counter += 1
     first_round_res = do_first_round(responses_fround, criteria_num, fr_n_papers, lr, values_count)
     classified_papers_fr, rest_p_ids, power_cr_list, acc_cr_list = first_round_res
+    # acc_cr_list = [criteria_accuracy[0][0], criteria_accuracy[1][0]]
     acc_cr_list = [acc * 0.9 for acc in acc_cr_list]
     classified_papers = dict(zip(range(n_papers), [1]*n_papers))
     classified_papers.update(classified_papers_fr)
