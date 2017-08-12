@@ -4,6 +4,8 @@ from helpers.utils import compute_metrics, estimate_cr_power_dif
 from fusion_algorithms.em import expectation_maximization
 import numpy as np
 
+counter = 0
+
 
 def do_first_round(responses, criteria_num, n_papers, lr, values_count):
     N = -1
@@ -37,6 +39,7 @@ def do_first_round(responses, criteria_num, n_papers, lr, values_count):
 
 
 def do_round(c_votes, rest_p_ids, criteria_num, cr_assigned, GT, criteria_accuracy):
+    global counter
     responses = []
     for paper_id, cr in zip(rest_p_ids, cr_assigned):
         if c_votes[paper_id * criteria_num + cr]:
@@ -47,8 +50,7 @@ def do_round(c_votes, rest_p_ids, criteria_num, cr_assigned, GT, criteria_accura
             sigma = (criteria_accuracy[cr][2] - criteria_accuracy[cr][0]) / 2
             acc = np.random.normal(mean, sigma, 1)[0]
             vote = np.random.binomial(gt, acc, 1)[0]
-            # p_out = float(values_count[paper_id * criteria_num + cr][1]) / sum(values_count[paper_id * criteria_num + cr])
-            # vote = np.random.binomial(1, p_out)
+            counter += 1
         responses.append(vote)
     return responses
 
@@ -100,4 +102,5 @@ def sm_run(c_votes, criteria_num, n_papers, lr, GT, fr_p_part, criteria_accuracy
     classified_papers = [classified_papers[p_id] for p_id in sorted(classified_papers.keys())]
     loss, fp_rate, fn_rate, recall, precision, f_beta = compute_metrics(classified_papers, GT, lr, criteria_num)
     price_per_paper = float(votes_count) / n_papers
-    return loss, fp_rate, fn_rate, recall, precision, f_beta, price_per_paper
+    syn_votes_prop = counter / float(votes_count)
+    return loss, fp_rate, fn_rate, recall, precision, f_beta, price_per_paper, syn_votes_prop
