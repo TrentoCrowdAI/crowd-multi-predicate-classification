@@ -57,4 +57,4 @@ def m_run(c_votes, criteria_num, n_papers, cost, GT, fr_p_part):
                 classified_papers[p_id] = 0
     loss, fp_rate, fn_rate, recall, precision, f_beta = compute_metrics(classified_papers, GT, cost, criteria_num)
     price_per_paper = float(votes_count) / n_papers
-    return loss, fp_rate, fn_rate, recall, precision, f_beta, price_per_paper
+    return loss, recall, precision, f_beta, price_per_paper

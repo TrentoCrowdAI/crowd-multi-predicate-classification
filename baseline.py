@@ -9,4 +9,4 @@ def baseline(responses, criteria_num, n_papers, cost, GT):
     for l in responses:
         votes_count += len(l)
     price_per_paper = float(votes_count) / n_papers
-    return loss, fp_rate, fn_rate, recall, precision, f_beta, price_per_paper
+    return loss, recall, precision, f_beta, price_per_paper

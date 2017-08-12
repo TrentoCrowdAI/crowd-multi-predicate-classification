@@ -103,4 +103,4 @@ def sm_run(c_votes, criteria_num, n_papers, lr, GT, fr_p_part, criteria_accuracy
     loss, fp_rate, fn_rate, recall, precision, f_beta = compute_metrics(classified_papers, GT, lr, criteria_num)
     price_per_paper = float(votes_count) / n_papers
     syn_votes_prop = counter / float(votes_count)
-    return loss, fp_rate, fn_rate, recall, precision, f_beta, price_per_paper, syn_votes_prop
+    return loss, recall, precision, f_beta, price_per_paper, syn_votes_prop
