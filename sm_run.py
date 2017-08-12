@@ -36,19 +36,24 @@ def do_first_round(responses, criteria_num, n_papers, lr, values_count):
     return classified_papers, rest_p_ids, power_cr_list, acc_cr_list
 
 
-def do_round(c_votes, rest_p_ids, criteria_num, cr_assigned, values_count):
+def do_round(c_votes, rest_p_ids, criteria_num, cr_assigned, GT, criteria_accuracy):
     responses = []
     for paper_id, cr in zip(rest_p_ids, cr_assigned):
         if c_votes[paper_id * criteria_num + cr]:
-            vote = c_votes[paper_id * criteria_num + cr].pop()[1]
+            vote = c_votes[paper_id * criteria_num + cr].pop(0)[1]
         else:
-            p_out = float(values_count[paper_id * criteria_num + cr][1]) / sum(values_count[paper_id * criteria_num + cr])
-            vote = np.random.binomial(1, p_out)
+            gt = GT[paper_id * criteria_num + cr]
+            mean = criteria_accuracy[cr][0]
+            sigma = (criteria_accuracy[cr][2] - criteria_accuracy[cr][0]) / 2
+            acc = np.random.normal(mean, sigma, 1)[0]
+            vote = np.random.binomial(gt, acc, 1)[0]
+            # p_out = float(values_count[paper_id * criteria_num + cr][1]) / sum(values_count[paper_id * criteria_num + cr])
+            # vote = np.random.binomial(1, p_out)
         responses.append(vote)
     return responses
 
 
-def sm_run(c_votes, criteria_num, n_papers, lr, GT, fr_p_part):
+def sm_run(c_votes, criteria_num, n_papers, lr, GT, fr_p_part, criteria_accuracy):
     # initialization
     p_thrs = 0.99
     values_count = [[0, 0] for _ in range(n_papers*criteria_num)]
@@ -75,7 +80,7 @@ def sm_run(c_votes, criteria_num, n_papers, lr, GT, fr_p_part):
         # criteria_count += len(rest_p_ids)
         cr_assigned = assign_criteria(rest_p_ids, criteria_num, values_count, power_cr_list, acc_cr_list)
 
-        responses = do_round(c_votes, rest_p_ids, criteria_num, cr_assigned, values_count)
+        responses = do_round(c_votes, rest_p_ids, criteria_num, cr_assigned, GT, criteria_accuracy)
         # update values_count
         update_v_count(values_count, criteria_num, cr_assigned, responses, rest_p_ids)
 
