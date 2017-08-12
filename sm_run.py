@@ -4,8 +4,6 @@ from helpers.utils import compute_metrics, estimate_cr_power_dif
 from fusion_algorithms.em import expectation_maximization
 import numpy as np
 
-counter = 0
-
 
 def do_first_round(responses, criteria_num, n_papers, lr, values_count):
     N = -1
@@ -39,7 +37,7 @@ def do_first_round(responses, criteria_num, n_papers, lr, values_count):
 
 
 def do_round(c_votes, rest_p_ids, criteria_num, cr_assigned, GT, criteria_accuracy):
-    global counter
+    counter = 0
     responses = []
     for paper_id, cr in zip(rest_p_ids, cr_assigned):
         if c_votes[paper_id * criteria_num + cr]:
@@ -52,7 +50,7 @@ def do_round(c_votes, rest_p_ids, criteria_num, cr_assigned, GT, criteria_accura
             vote = np.random.binomial(gt, acc, 1)[0]
             counter += 1
         responses.append(vote)
-    return responses
+    return responses, counter
 
 
 def sm_run(c_votes, criteria_num, n_papers, lr, GT, fr_p_part, criteria_accuracy):
@@ -63,17 +61,19 @@ def sm_run(c_votes, criteria_num, n_papers, lr, GT, fr_p_part, criteria_accuracy
     # in% papers
     fr_n_papers = int(n_papers * fr_p_part)
     responses_fround = c_votes[: fr_n_papers * criteria_num]
+    # Count votes 1st round
+    votes_count = 0
+    syn_v_counter = 0
+    for l in responses_fround:
+        votes_count += len(l)
+        for i in l:
+            if i[0] == 3333:
+                syn_v_counter += 1
     first_round_res = do_first_round(responses_fround, criteria_num, fr_n_papers, lr, values_count)
-
     classified_papers_fr, rest_p_ids, power_cr_list, acc_cr_list = first_round_res
     classified_papers = dict(zip(range(n_papers), [1]*n_papers))
     classified_papers.update(classified_papers_fr)
     rest_p_ids = rest_p_ids + range(fr_n_papers, n_papers)
-    # Count votes 1st round
-    votes_count = 0
-    for l in responses_fround:
-        votes_count += len(l)
-
     # Do Multi rounds
     break_list = []
     while len(rest_p_ids) != 0:
@@ -82,7 +82,8 @@ def sm_run(c_votes, criteria_num, n_papers, lr, GT, fr_p_part, criteria_accuracy
         # criteria_count += len(rest_p_ids)
         cr_assigned = assign_criteria(rest_p_ids, criteria_num, values_count, power_cr_list, acc_cr_list)
 
-        responses = do_round(c_votes, rest_p_ids, criteria_num, cr_assigned, GT, criteria_accuracy)
+        responses, round_syn_votes = do_round(c_votes, rest_p_ids, criteria_num, cr_assigned, GT, criteria_accuracy)
+        syn_v_counter += round_syn_votes
         # update values_count
         update_v_count(values_count, criteria_num, cr_assigned, responses, rest_p_ids)
 
@@ -102,5 +103,5 @@ def sm_run(c_votes, criteria_num, n_papers, lr, GT, fr_p_part, criteria_accuracy
     classified_papers = [classified_papers[p_id] for p_id in sorted(classified_papers.keys())]
     loss, fp_rate, fn_rate, recall, precision, f_beta = compute_metrics(classified_papers, GT, lr, criteria_num)
     price_per_paper = float(votes_count) / n_papers
-    syn_votes_prop = counter / float(votes_count)
+    syn_votes_prop = syn_v_counter / float(votes_count)
     return loss, recall, precision, f_beta, price_per_paper, syn_votes_prop
