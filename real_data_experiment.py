@@ -15,7 +15,7 @@ n_papers = 100
 
 
 def get_data():
-    data = pd.read_csv('output/amt_data/crowd_data.csv')
+    data = pd.read_csv('output/amt_data/crowd_data-2.csv')
     workers_ids_ch = set(list(pd.unique(data['intervention worker ID'])) \
                                    + list(pd.unique(data['use of tech worker ID'])) \
                                    + list(pd.unique(data['older adult worker ID'])))
