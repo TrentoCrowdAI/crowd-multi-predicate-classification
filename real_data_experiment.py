@@ -69,11 +69,11 @@ if __name__ == '__main__':
             for paper_id, c_id, vote in worker_votes:
                 c_votes[paper_id * n_criteria + c_id].append((worker_id, vote))
 
-        loss, fp_rate, fn_rate, recall, precision, f_beta = baseline(c_votes, n_criteria, n_papers, lr, GT)
+        loss, fp_rate, fn_rate, recall, precision, f_beta, price = baseline(c_votes, n_criteria, n_papers, lr, GT)
         print 'Nt: {}'.format(Nt)
         print 'Baseline'
-        print "loss, fp_rate, fn_rate, recall, precision, f_beta"
-        print loss, fp_rate, fn_rate, recall, precision, f_beta
+        print "price, loss, fp_rate, fn_rate, recall, precision, f_beta"
+        print price, loss, fp_rate, fn_rate, recall, precision, f_beta
         print '----------'
 
         fr_p_part = 0.25
