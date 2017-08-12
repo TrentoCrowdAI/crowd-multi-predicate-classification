@@ -1,4 +1,6 @@
 import pandas as pd
+# import random
+import math
 from m_run import m_run
 from baseline import baseline
 from sm_run import sm_run
@@ -11,9 +13,10 @@ n_papers = 100
 
 def get_data():
     data = pd.read_csv('output/amt_data/crowd_data.csv')
-    workers_ids_ch = list(set(list(pd.unique(data['intervention worker ID'])) \
+    workers_ids_ch = set(list(pd.unique(data['intervention worker ID'])) \
                                    + list(pd.unique(data['use of tech worker ID'])) \
-                                   + list(pd.unique(data['older adult worker ID']))[:-1]))
+                                   + list(pd.unique(data['older adult worker ID'])))
+    workers_ids_ch = [id_ch for id_ch in workers_ids_ch if type(id_ch) != float]
     workers_data = [[] for _ in workers_ids_ch]
 
     paper_ids_dict = dict(zip(set(data['paper ID']), range(n_papers)))
@@ -51,6 +54,8 @@ def do_quiz(data, GT, Nt):
     for w in data:
         if len(w) >= Nt+5:
             tests_correct = 0
+            # uiz_data = random.sample(w, Nt)
+            # for v_data in quiz_data:
             for v_data in w[:Nt]:
                 if v_data[2] == GT[v_data[0]*n_criteria + v_data[1]]:
                     tests_correct += 1
