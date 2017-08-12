@@ -77,10 +77,10 @@ if __name__ == '__main__':
         print '----------'
 
         fr_p_part = 0.25
-        loss, fp_rate, fn_rate, recall, precision, f_beta = m_run(c_votes, n_criteria, n_papers, lr, GT, fr_p_part)
+        loss, fp_rate, fn_rate, recall, precision, f_beta, price = m_run(c_votes, n_criteria, n_papers, lr, GT, fr_p_part)
         print 'M-runs'
-        print "loss, fp_rate, fn_rate, recall, precision, f_beta"
-        print loss, fp_rate, fn_rate, recall, precision, f_beta
+        print "price, loss, fp_rate, fn_rate, recall, precision, f_beta"
+        print price, loss, fp_rate, fn_rate, recall, precision, f_beta
         print '----------'
 
         loss, fp_rate, fn_rate, recall, precision, f_beta, price = sm_run(c_votes, n_criteria, n_papers, lr, GT, fr_p_part)
