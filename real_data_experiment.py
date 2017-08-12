@@ -123,7 +123,7 @@ def j_correction(c_votes, criteria_accuracy, GT, J):
 
 
 if __name__ == '__main__':
-    lr = 5
+    lr = 100
     J = 5
     fr_p_part = .3
     data = []
@@ -144,7 +144,7 @@ if __name__ == '__main__':
             loss_m, rec_m, pre_m, f_m, price_m = [], [], [], [], []
             loss_sm, rec_sm, pre_sm, f_sm, price_sm, syn_prop_sm = [], [], [], [], [], []
 
-            for _ in range(2):
+            for _ in range(10):
                 cj_votes, counter = j_correction(c_votes, criteria_accuracy, GT, J)
                 syn_votes_prop = float(counter) / (len(c_votes) * J)
                 # Baseline
