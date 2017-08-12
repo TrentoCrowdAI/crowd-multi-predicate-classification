@@ -1,8 +1,6 @@
-from generator import generate_responses_gt
-from helpers.method_2 import classify_papers_baseline, generate_responses, \
+from helpers.method_2 import classify_papers_baseline, \
     update_v_count, assign_criteria, classify_papers, update_cr_power
 from helpers.utils import compute_metrics, estimate_cr_power_dif
-from fusion_algorithms.algorithms_utils import input_adapter
 from fusion_algorithms.em import expectation_maximization
 import numpy as np
 
@@ -54,7 +52,6 @@ def sm_run(c_votes, criteria_num, n_papers, lr, GT, fr_p_part):
     # initialization
     p_thrs = 0.99
     values_count = [[0, 0] for _ in range(n_papers*criteria_num)]
-
     # Baseline round
     # in% papers
     fr_n_papers = int(n_papers * fr_p_part)
@@ -65,11 +62,15 @@ def sm_run(c_votes, criteria_num, n_papers, lr, GT, fr_p_part):
     classified_papers = dict(zip(range(n_papers), [1]*n_papers))
     classified_papers.update(classified_papers_fr)
     rest_p_ids = rest_p_ids + range(fr_n_papers, n_papers)
+    # Count votes 1st round
+    votes_count = 0
+    for l in responses_fround:
+        votes_count += len(l)
 
     # Do Multi rounds
     break_list = []
     while len(rest_p_ids) != 0:
-        # print len(rest_p_ids)
+        votes_count += len(rest_p_ids)
 
         # criteria_count += len(rest_p_ids)
         cr_assigned = assign_criteria(rest_p_ids, criteria_num, values_count, power_cr_list, acc_cr_list)
@@ -93,4 +94,5 @@ def sm_run(c_votes, criteria_num, n_papers, lr, GT, fr_p_part):
         classified_papers.update(classified_p_round)
     classified_papers = [classified_papers[p_id] for p_id in sorted(classified_papers.keys())]
     loss, fp_rate, fn_rate, recall, precision, f_beta = compute_metrics(classified_papers, GT, lr, criteria_num)
-    return loss, fp_rate, fn_rate, recall, precision, f_beta
+    price_per_paper = float(votes_count) / n_papers
+    return loss, fp_rate, fn_rate, recall, precision, f_beta, price_per_paper

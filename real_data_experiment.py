@@ -83,8 +83,8 @@ if __name__ == '__main__':
         print loss, fp_rate, fn_rate, recall, precision, f_beta
         print '----------'
 
-        loss, fp_rate, fn_rate, recall, precision, f_beta = sm_run(c_votes, n_criteria, n_papers, lr, GT, fr_p_part)
+        loss, fp_rate, fn_rate, recall, precision, f_beta, price = sm_run(c_votes, n_criteria, n_papers, lr, GT, fr_p_part)
         print 'SM-runs'
-        print "loss, fp_rate, fn_rate, recall, precision, f_beta"
-        print loss, fp_rate, fn_rate, recall, precision, f_beta
+        print "price, loss, fp_rate, fn_rate, recall, precision, f_beta"
+        print price, loss, fp_rate, fn_rate, recall, precision, f_beta
         print '----------'
