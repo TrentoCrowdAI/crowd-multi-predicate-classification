@@ -19,8 +19,6 @@ if __name__ == '__main__':
     data = []
     for Nt in range(1, 11, 1):
         for J in [3, 5, 10]:
-    # for Nt in [3]:
-    #     for J in [3, 5, 10]:
             print 'Nt: {}. J: {}'.format(Nt, J)
             cost_baseline = (Nt + papers_page * criteria_num) * J / float(papers_page)
             loss_baseline_list = []

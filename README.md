@@ -1,2 +1,2 @@
 # Criteria-based-tagging-algorithm
-Modelling of tagging scientific papers by crowd users for literature reviews
+Efficient Strategies for Crowd-based Screening of Papers in Literature Reviews

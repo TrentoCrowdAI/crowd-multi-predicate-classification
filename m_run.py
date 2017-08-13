@@ -1,13 +1,9 @@
-import numpy as np
-
-from fusion_algorithms.algorithms_utils import input_adapter
-from fusion_algorithms.em import expectation_maximization
 from generator import generate_responses_gt
 from helpers.utils import classify_papers, compute_metrics, estimate_cr_power_dif
 
 
 def get_best_cr_order(responses, criteria_num, n_papers, papers_page, J):
-    cr_power, cr_accuracy = estimate_cr_power_dif(responses, criteria_num, n_papers, papers_page, J)
+    # cr_power, cr_accuracy = estimate_cr_power_dif(responses, criteria_num, n_papers, papers_page, J)
     # TO DO
     # estimate_cr_order(cr_power, cr_accuracy)
     best_cr_order = range(criteria_num)
