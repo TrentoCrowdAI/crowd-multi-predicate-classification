@@ -1,4 +1,4 @@
-paper ID,intervention worker ID,intervention Vote,is vote accurate?,use of tech paper ID,use of tech worker ID,use of tech vote,is vote accurate?,older adult paper ID,older adult worker ID,older adult vote,is older vote accurate?,,classes,GOLD INTERVENTION,GOLD USE OF TECH,GOLD OLD,GOLD SI,GOLD remote
+paper ID,intervention worker ID,intervention Vote,is intervention vote accurate?,use of tech paper ID,use of tech worker ID,use of tech vote,is tech vote accurate?,older adult paper ID,older adult worker ID,older adult vote,is older vote accurate?,,classes,GOLD INTERVENTION,GOLD USE OF TECH,GOLD OLD,GOLD SI,GOLD remote
 1,AT6KZZ2OTABWK,1,1,1,AB66CTVQ90RCV,-1,0,1,A110KENBXU7SUJ,1,1,,INCLUDED,1,1,1,1,1
 1,A3IC61LDXYISDY,1,1,1,A1665VCUSZL9YT,1,1,1,A142ZRU284W9O,1,1,,INCLUDED,1,1,1,1,1
 1,A142ZRU284W9O,1,1,1,A1UE726OT3JLZ9,1,1,1,A3QX9ABC1DVMQG,-1,0,,INCLUDED,1,1,1,1,1
