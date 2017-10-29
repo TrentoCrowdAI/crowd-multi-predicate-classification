@@ -95,4 +95,4 @@ if __name__ == '__main__':
                          np.mean(rec_sm), np.mean(pre_sm), np.mean(f_sm)])
     pd.DataFrame(data, columns=['Nt', 'J', 'lr', 'loss_mean', 'loss_std', 'FPR', 'TPR',
                                 'price_mean', 'price_std', 'alg', 'recall', 'precision', 'f_beta']). \
-                                to_csv('output/data/loss_tests_cr5_reproducibility.csv', index=False)
+                                to_csv('output/data/stop-prob/cr5_ec20_a_norm.csv', index=False)

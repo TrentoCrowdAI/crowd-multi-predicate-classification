@@ -4,13 +4,17 @@ from scipy.special import binom
 
 def assign_criteria(papers_ids, criteria_num, values_count, power_cr_list, acc_cr_list):
     cr_assigned = []
+    papers_ids_new = []
     cr_list = range(criteria_num)
+    in_papers_ids = []
     for p_id in papers_ids:
         paper_in_given_data = []
+        paper_votes_total = 0
         for cr in cr_list:
             acc_cr = acc_cr_list[cr]
             power_cr = power_cr_list[cr]
             cr_count = values_count[p_id * criteria_num + cr]
+            paper_votes_total += sum(cr_count)
             in_c = cr_count[0]
             out_c = cr_count[1]
             term1_p_out = binom(in_c + out_c, out_c) * acc_cr ** out_c * (1 - acc_cr) ** in_c * power_cr
@@ -18,6 +22,7 @@ def assign_criteria(papers_ids, criteria_num, values_count, power_cr_list, acc_c
             paper_in_given_data.append(term1_p_in / (term1_p_out + term1_p_in))
 
         p_classify = []
+        n_min_list = []
         for cr in cr_list:
             acc_cr = acc_cr_list[cr]
             power_cr = power_cr_list[cr]
@@ -26,7 +31,7 @@ def assign_criteria(papers_ids, criteria_num, values_count, power_cr_list, acc_c
             out_c = cr_count[1]
 
             p_paper_out = power_cr
-            for n in range(1, 6):
+            for n in range(1, 11):
                 # new value is out
                 p_vote_out = acc_cr * p_paper_out + (1 - acc_cr) * (1 - p_paper_out)
                 term1_p_out = binom(in_c+out_c+n, out_c+n)*acc_cr**(out_c+n)*(1-acc_cr)**in_c*p_paper_out
@@ -39,12 +44,22 @@ def assign_criteria(papers_ids, criteria_num, values_count, power_cr_list, acc_c
                 p_paper_out = 1 - p_paper_in
                 if p_paper_out >= 0.99:
                     p_classify.append((p_paper_out/n))
+                    n_min_list.append(n)
                     break
-                elif n == 5:
+                elif n == 10:
                     p_classify.append((p_paper_out/n))
+                    n_min_list.append(n)
         cr_assign = p_classify.index(max(p_classify))
-        cr_assigned.append(cr_assign)
-    return cr_assigned
+
+        # check stopping condition
+        n_min = n_min_list[cr_assign]
+        if paper_votes_total + n_min >= 20:
+            in_papers_ids.append(p_id)
+        else:
+            cr_assigned.append(cr_assign)
+            papers_ids_new.append(p_id)
+
+    return cr_assigned, in_papers_ids, papers_ids_new
 
 
 def classify_papers_baseline(papers_ids, criteria_num, values_prob, lr):
@@ -102,35 +117,6 @@ def classify_papers(papers_ids, criteria_num, values_count, p_thrs, acc_cr_list,
     return dict(zip(classified_papers_ids, classified_papers)), rest_papers_ids
 
 
-# def generate_responses(GT, papers_ids, criteria_num, papers_worker, acc, criteria_difficulty, cr_assigned):
-#     responses = []
-#     n = len(papers_ids)
-#     workers_n = 1 if n < papers_worker else n / papers_worker
-#     for w_ind in range(workers_n):
-#         worker_acc_in = acc[1].pop()
-#         acc[1].insert(0, worker_acc_in)
-#         worker_acc_out = acc[0].pop()
-#         acc[0].insert(0, worker_acc_out)
-#         for cr, p_id in zip(cr_assigned[w_ind*papers_worker: w_ind*papers_worker+papers_worker],
-#                             papers_ids[w_ind*papers_worker: w_ind*papers_worker+papers_worker]):
-#             cr_vals_id = range(p_id * criteria_num, p_id * criteria_num + criteria_num, 1)
-#             isPaperIN = sum([GT[i] for i in cr_vals_id]) == 0
-#             if isPaperIN:
-#                 worker_acc = worker_acc_in
-#             else:
-#                 worker_acc = worker_acc_out
-#
-#             GT_cr = GT[p_id * criteria_num + cr]
-#             cr_dif = criteria_difficulty[cr]
-#             if np.random.binomial(1, worker_acc * cr_dif if worker_acc * cr_dif <= 1. else 1.):
-#                 vote = GT_cr
-#             else:
-#                 vote = 1 - GT_cr
-#             responses.append(vote)
-#     return responses
-
-
-# a low accurate criteria
 def generate_responses(GT, papers_ids, criteria_num, papers_worker, acc, criteria_difficulty, cr_assigned):
     responses = []
     n = len(papers_ids)
@@ -151,18 +137,47 @@ def generate_responses(GT, papers_ids, criteria_num, papers_worker, acc, criteri
 
             GT_cr = GT[p_id * criteria_num + cr]
             cr_dif = criteria_difficulty[cr]
-            if cr_dif < 1.:
-                if np.random.binomial(1, 0.55):
-                    vote = GT_cr
-                else:
-                    vote = 1 - GT_cr
+            if np.random.binomial(1, worker_acc * cr_dif if worker_acc * cr_dif <= 1. else 1.):
+                vote = GT_cr
             else:
-                if np.random.binomial(1, worker_acc * cr_dif if worker_acc * cr_dif <= 1. else 1.):
-                    vote = GT_cr
-                else:
-                    vote = 1 - GT_cr
+                vote = 1 - GT_cr
             responses.append(vote)
     return responses
+
+
+# # a low accurate criteria
+# def generate_responses(GT, papers_ids, criteria_num, papers_worker, acc, criteria_difficulty, cr_assigned):
+#     responses = []
+#     n = len(papers_ids)
+#     workers_n = 1 if n < papers_worker else n / papers_worker
+#     for w_ind in range(workers_n):
+#         worker_acc_in = acc[1].pop()
+#         acc[1].insert(0, worker_acc_in)
+#         worker_acc_out = acc[0].pop()
+#         acc[0].insert(0, worker_acc_out)
+#         for cr, p_id in zip(cr_assigned[w_ind*papers_worker: w_ind*papers_worker+papers_worker],
+#                             papers_ids[w_ind*papers_worker: w_ind*papers_worker+papers_worker]):
+#             cr_vals_id = range(p_id * criteria_num, p_id * criteria_num + criteria_num, 1)
+#             isPaperIN = sum([GT[i] for i in cr_vals_id]) == 0
+#             if isPaperIN:
+#                 worker_acc = worker_acc_in
+#             else:
+#                 worker_acc = worker_acc_out
+#
+#             GT_cr = GT[p_id * criteria_num + cr]
+#             cr_dif = criteria_difficulty[cr]
+#             if cr_dif < 1.:
+#                 if np.random.binomial(1, 0.55):
+#                     vote = GT_cr
+#                 else:
+#                     vote = 1 - GT_cr
+#             else:
+#                 if np.random.binomial(1, worker_acc * cr_dif if worker_acc * cr_dif <= 1. else 1.):
+#                     vote = GT_cr
+#                 else:
+#                     vote = 1 - GT_cr
+#             responses.append(vote)
+#     return responses
 
 
 def update_v_count(values_count, criteria_num, cr_assigned, responses, p_ids):
