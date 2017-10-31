@@ -8,57 +8,41 @@ def assign_criteria(papers_ids, criteria_num, values_count, power_cr_list, acc_c
     cr_list = range(criteria_num)
     in_papers_ids = []
     for p_id in papers_ids:
-        paper_in_given_data = []
-        paper_votes_total = 0
-        for cr in cr_list:
-            acc_cr = acc_cr_list[cr]
-            power_cr = power_cr_list[cr]
-            cr_count = values_count[p_id * criteria_num + cr]
-            paper_votes_total += sum(cr_count)
-            in_c = cr_count[0]
-            out_c = cr_count[1]
-            term1_p_out = binom(in_c + out_c, out_c) * acc_cr ** out_c * (1 - acc_cr) ** in_c * power_cr
-            term1_p_in = binom(in_c + out_c, in_c) * acc_cr ** in_c * (1 - acc_cr) ** out_c * (1 - power_cr)
-            paper_in_given_data.append(term1_p_in / (term1_p_out + term1_p_in))
-
         p_classify = []
         n_min_list = []
+        joint_prob_votes_out = [1., 1., 1., 1.]
         for cr in cr_list:
             acc_cr = acc_cr_list[cr]
             power_cr = power_cr_list[cr]
             cr_count = values_count[p_id * criteria_num + cr]
             in_c = cr_count[0]
             out_c = cr_count[1]
-
             p_paper_out = power_cr
             for n in range(1, 11):
                 # new value is out
                 p_vote_out = acc_cr * p_paper_out + (1 - acc_cr) * (1 - p_paper_out)
+                joint_prob_votes_out[cr] *= p_vote_out
                 term1_p_out = binom(in_c+out_c+n, out_c+n)*acc_cr**(out_c+n)*(1-acc_cr)**in_c*p_paper_out
                 term1_p_in = binom(in_c+out_c+n, in_c)*acc_cr**in_c*(1-acc_cr)**(out_c+n)*(1-p_paper_out)
                 p_paper_in_vote_out = term1_p_in * p_vote_out / (term1_p_out + term1_p_in)
-
-                p_paper_in = p_paper_in_vote_out
-                for c in [x for x in cr_list if x != cr]:
-                    p_paper_in *= paper_in_given_data[c]
-                p_paper_out = 1 - p_paper_in
+                p_paper_out = 1 - p_paper_in_vote_out
                 if p_paper_out >= 0.99:
-                    p_classify.append((p_paper_out/n))
+                    p_classify.append(joint_prob_votes_out[cr]/n)
                     n_min_list.append(n)
                     break
                 elif n == 10:
-                    p_classify.append((p_paper_out/n))
+                    p_classify.append(joint_prob_votes_out[cr]/n)
                     n_min_list.append(n)
         cr_assign = p_classify.index(max(p_classify))
+        n_min = n_min_list[cr_assign]
+        joint_prob = joint_prob_votes_out[cr_assign]
 
         # check stopping condition
-        n_min = n_min_list[cr_assign]
-        if paper_votes_total + n_min >= 20:
+        if n_min / joint_prob >= 20:
             in_papers_ids.append(p_id)
         else:
             cr_assigned.append(cr_assign)
             papers_ids_new.append(p_id)
-
     return cr_assigned, in_papers_ids, papers_ids_new
 
 
