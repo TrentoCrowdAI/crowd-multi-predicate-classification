@@ -4,7 +4,6 @@ from helpers.method_2 import classify_papers_baseline, generate_responses, \
 from helpers.utils import compute_metrics, estimate_cr_power_dif
 from fusion_algorithms.algorithms_utils import input_adapter
 from fusion_algorithms.em import expectation_maximization
-
 import numpy as np
 
 
@@ -50,7 +49,7 @@ def do_round(GT, papers_ids, criteria_num, papers_worker, acc, criteria_difficul
 
 
 def sm_run(criteria_num, n_papers, papers_worker, J, lr, Nt, acc,
-           criteria_power, criteria_difficulty, GT, fr_p_part, pow_term, M):
+           criteria_power, criteria_difficulty, GT, fr_p_part,  acc_term):
     # initialization
     p_thrs = 0.99
     values_count = [[0, 0] for _ in range(n_papers*criteria_num)]
@@ -61,47 +60,42 @@ def sm_run(criteria_num, n_papers, papers_worker, J, lr, Nt, acc,
     criteria_count = (Nt + papers_worker * criteria_num) * J * fr_n_papers / papers_worker
     first_round_res = do_first_round(fr_n_papers, criteria_num, papers_worker, J, lr, GT,
                                      criteria_power, acc, criteria_difficulty, values_count)
-    classified_papers_fr, rest_p_ids, power_cr_list_old, acc_cr_list = first_round_res
-    acc_cr_list = []
-    acc_mean = np.mean(acc)
-    for multiplier in criteria_difficulty:
-        if acc_mean * multiplier > 1.:
-            acc_cr_list.append(1.)
-        else:
-            acc_cr_list.append(acc_mean * multiplier)
+    classified_papers_fr, rest_p_ids, power_cr_list, acc_cr_list_old = first_round_res
 
-    power_cr_list = []
-    # Random error
-    # if isinstance(pow_term, basestring):
-    #     for power_c in criteria_power:
-    #         if np.random.binomial(1, 0.5):
-    #             pow_term = 0.1
-    #         else:
-    #             pow_term = 0.05
-    #         if np.random.binomial(1, 0.5):
-    #             power_cr_list.append(power_c + power_c * pow_term)
-    #         else:
-    #             power_cr_list.append(power_c - power_c * pow_term)
-    if pow_term == 'est':
-        power_cr_list = power_cr_list_old
-    elif pow_term == 'gt':
-        power_cr_list = criteria_power
+    # create acc criteria GT list
+    acc_mean = np.mean(acc)
+    acc_cr_list_gt = []
+    for acc_dif in criteria_difficulty:
+        if acc_mean * acc_dif >= 1.:
+            acc_cr_list_gt.append(0.98)
+        else:
+            acc_cr_list_gt.append(acc_mean * acc_dif)
+
+    # change criteria accuracy estimation
+    acc_cr_list = []
+    if acc_term == 'est':
+        acc_cr_list = acc_cr_list_old
+    elif acc_term == 'gt':
+        acc_cr_list = acc_cr_list_gt
     else:
-        for power_c in criteria_power:
-            power_cr_list.append(power_c + power_c * pow_term / 100.)
+        for acc_c in acc_cr_list_gt:
+            if acc_c + acc_c * acc_term / 100. > 1.:
+                acc_cr_list.append(.98)
+            else:
+                acc_cr_list.append(acc_c + acc_c * acc_term / 100.)
 
     classified_papers = dict(zip(range(n_papers), [1]*n_papers))
     classified_papers.update(classified_papers_fr)
     rest_p_ids = rest_p_ids + range(fr_n_papers, n_papers)
 
     # Do Multi rounds
-    break_list = []
     while len(rest_p_ids) != 0:
-        # print len(rest_p_ids)
 
         criteria_count += len(rest_p_ids)
-        cr_assigned = assign_criteria(rest_p_ids, criteria_num, values_count, power_cr_list, acc_cr_list)
+        cr_assigned, in_papers_ids, rest_p_ids = assign_criteria(rest_p_ids, criteria_num, values_count, power_cr_list, acc_cr_list)
 
+        for i in in_papers_ids:
+            classified_papers[i] = 1
         responses = do_round(GT, rest_p_ids, criteria_num, papers_worker*criteria_num,
                              acc, criteria_difficulty, cr_assigned)
         # update values_count
@@ -109,16 +103,11 @@ def sm_run(criteria_num, n_papers, papers_worker, J, lr, Nt, acc,
 
         # classify papers
         classified_p_round, rest_p_ids = classify_papers(rest_p_ids, criteria_num, values_count,
-                                                         p_thrs, acc_cr_list, power_cr_list)
+                                                                              p_thrs, acc_cr_list, power_cr_list)
 
         # update criteria power
         power_cr_list = update_cr_power(n_papers, criteria_num, acc_cr_list, power_cr_list, values_count)
 
-        # print len(rest_p_ids)
-        n_rest = len(rest_p_ids)
-        break_list.append(n_rest)
-        if break_list.count(n_rest) >= M:
-            break
         classified_papers.update(classified_p_round)
     classified_papers = [classified_papers[p_id] for p_id in sorted(classified_papers.keys())]
     loss, fp_rate, fn_rate, recall, precision, f_beta = compute_metrics(classified_papers, GT, lr, criteria_num)
