@@ -77,7 +77,6 @@ def sm_run(c_votes, criteria_num, n_papers, lr, GT, fr_p_part, criteria_accuracy
     classified_papers.update(classified_papers_fr)
     rest_p_ids = rest_p_ids + range(fr_n_papers, n_papers)
     # Do Multi rounds
-    break_list = []
     while len(rest_p_ids) != 0:
         votes_count += len(rest_p_ids)
 
@@ -92,18 +91,12 @@ def sm_run(c_votes, criteria_num, n_papers, lr, GT, fr_p_part, criteria_accuracy
         # update values_count
         update_v_count(values_count, criteria_num, cr_assigned, responses, rest_p_ids)
 
-        # classify papers
-        classified_p_round, rest_p_ids = classify_papers(rest_p_ids, criteria_num, values_count,
-                                                         p_thrs, acc_cr_list, power_cr_list)
-
         # update criteria power
         power_cr_list = update_cr_power(n_papers, criteria_num, acc_cr_list, power_cr_list, values_count)
 
-        # print len(rest_p_ids)
-        n_rest = len(rest_p_ids)
-        break_list.append(n_rest)
-        if break_list.count(n_rest) >= 10:
-            break
+        # classify papers
+        classified_p_round, rest_p_ids = classify_papers(rest_p_ids, criteria_num, values_count,
+                                                         p_thrs, acc_cr_list, power_cr_list)
         classified_papers.update(classified_p_round)
     classified_papers = [classified_papers[p_id] for p_id in sorted(classified_papers.keys())]
     loss, fp_rate, fn_rate, recall, precision, f_beta = compute_metrics(classified_papers, GT, lr, criteria_num)
