@@ -10,9 +10,9 @@ if __name__ == '__main__':
     lr = 5
     n_papers = 1000
     papers_page = 10
-    # criteria_power = [0.14, 0.14, 0.28, 0.42]
+    criteria_power = [0.14, 0.14, 0.28, 0.42]
     # theta = 0.5
-    criteria_power = [0.09, 0.09, 0.18, 0.27]
+    # criteria_power = [0.09, 0.09, 0.18, 0.27]
     criteria_difficulty = [1., 1., 1.1, 0.9]
     criteria_num = len(criteria_power)
     fr_p_part = 0.05
@@ -20,7 +20,7 @@ if __name__ == '__main__':
     # for Nt in range(1, 11, 1):
     #     for J in [3, 5, 10]:
     for Nt in [4]:
-        for J in [5]:
+        for J in [3]:
             print 'Nt: {}. J: {}'.format(Nt, J)
             cost_baseline = (Nt + papers_page * criteria_num) * J / float(papers_page)
             N, P = 0., 0.
