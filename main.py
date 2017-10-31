@@ -81,4 +81,4 @@ if __name__ == '__main__':
                     print '---------------------'
     pd.DataFrame(data, columns=['Nt', 'J', 'lr', 'loss_mean', 'loss_std', 'FPR', 'TPR',
                                 'price_mean', 'price_std', 'alg', 'recall', 'precision', 'f_beta', 'acc_term', 'theta']). \
-                                to_csv('output/data/accurcy_criteria_experiment.csv', index=False)
+                                to_csv('output/data/accurcy_criteria_experiment_nt.csv', index=False)
