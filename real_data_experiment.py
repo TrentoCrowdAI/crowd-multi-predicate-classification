@@ -144,7 +144,7 @@ if __name__ == '__main__':
             loss_m, rec_m, pre_m, f_m, price_m = [], [], [], [], []
             loss_sm, rec_sm, pre_sm, f_sm, price_sm, syn_prop_sm = [], [], [], [], [], []
 
-            for _ in range(10):
+            for _ in range(30):
                 cj_votes, counter = j_correction(c_votes, criteria_accuracy, GT, J)
                 syn_votes_prop = float(counter) / (len(c_votes) * J)
                 # Baseline
@@ -192,4 +192,4 @@ if __name__ == '__main__':
                          np.mean(pre_sm), np.mean(f_sm), np.std(f_sm), 'SM-runs'])
     pd.DataFrame(data, columns=['Nt', 'J', 'lr', 'loss_mean', 'loss_std', 'syn_votes_prop',
                                 'price_mean', 'recall', 'precision', 'f_beta', 'f_beta_std', 'alg']). \
-        to_csv('output/data/experimental_results.csv', index=False)
+        to_csv('output/data/new/experimental_results_lr100.csv', index=False)

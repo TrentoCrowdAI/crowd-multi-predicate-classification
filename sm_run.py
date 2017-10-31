@@ -82,7 +82,10 @@ def sm_run(c_votes, criteria_num, n_papers, lr, GT, fr_p_part, criteria_accuracy
         votes_count += len(rest_p_ids)
 
         # criteria_count += len(rest_p_ids)
-        cr_assigned = assign_criteria(rest_p_ids, criteria_num, values_count, power_cr_list, acc_cr_list)
+        cr_assigned, in_papers_ids, rest_p_ids = assign_criteria(rest_p_ids, criteria_num, values_count, power_cr_list,
+                                                                 acc_cr_list)
+        for i in in_papers_ids:
+            classified_papers[i] = 1
 
         responses, round_syn_votes = do_round(c_votes, rest_p_ids, criteria_num, cr_assigned, GT, criteria_accuracy)
         syn_v_counter += round_syn_votes
