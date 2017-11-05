@@ -10,7 +10,7 @@ def assign_criteria(papers_ids, criteria_num, values_count, power_cr_list, acc_c
     for p_id in papers_ids:
         p_classify = []
         n_min_list = []
-        joint_prob_votes_out = [1., 1., 1., 1.]
+        joint_prob_votes_out = [1. for _ in range(criteria_num)]
         for cr in cr_list:
             acc_cr = acc_cr_list[cr]
             power_cr = power_cr_list[cr]
@@ -38,7 +38,7 @@ def assign_criteria(papers_ids, criteria_num, values_count, power_cr_list, acc_c
         joint_prob = joint_prob_votes_out[cr_assign]
 
         # check stopping condition
-        if n_min / joint_prob >= 20:
+        if n_min / joint_prob >= 40:
             in_papers_ids.append(p_id)
         else:
             cr_assigned.append(cr_assign)

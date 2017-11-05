@@ -47,6 +47,10 @@ def do_round(c_votes, rest_p_ids, criteria_num, cr_assigned, GT, criteria_accura
             mean = criteria_accuracy[cr][0]
             sigma = (criteria_accuracy[cr][2] - criteria_accuracy[cr][0]) / 2
             acc = np.random.normal(mean, sigma, 1)[0]
+            if acc < 0.5:
+                acc = 0.5
+            if acc > 1.:
+                acc = 0.98
             vote = np.random.binomial(gt, acc, 1)[0]
             counter += 1
         responses.append(vote)

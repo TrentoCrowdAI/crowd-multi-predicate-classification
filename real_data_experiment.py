@@ -3,8 +3,6 @@ import numpy as np
 import scipy as sp
 import scipy.stats
 import copy
-# import random
-# import math
 from m_run import m_run
 from baseline import baseline
 from sm_run import sm_run
@@ -16,7 +14,7 @@ n_papers = 100
 
 
 def get_data():
-    data = pd.read_csv('output/amt_data/crowd_data-3.csv')
+    data = pd.read_csv('output/amt_data/crowd-data-corrected.csv')
     # workers_ids_ch = set(list(pd.unique(data['intervention worker ID'])) \
     #                                + list(pd.unique(data['use of tech worker ID'])) \
     #                                + list(pd.unique(data['older adult worker ID'])))
@@ -114,7 +112,10 @@ def j_correction(c_votes, criteria_accuracy, GT, J):
                 mean = criteria_accuracy[c_id][0]
                 sigma = (criteria_accuracy[c_id][2] - criteria_accuracy[c_id][0]) / 2
                 acc = np.random.normal(mean, sigma, 1)[0]
-                if acc > 1.: acc = 1.
+                if acc < 0.5:
+                    acc = 0.5
+                if acc > 1.:
+                    acc = 0.98
                 v = np.random.binomial(gt, acc, 1)[0]
                 votes.append((w_id, v))
                 counter += 1
@@ -123,9 +124,9 @@ def j_correction(c_votes, criteria_accuracy, GT, J):
 
 
 if __name__ == '__main__':
-    lr = 100
+    lr = 5
     J = 5
-    fr_p_part = .3
+    fr_p_part = .5
     data = []
     votes_worker = 20.
     for Nt in [1, 2, 3, 4, 5]:
