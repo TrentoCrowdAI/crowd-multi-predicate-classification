@@ -1,8 +1,8 @@
 import numpy as np
 import math
 from collections import defaultdict
-from algorithms_utils import invert
-from mv import majority_voting
+from .algorithms_utils import invert
+from .mv import majority_voting
 
 
 def expectation_maximization(N, M, Psi):
@@ -10,9 +10,9 @@ def expectation_maximization(N, M, Psi):
     The expectation maximization method (EM) from Dong et al., 2013. It iteratively estimates the probs of objects, then
     the accuracies of sources until a convergence is reached.
 
-    :param N:
-    :param M:
-    :param Psi:
+    :param N: number of sources
+    :param M: number of items
+    :param Psi: observations
     :return:
     """
     inv_Psi = invert(N, M, Psi)

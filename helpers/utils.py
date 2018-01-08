@@ -73,12 +73,12 @@ def compute_metrics(classified_papers, GT, lr, criteria_num):
 
 def classify_papers(n_papers, criteria_num, responses, papers_page, J, lr):
     Psi = input_adapter(responses)
-    N = (n_papers / papers_page) * J
+    N = n_papers // papers_page * J
     p = expectation_maximization(N, n_papers * criteria_num, Psi)[1]
     values_prob = []
     for e in p:
         e_prob = [0., 0.]
-        for e_id, e_p in e.iteritems():
+        for e_id, e_p in e.items():
             e_prob[e_id] = e_p
         values_prob.append(e_prob)
 
@@ -95,7 +95,7 @@ def classify_papers(n_papers, criteria_num, responses, papers_page, J, lr):
 
 def estimate_cr_power_dif(responses, criteria_num, n_papers, papers_page, J):
     Psi = input_adapter(responses)
-    N = (n_papers / papers_page) * J
+    N = (n_papers // papers_page) * J
     cr_power = []
     cr_accuracy = []
     for cr in range(criteria_num):
@@ -105,10 +105,10 @@ def estimate_cr_power_dif(responses, criteria_num, n_papers, papers_page, J):
         pow_cr = 0.
         for e in p_cr:
             e_prob = [0., 0.]
-            for e_id, e_p in e.iteritems():
+            for e_id, e_p in e.items():
                 e_prob[e_id] = e_p
             pow_cr += e_prob[1]
-        pow_cr /= float(n_papers)
+        pow_cr /= n_papers
         cr_power.append(pow_cr)
         cr_accuracy.append(acc_cr)
 

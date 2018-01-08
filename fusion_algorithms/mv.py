@@ -18,7 +18,7 @@ def majority_voting(Psi):
 
         # normalize
         for val in counts.keys():
-            counts[val] /= total
+            counts[val] //= total
 
         res.append(counts)
 

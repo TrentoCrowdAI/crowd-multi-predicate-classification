@@ -13,12 +13,12 @@ def do_first_round(n_papers, criteria_num, papers_worker, J, lr, GT,
                                       J, acc, criteria_difficulty, GT)
     # aggregate responses
     Psi = input_adapter(responses)
-    N = (n_papers / papers_worker) * J
+    N = (n_papers // papers_worker) * J
     p = expectation_maximization(N, n_papers * criteria_num, Psi)[1]
     values_prob = []
     for e in p:
         e_prob = [0., 0.]
-        for e_id, e_p in e.iteritems():
+        for e_id, e_p in e.items():
             e_prob[e_id] = e_p
         values_prob.append(e_prob)
 
@@ -56,13 +56,13 @@ def sm_run(criteria_num, n_papers, papers_worker, J, lr, Nt, acc,
     # Baseline round
     # in% papers
     fr_n_papers = int(n_papers * fr_p_part)
-    criteria_count = (Nt + papers_worker * criteria_num) * J * fr_n_papers / papers_worker
+    criteria_count = (Nt + papers_worker * criteria_num) * J * fr_n_papers // papers_worker
     first_round_res = do_first_round(fr_n_papers, criteria_num, papers_worker, J, lr, GT,
                                      criteria_power, acc, criteria_difficulty, values_count)
     classified_papers_fr, rest_p_ids, power_cr_list, acc_cr_list = first_round_res
     classified_papers = dict(zip(range(n_papers), [1]*n_papers))
     classified_papers.update(classified_papers_fr)
-    rest_p_ids = rest_p_ids + range(fr_n_papers, n_papers)
+    rest_p_ids = rest_p_ids + list(range(fr_n_papers, n_papers))
 
     # Do Multi rounds
     while len(rest_p_ids) != 0:
@@ -79,7 +79,7 @@ def sm_run(criteria_num, n_papers, papers_worker, J, lr, Nt, acc,
 
         # classify papers
         classified_p_round, rest_p_ids = classify_papers(rest_p_ids, criteria_num, values_count,
-                                                                              p_thrs, acc_cr_list, power_cr_list)
+                                                         p_thrs, acc_cr_list, power_cr_list)
 
         # update criteria power
         power_cr_list = update_cr_power(n_papers, criteria_num, acc_cr_list, power_cr_list, values_count)
@@ -87,5 +87,5 @@ def sm_run(criteria_num, n_papers, papers_worker, J, lr, Nt, acc,
         classified_papers.update(classified_p_round)
     classified_papers = [classified_papers[p_id] for p_id in sorted(classified_papers.keys())]
     loss, fp_rate, fn_rate, recall, precision, f_beta = compute_metrics(classified_papers, GT, lr, criteria_num)
-    price_per_paper = float(criteria_count) / n_papers
+    price_per_paper = criteria_count / n_papers
     return loss, price_per_paper, fp_rate, fn_rate, recall, precision, f_beta

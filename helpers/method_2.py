@@ -104,7 +104,7 @@ def classify_papers(papers_ids, criteria_num, values_count, p_thrs, acc_cr_list,
 def generate_responses(GT, papers_ids, criteria_num, papers_worker, acc, criteria_difficulty, cr_assigned):
     responses = []
     n = len(papers_ids)
-    workers_n = 1 if n < papers_worker else n / papers_worker
+    workers_n = 1 if n < papers_worker else n // papers_worker
     for w_ind in range(workers_n):
         worker_acc_in = acc[1].pop()
         acc[1].insert(0, worker_acc_in)
@@ -133,7 +133,7 @@ def generate_responses(GT, papers_ids, criteria_num, papers_worker, acc, criteri
 # def generate_responses(GT, papers_ids, criteria_num, papers_worker, acc, criteria_difficulty, cr_assigned):
 #     responses = []
 #     n = len(papers_ids)
-#     workers_n = 1 if n < papers_worker else n / papers_worker
+#     workers_n = 1 if n < papers_worker else n // papers_worker
 #     for w_ind in range(workers_n):
 #         worker_acc_in = acc[1].pop()
 #         acc[1].insert(0, worker_acc_in)

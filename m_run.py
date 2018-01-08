@@ -1,5 +1,6 @@
 from generator import generate_responses_gt
 from helpers.utils import classify_papers, compute_metrics, estimate_cr_power_dif
+from itertools import chain
 
 
 def get_best_cr_order(responses, criteria_num, n_papers, papers_page, J):
@@ -30,7 +31,7 @@ def m_run(criteria_num, n_papers, papers_page, J, cost, Nt, acc,
           criteria_power, criteria_difficulty, GT, fr_p_part):
     # first round responses
     fr_n_papers = int(n_papers*fr_p_part)
-    criteria_count = (Nt + papers_page * criteria_num) * J * fr_n_papers / papers_page
+    criteria_count = (Nt + papers_page * criteria_num) * J * fr_n_papers // papers_page
     GT_fround = GT[: fr_n_papers*criteria_num]
     responses_fround = generate_responses_gt(fr_n_papers, criteria_power, papers_page,
                                              J, acc, criteria_difficulty, GT_fround)
@@ -46,14 +47,16 @@ def m_run(criteria_num, n_papers, papers_page, J, cost, Nt, acc,
         papers_ids_rest1 = papers_ids_rest[:n_rest - n_rest % papers_worker]
         papers_ids_rest2 = papers_ids_rest[n_rest - n_rest % papers_worker:]
         if papers_ids_rest1:
-            criteria_count += (Nt + papers_worker) * J * len(papers_ids_rest1) / float(papers_worker)
+            criteria_count += (Nt + papers_worker) * J * len(papers_ids_rest1) // papers_worker
             classified_papers_cr = do_round(GT, cr, papers_ids_rest1, criteria_num, papers_worker, J,
                                             cost, acc, criteria_power, criteria_difficulty)
         # check if n_papers_rest % papers_page != 0 then run an additional round
         if papers_ids_rest2:
             criteria_count += (Nt + len(papers_ids_rest2)) * J
-            classified_papers_cr += do_round(GT, cr, papers_ids_rest2, criteria_num, n_rest % papers_worker, J,
-                                             cost, acc, criteria_power, criteria_difficulty)
+            classified_papers_cr = chain(classified_papers_cr,
+                                         do_round(GT, cr, papers_ids_rest2, criteria_num,
+                                                  n_rest % papers_worker, J, cost, acc,
+                                                  criteria_power, criteria_difficulty))
         papers_ids_rest = []
         for p_id, p_cr in classified_papers_cr:
             if p_cr:
@@ -61,5 +64,5 @@ def m_run(criteria_num, n_papers, papers_page, J, cost, Nt, acc,
             else:
                 classified_papers[p_id] = 0
     loss, fp_rate, fn_rate, recall, precision, f_beta = compute_metrics(classified_papers, GT, cost, criteria_num)
-    cost = criteria_count / float(n_papers)
+    cost = criteria_count / n_papers
     return loss, cost, fp_rate, fn_rate, recall, precision, f_beta

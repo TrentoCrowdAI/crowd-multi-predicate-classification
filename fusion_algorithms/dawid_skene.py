@@ -195,7 +195,7 @@ def initialize(counts):
     patient_classes = np.zeros([nPatients, nClasses])
     # for each patient, take the average number of observations in each class
     for p in range(nPatients):
-        patient_classes[p, :] = response_sums[p, :] / np.sum(response_sums[p, :], dtype=float)
+        patient_classes[p, :] = response_sums[p, :] // np.sum(response_sums[p, :], dtype=float)
 
     return patient_classes
 
@@ -220,7 +220,7 @@ def m_step(counts, patient_classes):
     [nPatients, nObservers, nClasses] = np.shape(counts)
 
     # compute class marginals
-    class_marginals = np.sum(patient_classes, 0) / float(nPatients)
+    class_marginals = np.sum(patient_classes, 0) / nPatients
 
     # compute error rates
     error_rates = np.zeros([nObservers, nClasses, nClasses])
@@ -231,7 +231,7 @@ def m_step(counts, patient_classes):
             # normalize by summing over all observation classes
             sum_over_responses = np.sum(error_rates[k, j, :])
             if sum_over_responses > 0:
-                error_rates[k, j, :] = error_rates[k, j, :] / float(sum_over_responses)
+                error_rates[k, j, :] = error_rates[k, j, :] / sum_over_responses
 
     return (class_marginals, error_rates)
 
@@ -267,7 +267,7 @@ def e_step(counts, class_marginals, error_rates):
         # normalize error rates by dividing by the sum over all observation classes
         patient_sum = np.sum(patient_classes[i, :])
         if patient_sum > 0:
-            patient_classes[i, :] = patient_classes[i, :] / float(patient_sum)
+            patient_classes[i, :] = patient_classes[i, :] / patient_sum
 
     return patient_classes
 
@@ -303,7 +303,7 @@ def calc_likelihood(counts, class_marginals, error_rates):
         temp = log_L + np.log(patient_likelihood)
 
         if np.isnan(temp) or np.isinf(temp):
-            print i, log_L, np.log(patient_likelihood), temp
+            print(i, log_L, np.log(patient_likelihood), temp)
             sys.exit()
 
         log_L = temp

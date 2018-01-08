@@ -19,8 +19,8 @@ if __name__ == '__main__':
     data = []
     for Nt in range(1, 11, 1):
         for J in [3, 5, 10]:
-            print 'Nt: {}. J: {}'.format(Nt, J)
-            cost_baseline = (Nt + papers_page * criteria_num) * J / float(papers_page)
+            print('Nt: {}. J: {}'.format(Nt, J))
+            cost_baseline = (Nt + papers_page * criteria_num) * J / papers_page
             loss_baseline_list = []
             fp_b, tp_b, rec_b, pre_b, f_b = [], [], [], [], []
             loss_mrun_list = []
@@ -68,21 +68,21 @@ if __name__ == '__main__':
                 pre_sm.append(pre_sm_)
                 f_sm.append(f_beta_sm)
 
-            print 'BASELINE  loss: {:1.2f}, price: {:1.2f}, fp_rate: {:1.2f}, tp_rate: {:1.2f}, ' \
+            print('BASELINE  loss: {:1.2f}, price: {:1.2f}, fp_rate: {:1.2f}, tp_rate: {:1.2f}, ' \
                   'recall: {:1.2f}, precision: {:1.2f}, f_b: {}'.\
                 format(np.mean(loss_baseline_list), cost_baseline, np.mean(fp_b), np.mean(tp_b),
-                       np.mean(rec_b), np.mean(pre_b), np.mean(f_b))
+                       np.mean(rec_b), np.mean(pre_b), np.mean(f_b)))
 
-            print 'M-RUN     loss: {:1.2f}, price: {:1.2f}, fp_rate: {:1.2f}, tp_rate: {:1.2f}, ' \
+            print('M-RUN     loss: {:1.2f}, price: {:1.2f}, fp_rate: {:1.2f}, tp_rate: {:1.2f}, ' \
                   'recall: {:1.2f}, precision: {:1.2f}, f_b: {}'.\
                 format(np.mean(loss_mrun_list), np.mean(cost_mrun_list), np.mean(fp_m), np.mean(tp_m),
-                       np.mean(rec_m), np.mean(pre_m), np.mean(f_m))
+                       np.mean(rec_m), np.mean(pre_m), np.mean(f_m)))
 
-            print 'SM-RUN    loss: {:1.2f}, price: {:1.2f}, fp_rate: {:1.2f}, tp_rate: {:1.2f}, ' \
+            print('SM-RUN    loss: {:1.2f}, price: {:1.2f}, fp_rate: {:1.2f}, tp_rate: {:1.2f}, ' \
                   'recall: {:1.2f}, precision: {:1.2f}, f_b: {}'.\
                 format(np.mean(loss_smrun_list), np.mean(cost_smrun_list), np.mean(fp_sm), np.mean(tp_sm),
-                       np.mean(rec_sm), np.mean(pre_sm), np.mean(f_sm))
-            print '---------------------'
+                       np.mean(rec_sm), np.mean(pre_sm), np.mean(f_sm)))
+            print('---------------------')
 
             data.append([Nt, J, lr, np.mean(loss_baseline_list), np.std(loss_baseline_list),
                          np.mean(fp_b), np.mean(tp_b), cost_baseline, 0., 'Baseline',

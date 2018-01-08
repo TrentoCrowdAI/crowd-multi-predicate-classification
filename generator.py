@@ -23,7 +23,7 @@ def generate_responses_gt(n_papers, criteria_power, papers_page, J, acc, criteri
     acc_in_list = acc[1]
 
     # generate responses
-    pages_n = n_papers / papers_page
+    pages_n = n_papers // papers_page
     criteria_num = len(criteria_power)
     responses = {}
     for e_paper_id in range(pages_n*papers_page*criteria_num):
@@ -64,7 +64,7 @@ def generate_responses_gt(n_papers, criteria_power, papers_page, J, acc, criteri
 #     acc_in_list = acc[1]
 #
 #     # generate responses
-#     pages_n = n_papers / papers_page
+#     pages_n = n_papers // papers_page
 #     criteria_num = len(criteria_power)
 #     responses = {}
 #     for e_paper_id in range(pages_n*papers_page*criteria_num):

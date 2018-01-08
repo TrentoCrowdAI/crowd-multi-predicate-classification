@@ -36,7 +36,7 @@ for w_id, w_ch in enumerate(workers_ids_ch):
         c_data = data[data[column_workers] == w_ch][['paper ID', column_workers, c_name, column_g]]
         if len(c_data) < 5:
             continue
-        w_acc = sum(c_data[column_g])/float(len(c_data))
+        w_acc = sum(c_data[column_g]) / len(c_data)
         if w_acc >= 0.7:
             data_df.append([w_ch, c_name, w_acc, len(c_data)])
 pd.DataFrame(data_df, columns=['worker_id', 'criteria', 'accuracy', 'n_votes']).to_csv('output/amt_data/workers_stat2.csv', index=False)
