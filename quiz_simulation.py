@@ -20,7 +20,7 @@ def do_quiz_criteria_confm(quiz_papers_n, cheaters_prop, criteria_difficulty):
                 elif not np.random.binomial(1, worker_accuracy_in*mult if worker_accuracy_in*mult <= 1. else 1.):
                     return [worker_type]
         else:
-            for mult in [1., 1., 1.1, 0.9]:
+            for mult in [1.]:
                 if worker_type == 'rand_ch':
                     if not np.random.binomial(1, worker_accuracy_out):
                         return [worker_type]

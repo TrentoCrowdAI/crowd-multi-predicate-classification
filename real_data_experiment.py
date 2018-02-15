@@ -129,7 +129,7 @@ if __name__ == '__main__':
     fr_p_part = .5
     data = []
     votes_worker = 20.
-    for Nt in [1, 2, 3, 4, 5]:
+    for Nt in [3, 4, 5]:
         for J in [3, 5, 10]:
             print 'Nt: {}, J: {}'.format(Nt, J)
             w_data, GT = get_data()
@@ -193,4 +193,4 @@ if __name__ == '__main__':
                          np.mean(pre_sm), np.mean(f_sm), np.std(f_sm), 'SM-runs'])
     pd.DataFrame(data, columns=['Nt', 'J', 'lr', 'loss_mean', 'loss_std', 'syn_votes_prop',
                                 'price_mean', 'recall', 'precision', 'f_beta', 'f_beta_std', 'alg']). \
-        to_csv('output/data/new/experimental_results_lr100.csv', index=False)
+        to_csv('output/data/experimental_results.csv', index=False)

@@ -50,7 +50,7 @@ def do_round(c_votes, rest_p_ids, criteria_num, cr_assigned, GT, criteria_accura
             if acc < 0.5:
                 acc = 0.5
             if acc > 1.:
-                acc = 0.98
+                acc = 0.95
             vote = np.random.binomial(gt, acc, 1)[0]
             counter += 1
         responses.append(vote)
