@@ -33,7 +33,7 @@ if __name__ == '__main__':
                     loss_smrun_list = []
                     cost_smrun_list = []
                     fp_sm, tp_sm, rec_sm, pre_sm, f_sm, f_sm = [], [], [], [], [], []
-                    for _ in range(15):
+                    for _ in range(50):
                         # quiz, generation responses
                         acc = run_quiz_criteria_confm(Nt, z, [1.])
                         responses, GT = generate_responses_gt(n_papers, criteria_power[theta], papers_page,
@@ -68,6 +68,7 @@ if __name__ == '__main__':
                     #     format(np.mean(loss_mrun_list), np.mean(cost_mrun_list), np.mean(fp_m), np.mean(tp_m),
                     #            np.mean(rec_m), np.mean(pre_m), np.mean(f_m))
 
+                    print 'recall std: ', np.std(rec_sm)
                     print 'SM-RUN  acc_term: {}, theta: {}, loss: {:1.2f}, price: {:1.2f}, fp_rate: {:1.2f}, tp_rate: {:1.2f}, ' \
                           'recall: {:1.2f}, precision: {:1.2f}, f_b: {}'. \
                         format(str(acc_term), theta, np.mean(loss_smrun_list), np.mean(cost_smrun_list), np.mean(fp_sm), np.mean(tp_sm),

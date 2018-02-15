@@ -67,7 +67,7 @@ def sm_run(criteria_num, n_papers, papers_worker, J, lr, Nt, acc,
     acc_cr_list_gt = []
     for acc_dif in criteria_difficulty:
         if acc_mean * acc_dif >= 1.:
-            acc_cr_list_gt.append(0.98)
+            acc_cr_list_gt.append(0.95)
         else:
             acc_cr_list_gt.append(acc_mean * acc_dif)
 
@@ -80,7 +80,7 @@ def sm_run(criteria_num, n_papers, papers_worker, J, lr, Nt, acc,
     else:
         for acc_c in acc_cr_list_gt:
             if acc_c + acc_c * acc_term / 100. > 1.:
-                acc_cr_list.append(.98)
+                acc_cr_list.append(.95)
             else:
                 acc_cr_list.append(acc_c + acc_c * acc_term / 100.)
 
