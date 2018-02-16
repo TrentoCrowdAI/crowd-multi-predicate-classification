@@ -6,20 +6,22 @@ import copy
 from m_run import m_run
 from baseline import baseline
 from sm_run import sm_run
+from copy import deepcopy
+import random
 
 
 J = 5
 n_criteria = 2
-n_papers = 100
 
 
-def get_data():
+def get_data(n_papers):
     data = pd.read_csv('output/amt_data/crowd-data-corrected.csv')
+    n_papers_init = 100
 
     if n_criteria == 3:
         workers_ids_ch = set(list(pd.unique(data['intervention worker ID'])) \
-                               + list(pd.unique(data['use of tech worker ID'])) \
-                               + list(pd.unique(data['older adult worker ID'])))
+                             + list(pd.unique(data['use of tech worker ID'])) \
+                             + list(pd.unique(data['older adult worker ID'])))
         # property of the data file
         criteria = {0: 'intervention Vote',
                     1: 'use of tech vote',
@@ -32,8 +34,8 @@ def get_data():
                              + list(pd.unique(data['older adult worker ID'])))
         # property of the data file
         criteria = {
-                    0: 'use of tech vote',
-                    1: 'older adult vote'}
+            0: 'use of tech vote',
+            1: 'older adult vote'}
         column_workers_ids = ['use of tech worker ID', 'older adult worker ID']
         gold_columns = ['GOLD USE OF TECH', 'GOLD OLD']
 
@@ -41,14 +43,30 @@ def get_data():
     workers_ids_ch = [id_ch for id_ch in workers_ids_ch if type(id_ch) != float]
     workers_data = [[] for _ in workers_ids_ch]
 
+    paper_ids_init = data['paper ID'].unique()
+    paper_ids_to_add = np.random.choice(paper_ids_init, n_papers-n_papers_init)
+
+    # bootstrap papers
+    data_bootstraped = []
+    paper_id_new = paper_ids_init.max() + 1
+    for paper_id in paper_ids_to_add:
+        df = data.loc[data['paper ID'] == paper_id].copy()
+        df.loc[:, 'paper ID'] = paper_id_new
+        df.loc[:, 'use of tech paper ID'] = paper_id_new
+        df.loc[:, 'older adult paper ID'] = paper_id_new
+        df.loc[:, 'intervention paper ID'] = paper_id_new
+        data_bootstraped.append(df)
+        paper_id_new += 1
+    data = pd.concat([data] + data_bootstraped)
     paper_ids_dict = dict(zip(set(data['paper ID']), range(n_papers)))
+
     for w_id, w_ch in enumerate(workers_ids_ch):
         for c_id, c_name in criteria.iteritems():
             column_workers = column_workers_ids[c_id]
             c_data = data[data[column_workers] == w_ch][['paper ID', column_workers, c_name]]
             if not len(c_data):
                 continue
-            for row_index, row in c_data.iterrows():
+            for _, row in c_data.iterrows():
                 paper_id = paper_ids_dict[row['paper ID']]
                 if row[c_name] == -1 or row[c_name] == 0:
                     vote = 1
@@ -74,6 +92,7 @@ def do_quiz(data, GT, Nt):
             # uiz_data = random.sample(w, Nt)
             # for v_data in quiz_data:
             for v_data in w[:Nt]:
+            # for v_data in random.sample(w, Nt):
                 if v_data[2] == GT[v_data[0]*n_criteria + v_data[1]]:
                     tests_correct += 1
             if tests_correct == Nt:
@@ -123,7 +142,7 @@ def j_correction(c_votes, criteria_accuracy, GT, J):
                 if acc < 0.5:
                     acc = 0.5
                 if acc > 1.:
-                    acc = 0.98
+                    acc = 0.95
                 v = np.random.binomial(gt, acc, 1)[0]
                 votes.append((w_id, v))
                 counter += 1
@@ -134,26 +153,28 @@ def j_correction(c_votes, criteria_accuracy, GT, J):
 if __name__ == '__main__':
     lr = 5
     J = 5
-    fr_p_part = .5
+    fr_p_part = .05
     data = []
-    votes_worker = 20.
+    # votes_worker = 20.
+    n_papers = 1000
+    w_data, GT = get_data(n_papers)
     for Nt in [2, 3, 4, 5]:
-        for J in [3, 5]:
+        for J in [3]:
             print 'Nt: {}, J: {}'.format(Nt, J)
-            w_data, GT = get_data()
-            w_data = do_quiz(w_data, GT, Nt)
+
+            w_data_quiz = do_quiz(deepcopy(w_data), GT, Nt)
             c_votes = [[] for _ in range(n_criteria * n_papers)]
-            for worker_id, worker_votes in enumerate(w_data):
+            for worker_id, worker_votes in enumerate(w_data_quiz):
                 for paper_id, c_id, vote in worker_votes:
                     c_votes[paper_id * n_criteria + c_id].append((worker_id, vote))
             criteria_accuracy = get_accuracy(c_votes, GT)
-            # print criteria_accuracy[0][0], criteria_accuracy[1][0], criteria_accuracy[0][0]
+            print criteria_accuracy[0][0], criteria_accuracy[1][0], criteria_accuracy[0][0]
 
             loss_b, rec_b, pre_b, f_b, price_b = [], [], [], [], []
             loss_m, rec_m, pre_m, f_m, price_m = [], [], [], [], []
             loss_sm, rec_sm, pre_sm, f_sm, price_sm, syn_prop_sm = [], [], [], [], [], []
 
-            for _ in range(50):
+            for _ in range(10):
                 cj_votes, counter = j_correction(c_votes, criteria_accuracy, GT, J)
                 syn_votes_prop = float(counter) / (len(c_votes) * J)
                 # Baseline
@@ -162,7 +183,8 @@ if __name__ == '__main__':
                 rec_b.append(rec_b_)
                 pre_b.append(pre_b_)
                 f_b.append(f_beta_b)
-                price_b.append(price_b_*(Nt+votes_worker)/votes_worker)
+                # price_b.append(price_b_*(Nt+votes_worker)/votes_worker)
+                price_b.append(price_b_)
 
                 # M-runs
                 loss_m_, rec_m_, pre_m_, f_beta_m, price_m_ = m_run(copy.deepcopy(cj_votes), n_criteria, n_papers, lr, GT, fr_p_part)
@@ -170,16 +192,18 @@ if __name__ == '__main__':
                 rec_m.append(rec_m_)
                 pre_m.append(pre_m_)
                 f_m.append(f_beta_m)
-                price_m.append(price_m_*(Nt+votes_worker)/votes_worker)
+                # price_m.append(price_m_*(Nt+votes_worker)/votes_worker)
+                price_m.append(price_m_)
 
                 # SM-runs
                 loss_sm_, rec_sm_, pre_sm_, f_beta_sm, price_sm_, syn_prop_sm_ = sm_run(copy.deepcopy(cj_votes), n_criteria, n_papers,
-                                                                                   lr, GT, fr_p_part, criteria_accuracy)
+                                                                                        lr, GT, fr_p_part, criteria_accuracy)
                 loss_sm.append(loss_sm_)
                 rec_sm.append(rec_sm_)
                 pre_sm.append(pre_sm_)
                 f_sm.append(f_beta_sm)
-                price_sm.append(price_sm_*(Nt+votes_worker)/votes_worker)
+                # price_sm.append(price_sm_*(Nt+votes_worker)/votes_worker)
+                price_sm.append(price_sm_)
                 syn_prop_sm.append(syn_prop_sm_)
 
             print 'BASELINE syn_votes_prop: {}, loss: {:1.2f}, price: {:1.2f}, recall: {:1.2f}, precision: {:1.2f}, f_b: {}, f_b_std: {}'. \
