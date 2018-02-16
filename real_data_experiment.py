@@ -10,8 +10,8 @@ from copy import deepcopy
 import random
 
 
-J = 5
-n_criteria = 2
+# J = 5
+n_criteria = 3
 
 
 def get_data(n_papers):
@@ -156,25 +156,26 @@ if __name__ == '__main__':
     fr_p_part = .05
     data = []
     # votes_worker = 20.
-    n_papers = 1000
-    w_data, GT = get_data(n_papers)
+    n_papers = 500
     for Nt in [2, 3, 4, 5]:
-        for J in [3]:
+        for J in [3, 5]:
             print 'Nt: {}, J: {}'.format(Nt, J)
-
-            w_data_quiz = do_quiz(deepcopy(w_data), GT, Nt)
-            c_votes = [[] for _ in range(n_criteria * n_papers)]
-            for worker_id, worker_votes in enumerate(w_data_quiz):
-                for paper_id, c_id, vote in worker_votes:
-                    c_votes[paper_id * n_criteria + c_id].append((worker_id, vote))
-            criteria_accuracy = get_accuracy(c_votes, GT)
-            print criteria_accuracy[0][0], criteria_accuracy[1][0], criteria_accuracy[0][0]
 
             loss_b, rec_b, pre_b, f_b, price_b = [], [], [], [], []
             loss_m, rec_m, pre_m, f_m, price_m = [], [], [], [], []
             loss_sm, rec_sm, pre_sm, f_sm, price_sm, syn_prop_sm = [], [], [], [], [], []
 
-            for _ in range(10):
+            for _ in range(30):
+                w_data, GT = get_data(n_papers)
+                w_data_quiz = do_quiz(w_data, GT, Nt)
+                c_votes = [[] for _ in range(n_criteria * n_papers)]
+                for worker_id, worker_votes in enumerate(w_data_quiz):
+                    for paper_id, c_id, vote in worker_votes:
+                        c_votes[paper_id * n_criteria + c_id].append((worker_id, vote))
+                criteria_accuracy = get_accuracy(c_votes, GT)
+                # print criteria_accuracy[0][0], criteria_accuracy[1][0], criteria_accuracy[0][0]
+
+
                 cj_votes, counter = j_correction(c_votes, criteria_accuracy, GT, J)
                 syn_votes_prop = float(counter) / (len(c_votes) * J)
                 # Baseline
@@ -225,4 +226,4 @@ if __name__ == '__main__':
                          np.mean(pre_sm), np.mean(f_sm), np.std(f_sm), 'SM-runs'])
     pd.DataFrame(data, columns=['Nt', 'J', 'lr', 'loss_mean', 'loss_std', 'syn_votes_prop',
                                 'price_mean', 'recall', 'precision', 'f_beta', 'f_beta_std', 'alg']). \
-        to_csv('output/data/experimental_results_cr{}_stpXXX.csv'.format(n_criteria), index=False)
+        to_csv('output/data/experimental_results_cr{}_stp1500.csv'.format(n_criteria), index=False)
