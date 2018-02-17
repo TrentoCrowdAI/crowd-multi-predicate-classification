@@ -13,11 +13,13 @@ if __name__ == '__main__':
     n_papers = 1000
     papers_page = 10
     criteria_power = [0.14, 0.14, 0.28, 0.42]
-    criteria_difficulty = [1., 1., 1.1, 0.9]
+    criteria_difficulty = [1., 1., 1.1, 0.]
     criteria_num = len(criteria_power)
     fr_p_part = 0.05
     data = []
-    for Nt in range(1, 11, 1):
+    for Nt in range(2, 11, 1):
+    # for Nt in [2,3,4,5]:
+    # for Nt in [6,7,8,9,10]:
         for J in [3, 5, 10]:
             print('Nt: {}. J: {}'.format(Nt, J))
             cost_baseline = (Nt + papers_page * criteria_num) * J / papers_page
@@ -29,7 +31,7 @@ if __name__ == '__main__':
             loss_smrun_list = []
             cost_smrun_list = []
             fp_sm, tp_sm, rec_sm, pre_sm, f_sm, f_sm = [], [], [], [], [], []
-            for _ in range(30):
+            for _ in range(50):
                 # quiz, generation responses
                 acc = run_quiz_criteria_confm(Nt, z, [1.])
                 responses, GT = generate_responses_gt(n_papers, criteria_power, papers_page,
@@ -95,4 +97,4 @@ if __name__ == '__main__':
                          np.mean(rec_sm), np.mean(pre_sm), np.mean(f_sm)])
     pd.DataFrame(data, columns=['Nt', 'J', 'lr', 'loss_mean', 'loss_std', 'FPR', 'TPR',
                                 'price_mean', 'price_std', 'alg', 'recall', 'precision', 'f_beta']). \
-                                to_csv('output/data/cr5_ec20_a_norm.csv', index=False)
+                                to_csv('output/data/figXXX.csv', index=False)
