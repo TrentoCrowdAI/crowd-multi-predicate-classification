@@ -87,16 +87,19 @@ def get_data(n_papers):
 def do_quiz(data, GT, Nt):
     workers_data = []
     for w in data:
-        if len(w) >= Nt+5:
+        if len(w) >= Nt+5 and len(w) <= 50:  # TO CONSIDER
+        # if len(w) >= Nt+5 and len(w):
             tests_correct = 0
             # uiz_data = random.sample(w, Nt)
             # for v_data in quiz_data:
-            for v_data in w[:Nt]:
+            for v_data in w[-Nt:]:
+            # for v_data in w[:Nt]:
             # for v_data in random.sample(w, Nt):
                 if v_data[2] == GT[v_data[0]*n_criteria + v_data[1]]:
                     tests_correct += 1
             if tests_correct == Nt:
-                workers_data.append(w[Nt:])
+                # workers_data.append(w[Nt:])
+                workers_data.append(w[:Nt+1])
     return workers_data
 
 
@@ -153,10 +156,11 @@ def j_correction(c_votes, criteria_accuracy, GT, J):
 if __name__ == '__main__':
     lr = 5
     J = 5
-    fr_p_part = .05
+    fr_p_part = .2
     data = []
-    # votes_worker = 20.
-    n_papers = 500
+    votes_worker = 20.
+    n_papers = 100
+    w_data, GT = get_data(n_papers)
     for Nt in [2, 3, 4, 5]:
         for J in [3, 5]:
             print 'Nt: {}, J: {}'.format(Nt, J)
@@ -166,8 +170,7 @@ if __name__ == '__main__':
             loss_sm, rec_sm, pre_sm, f_sm, price_sm, syn_prop_sm = [], [], [], [], [], []
 
             for _ in range(30):
-                w_data, GT = get_data(n_papers)
-                w_data_quiz = do_quiz(w_data, GT, Nt)
+                w_data_quiz = do_quiz(deepcopy(w_data), GT, Nt)
                 c_votes = [[] for _ in range(n_criteria * n_papers)]
                 for worker_id, worker_votes in enumerate(w_data_quiz):
                     for paper_id, c_id, vote in worker_votes:
@@ -184,8 +187,7 @@ if __name__ == '__main__':
                 rec_b.append(rec_b_)
                 pre_b.append(pre_b_)
                 f_b.append(f_beta_b)
-                # price_b.append(price_b_*(Nt+votes_worker)/votes_worker)
-                price_b.append(price_b_)
+                price_b.append(price_b_*(Nt+votes_worker)/votes_worker)
 
                 # M-runs
                 loss_m_, rec_m_, pre_m_, f_beta_m, price_m_ = m_run(copy.deepcopy(cj_votes), n_criteria, n_papers, lr, GT, fr_p_part)
@@ -193,8 +195,7 @@ if __name__ == '__main__':
                 rec_m.append(rec_m_)
                 pre_m.append(pre_m_)
                 f_m.append(f_beta_m)
-                # price_m.append(price_m_*(Nt+votes_worker)/votes_worker)
-                price_m.append(price_m_)
+                price_m.append(price_m_*(Nt+votes_worker)/votes_worker)
 
                 # SM-runs
                 loss_sm_, rec_sm_, pre_sm_, f_beta_sm, price_sm_, syn_prop_sm_ = sm_run(copy.deepcopy(cj_votes), n_criteria, n_papers,
@@ -203,8 +204,7 @@ if __name__ == '__main__':
                 rec_sm.append(rec_sm_)
                 pre_sm.append(pre_sm_)
                 f_sm.append(f_beta_sm)
-                # price_sm.append(price_sm_*(Nt+votes_worker)/votes_worker)
-                price_sm.append(price_sm_)
+                price_sm.append(price_sm_*(Nt+votes_worker)/votes_worker)
                 syn_prop_sm.append(syn_prop_sm_)
 
             print 'BASELINE syn_votes_prop: {}, loss: {:1.2f}, price: {:1.2f}, recall: {:1.2f}, precision: {:1.2f}, f_b: {}, f_b_std: {}'. \
@@ -226,4 +226,4 @@ if __name__ == '__main__':
                          np.mean(pre_sm), np.mean(f_sm), np.std(f_sm), 'SM-runs'])
     pd.DataFrame(data, columns=['Nt', 'J', 'lr', 'loss_mean', 'loss_std', 'syn_votes_prop',
                                 'price_mean', 'recall', 'precision', 'f_beta', 'f_beta_std', 'alg']). \
-        to_csv('output/data/experimental_results_cr{}_stp1500.csv'.format(n_criteria), index=False)
+        to_csv('output/data/experimental_results_cr{}_XXX.csv'.format(n_criteria), index=False)
