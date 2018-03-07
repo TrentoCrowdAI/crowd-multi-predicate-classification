@@ -35,12 +35,12 @@ import sys
 
 """
 Function: main()
-    Run the EM estimator on the data from the Dawid-Skene paper
+    Run the EM estimator on the output_data from the Dawid-Skene paper
 """
 
 
 def main():
-    # load the data from the paper
+    # load the output_data from the paper
     responses = generate_sample_data()
     # run EM
     dawid_skene(responses)
@@ -48,7 +48,7 @@ def main():
 
 """
 Function: dawid_skene()
-    Run the Dawid-Skene estimator on response data
+    Run the Dawid-Skene estimator on response output_data
 Input:
     responses: a dictionary object of responses:
         {patients: {observers: [labels]}}
@@ -124,7 +124,7 @@ def dawid_skene(responses, tol=0.00001, max_iter=100):
 
 """
 Function: responses_to_counts()
-    Convert a matrix of annotations to count data
+    Convert a matrix of annotations to count output_data
 Inputs:
     responses: dictionary of responses {patient:{observers:[responses]}}
 Return:
@@ -313,7 +313,7 @@ def calc_likelihood(counts, class_marginals, error_rates):
 
 """
 Function: generate_sample_data()
-    Generate the data from Table 1 in Dawid-Skene (1979) in the proper format
+    Generate the output_data from Table 1 in Dawid-Skene (1979) in the proper format
 """
 
 
