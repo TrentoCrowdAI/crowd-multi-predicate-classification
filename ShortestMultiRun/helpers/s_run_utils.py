@@ -26,8 +26,7 @@ class SRunUtils:
                                * (1 - filter_acc) ** pos_c * filter_select
                     term_pos = binom(pos_c + neg_c + n, pos_c) * filter_acc ** pos_c \
                                * (1 - filter_acc) ** (neg_c + n) * (1 - filter_select)
-                    prob_item_pos = term_pos * prob_vote_neg / (term_neg + term_pos)
-                    prob_item_neg = 1 - prob_item_pos
+                    prob_item_neg = term_neg / (term_neg + term_pos)
                     if prob_item_neg >= 0.99:
                         classify_score.append(joint_prob_votes_neg[filter_index] / n)
                         n_min_list.append(n)
