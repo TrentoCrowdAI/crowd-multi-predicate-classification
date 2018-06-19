@@ -11,7 +11,7 @@ app = Flask(__name__)
 
 
 @app.route('/estimates', methods=['POST'])
-def generate_tasks():
+def estimate():
     content = request.get_json()
     items_per_worker = content['itemsPerWorker']
     votes_per_item = content['votesPerItem']
@@ -21,8 +21,9 @@ def generate_tasks():
     baseround_items = content['baseroundItems']
     filters_selectivity = content['filtersSelectivity']
     filters_difficulty = content['filtersDifficulty']
-    stop_score = content['stopScore'] or 100
-    iterations = content['iterations'] or 50
+    stop_score = content.get('stopScore', 100)
+    iterations = content.get('iterations', 50)
+    single_run = content.get('single', False)
     params = {
         'filters_num': filters_num,
         'items_num': items_num,
@@ -39,5 +40,5 @@ def generate_tasks():
         'theta': 0.3
     }
     estimator = Estimator(params)
-    output = estimator.run()
-    return jsonify(output)
+    output = estimator.run(single_run)
+    return output.to_json(orient='records')
