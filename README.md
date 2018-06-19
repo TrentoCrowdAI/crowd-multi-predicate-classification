@@ -5,4 +5,10 @@ Authors: Evgeny Krivosheev, Fabio Casati and Boualem Benatallah
 Keywords: crowdsourcing, classification, systematic reviews
 
 Python 3.6
-conda 4.3.30
+
+1. Install all dependences:<br />
+pip install -r requirements.txt
+
+2. Run flask application:<br />
+$ export FLASK_APP=flask_app.py<br />
+$ flask run
