@@ -41,4 +41,9 @@ def estimate():
     }
     estimator = Estimator(params)
     output = estimator.run(single_run)
-    return output.to_json(orient='records')
+    response = app.response_class(
+        response=output.to_json(orient='records'),
+        status=200,
+        mimetype='application/json'
+    )
+    return response
