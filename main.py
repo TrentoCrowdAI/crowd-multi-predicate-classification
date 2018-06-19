@@ -37,5 +37,5 @@ if __name__ == '__main__':
     }
 
     estimator = Estimator(params)
-    output = estimator.run()
+    output = estimator.run(True)
     output.to_csv('output.csv', index=False)
