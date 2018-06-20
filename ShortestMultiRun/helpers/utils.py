@@ -116,25 +116,25 @@ class Metrics:
                 gt_scope.append(0)
             else:
                 gt_scope.append(1)
-        # FP == False Exclusion
-        # FN == False Inclusion
+
+        # Positive == Inclusion (Relevant)
+        # Negative == Exclusion (Not relevant)
         fp = 0.
         fn = 0.
         tp = 0.
         tn = 0.
         for cl_val, gt_val in zip(items, gt_scope):
             if gt_val and not cl_val:
-                fp += 1
-            if not gt_val and cl_val:
                 fn += 1
+            if not gt_val and cl_val:
+                fp += 1
             if gt_val and cl_val:
-                tn += 1
-            if not gt_val and not cl_val:
                 tp += 1
-
+            if not gt_val and not cl_val:
+                tn += 1
         recall = tp / (tp + fn)
         precision = tp / (tp + fp)
-        loss = (fp * lr + fn) / len(items)
+        loss = (fn * lr + fp) / len(items)
         beta = 1. / lr
         f_beta = (beta + 1) * precision * recall / (beta * recall + precision)
-        return loss,  recall, precision, f_beta
+        return loss, recall, precision, f_beta
