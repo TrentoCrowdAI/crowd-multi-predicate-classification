@@ -22,14 +22,15 @@ class Estimator:
         votes_per_item = self.params['votes_per_item']
         rec_sm, pre_sm, f_sm, f_sm = [], [], [], []
         nt_ini = 1
-        j_ini = 3
-        
-        if(single_run):
-            nt_ini = worker_tests
-            j_ini = votes_per_item
+        nt_end = 10
+        j_values = [3, 5, 10]
 
-        for Nt in range(nt_ini, worker_tests + 1):
-            for J in range(j_ini, votes_per_item + 1):
+        if(single_run):
+            nt_ini = nt_end = worker_tests
+            j_values = [votes_per_item]
+
+        for Nt in range(nt_ini, nt_end + 1):
+            for J in j_values:
                 print('Nt: {}. J: {}'.format(Nt, J))
                 params = copy.deepcopy(self.params)
                 params['worker_tests'] = Nt

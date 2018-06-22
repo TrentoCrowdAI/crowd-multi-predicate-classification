@@ -4,18 +4,23 @@ from flask import Flask
 from flask import request
 from flask import jsonify
 from flask import abort
+import uuid
+import time
+from flask_rq2 import RQ
+import redis
 
 from estimator import Estimator
 
 app = Flask(__name__)
-
+rq = RQ(app)
+r = redis.StrictRedis.from_url(app.config['RQ_REDIS_URL'], decode_responses=True)
 
 @app.route('/estimates', methods=['POST'])
 def estimate():
     content = request.get_json()
     items_per_worker = content['itemsPerWorker']
-    votes_per_item = content['votesPerItem']
-    initial_tests = content['initialTests']
+    votes_per_item = content.get('votesPerItem', 0)
+    initial_tests = content.get('initialTests', 0)
     items_num = content['itemsNum']
     filters_num = content['filtersNum']
     baseround_items = content['baseroundItems']
@@ -39,11 +44,48 @@ def estimate():
         'z': 0.3,
         'theta': 0.3
     }
+    token = str(uuid.uuid4())
+    __run.queue(params, single_run, token)
+    payload = {
+        'token': token
+    }
+    return jsonify(payload)
+
+
+@app.route('/estimates/<string:token>', methods=['GET'])
+def get_estimate(token):
+    status = r.get(f"{token}_status")
+    
+    if(status == 'DONE'):
+        estimate = r.get(token)
+        return app.response_class(
+            response=estimate,
+            status=200,
+            mimetype='application/json'
+        )
+    else:
+        payload = {
+            'msg': 'The estimation is still in-progress'
+        }
+        return jsonify(payload)
+
+
+@app.route('/status/<string:token>', methods=['GET'])
+def get_status(token):
+    payload = {
+        'status': r.get(f"{token}_status")
+    }
+    return jsonify(payload)
+
+
+@rq.job
+def __run(params, single_run, token):
+    print(f"Running {token}")
+    start_time = time.time()
+    r.set(f"{token}_status", 'IN_PROGRESS')
     estimator = Estimator(params)
     output = estimator.run(single_run)
-    response = app.response_class(
-        response=output.to_json(orient='records'),
-        status=200,
-        mimetype='application/json'
-    )
-    return response
+    r.set(token, output.to_json(orient='records'))
+    r.set(f"{token}_status", 'DONE')
+    total_time = time.time() - start_time
+    print(f"{token} DONE. Time: {total_time} seconds")

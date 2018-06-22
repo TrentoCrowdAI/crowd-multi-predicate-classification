@@ -11,3 +11,4 @@ scipy==1.1.0
 six==1.11.0
 SQLAlchemy==1.2.5
 Werkzeug==0.14.1
+Flask-RQ2==18.0
