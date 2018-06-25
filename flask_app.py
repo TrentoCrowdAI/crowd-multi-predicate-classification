@@ -12,8 +12,10 @@ import redis
 from estimator import Estimator
 
 app = Flask(__name__)
-rq = RQ(app)
-r = redis.StrictRedis.from_url(app.config['RQ_REDIS_URL'], decode_responses=True)
+rq = RQ(app, default_timeout=18000)
+r = redis.StrictRedis.from_url(
+    app.config['RQ_REDIS_URL'], decode_responses=True)
+
 
 @app.route('/estimates', methods=['POST'])
 def estimate():
@@ -55,7 +57,7 @@ def estimate():
 @app.route('/estimates/<string:token>', methods=['GET'])
 def get_estimate(token):
     status = r.get(f"{token}_status")
-    
+
     if(status == 'DONE'):
         estimate = r.get(token)
         return app.response_class(
