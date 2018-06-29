@@ -8,6 +8,7 @@ import uuid
 import time
 from flask_rq2 import RQ
 import redis
+import json
 
 from estimator import Estimator
 
@@ -59,12 +60,8 @@ def get_estimate(token):
     status = r.get(f"{token}_status")
 
     if(status == 'DONE'):
-        estimate = r.get(token)
-        return app.response_class(
-            response=estimate,
-            status=200,
-            mimetype='application/json'
-        )
+        estimate = json.loads(r.get(token))
+        return jsonify(estimate)
     else:
         payload = {
             'msg': 'The estimation is still in-progress'
@@ -74,9 +71,13 @@ def get_estimate(token):
 
 @app.route('/status/<string:token>', methods=['GET'])
 def get_status(token):
+    status = r.get(f"{token}_status")
     payload = {
         'status': r.get(f"{token}_status")
     }
+
+    if status == None:
+        payload['status'] = 'NONE'
     return jsonify(payload)
 
 
