@@ -6,16 +6,20 @@ from flask import jsonify
 from flask import abort
 import uuid
 import time
-from flask_rq2 import RQ
 import redis
 import json
 
 from estimator import Estimator
+from tasks import make_celery
 
 app = Flask(__name__)
-rq = RQ(app, default_timeout=18000)
+app.config.update(
+    CELERY_BROKER_URL=os.environ.get(
+        'REDIS_URL', None) or 'redis://localhost:6379'
+)
+celery = make_celery(app)
 r = redis.StrictRedis.from_url(
-    app.config['RQ_REDIS_URL'], decode_responses=True)
+    app.config['CELERY_BROKER_URL'], decode_responses=True)
 
 
 @app.route('/estimates', methods=['POST'])
@@ -48,7 +52,8 @@ def estimate():
         'theta': 0.3
     }
     token = str(uuid.uuid4())
-    __run.queue(params, single_run, token)
+    r.set(f"{token}_status", 'IN_PROGRESS')
+    __run.delay(params, single_run, token)
     payload = {
         'token': token
     }
@@ -73,7 +78,7 @@ def get_estimate(token):
 def get_status(token):
     status = r.get(f"{token}_status")
     payload = {
-        'status': r.get(f"{token}_status")
+        'status': status
     }
 
     if status == None:
@@ -81,11 +86,10 @@ def get_status(token):
     return jsonify(payload)
 
 
-@rq.job
+@celery.task
 def __run(params, single_run, token):
     print(f"Running {token}")
     start_time = time.time()
-    r.set(f"{token}_status", 'IN_PROGRESS')
     estimator = Estimator(params)
     output = estimator.run(single_run)
     r.set(token, output.to_json(orient='records'))
