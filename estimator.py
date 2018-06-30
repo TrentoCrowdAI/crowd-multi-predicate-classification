@@ -10,7 +10,7 @@ class Estimator:
     def __init__(self, params):
         self.params = params
 
-    def run(self, single_run=False):
+    def run(self, single_run=False, fixed_votes=False):
         if self.params['baseround_items'] % self.params['items_per_worker']:
             raise ValueError(
                 'baseround_items must be a multiple of items_per_worker')
@@ -25,8 +25,10 @@ class Estimator:
         nt_end = 10
         j_values = [3, 5, 10]
 
-        if(single_run):
+        if  single_run:
             nt_ini = nt_end = worker_tests
+        
+        if fixed_votes or single_run:
             j_values = [votes_per_item]
 
         for Nt in range(nt_ini, nt_end + 1):

@@ -36,6 +36,7 @@ def estimate():
     stop_score = content.get('stopScore', 100)
     iterations = content.get('iterations', 50)
     single_run = content.get('single', False)
+    fixed_votes = content.get('fixedVotes', False)
     params = {
         'filters_num': filters_num,
         'items_num': items_num,
@@ -53,7 +54,7 @@ def estimate():
     }
     token = str(uuid.uuid4())
     r.set(f"{token}_status", 'IN_PROGRESS')
-    __run.delay(params, single_run, token)
+    __run.delay(params, single_run, fixed_votes, token)
     payload = {
         'token': token
     }
@@ -87,11 +88,11 @@ def get_status(token):
 
 
 @celery.task
-def __run(params, single_run, token):
+def __run(params, single_run, fixed_votes, token):
     print(f"Running {token}")
     start_time = time.time()
     estimator = Estimator(params)
-    output = estimator.run(single_run)
+    output = estimator.run(single_run, fixed_votes)
     r.set(token, output.to_json(orient='records'))
     r.set(f"{token}_status", 'DONE')
     total_time = time.time() - start_time
