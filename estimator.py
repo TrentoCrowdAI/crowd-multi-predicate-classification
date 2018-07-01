@@ -25,9 +25,9 @@ class Estimator:
         nt_end = 10
         j_values = [3, 5, 10]
 
-        if  single_run:
+        if single_run:
             nt_ini = nt_end = worker_tests
-        
+
         if fixed_votes or single_run:
             j_values = [votes_per_item]
 
@@ -37,8 +37,9 @@ class Estimator:
                 params = copy.deepcopy(self.params)
                 params['worker_tests'] = Nt
                 params['votes_per_item'] = J
+                i = 0
 
-                for _ in range(params['iter_num']):
+                while i != params['iter_num']:
                     # quiz, generation votes
                     workers_accuracy = Workers(
                         params['worker_tests'], params['z']).simulate_workers()
@@ -50,14 +51,18 @@ class Estimator:
                         params).generate_votes_gt(params['items_num'])
                     params.update({'ground_truth': ground_truth})
 
-                    # s-run
-                    loss_smrun, cost_smrun, rec_sm_, pre_sm_, f_beta_sm = ShortestMultiRun(
-                        params).run()
-                    loss_smrun_list.append(loss_smrun)
-                    cost_smrun_list.append(cost_smrun)
-                    rec_sm.append(rec_sm_)
-                    pre_sm.append(pre_sm_)
-                    f_sm.append(f_beta_sm)
+                    try:
+                        # s-run
+                        loss_smrun, cost_smrun, rec_sm_, pre_sm_, f_beta_sm = ShortestMultiRun(
+                            params).run()
+                        loss_smrun_list.append(loss_smrun)
+                        cost_smrun_list.append(cost_smrun)
+                        rec_sm.append(rec_sm_)
+                        pre_sm.append(pre_sm_)
+                        f_sm.append(f_beta_sm)
+                        i += 1
+                    except:
+                        continue
 
                 data.append([Nt, J, params['lr'], np.mean(loss_smrun_list), np.std(loss_smrun_list),
                              np.mean(cost_smrun_list), np.std(
