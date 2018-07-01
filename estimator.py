@@ -40,6 +40,7 @@ class Estimator:
                 i = 0
 
                 while i != params['iter_num']:
+                    print("iteration", i)
                     # quiz, generation votes
                     workers_accuracy = Workers(
                         params['worker_tests'], params['z']).simulate_workers()
@@ -61,7 +62,8 @@ class Estimator:
                         pre_sm.append(pre_sm_)
                         f_sm.append(f_beta_sm)
                         i += 1
-                    except:
+                    except Exception as e:
+                        print(e)
                         continue
 
                 data.append([Nt, J, params['lr'], np.mean(loss_smrun_list), np.std(loss_smrun_list),
