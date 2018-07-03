@@ -32,7 +32,6 @@ def estimate():
     filters_num = content['filtersNum']
     baseround_items = content['baseroundItems']
     filters_selectivity = content['filtersSelectivity']
-    filters_difficulty = content['filtersDifficulty']
     stop_score = content.get('stopScore', 100)
     iterations = content.get('iterations', 50)
     single_run = content.get('single', False)
@@ -44,7 +43,6 @@ def estimate():
         'items_per_worker': items_per_worker,
         'votes_per_item': votes_per_item,
         'filters_select': filters_selectivity,
-        'filters_dif': filters_difficulty,
         'worker_tests': initial_tests,
         'stop_score': stop_score,
         'iter_num': iterations,

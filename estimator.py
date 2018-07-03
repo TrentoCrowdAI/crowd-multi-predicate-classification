@@ -15,6 +15,8 @@ class Estimator:
             raise ValueError(
                 'baseround_items must be a multiple of items_per_worker')
         data = []
+        # TODO: do not hardcode this
+        self.params['filters_dif'] = [1.0, 1.1, 0.9]
         # S-run algorithm
         loss_smrun_list = []
         cost_smrun_list = []
